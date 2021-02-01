@@ -1,0 +1,4 @@
+// Bbox colors
+$bbox-border-color: grey;
+$bbox-border-color--hover: orangered;
+$bbox-bg-color--selected: transparentize($bbox-border-color--hover, .5);

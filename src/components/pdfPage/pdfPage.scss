@@ -1,0 +1,8 @@
+.pdf-page {
+  position: relative;
+  background: #fff;
+
+  & + .pdf-page {
+    margin-top: 8px;
+  }
+}
