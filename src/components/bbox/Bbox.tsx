@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, {FC, memo} from 'react';
 import styled from 'styled-components';
 
 import { TBbox } from '../../types/bbox';
@@ -7,6 +7,7 @@ import './bbox.scss';
 
 interface IBboxProps {
   bbox: TBbox;
+  scale: number;
   selected?: boolean;
   onClick?(e: any): void;
 }
@@ -29,12 +30,12 @@ const Bbox: FC<IBboxProps> = (props) => {
   const [left, top, width, height]  = props.bbox;
 
   return <BboxDiv className={`pdf-bbox ${props.selected && 'pdf-bbox_selected'}`}
-                  left={left}
-                  top={top}
-                  width={width}
-                  height={height}
+                  left={left * props.scale}
+                  top={top * props.scale}
+                  width={width * props.scale}
+                  height={height * props.scale}
                   onClick={props.onClick}
   />;
 };
 
-export default Bbox;
+export default memo(Bbox);

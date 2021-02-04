@@ -22,6 +22,7 @@ var React = require('react');
 var reactPdf = require('react-pdf');
 var useIntersection = require('use-intersection');
 var styled = require('styled-components');
+var reactUse = require('react-use');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -104,13 +105,6 @@ function __generator(thisArg, body) {
     }
 }
 
-function __spreadArrays() {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-}
 function __makeTemplateObject(cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
@@ -121,19 +115,54 @@ ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n
 var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-wabgee" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  left: ", "px;\n  top: ", "px;\n  height: ", "px;\n  width: ", "px;\n"], ["\n  left: ", "px;\n  top: ", "px;\n  height: ", "px;\n  width: ", "px;\n"])), function (props) { return props.left; }, function (props) { return props.top; }, function (props) { return props.height; }, function (props) { return props.width; });
 var Bbox = function (props) {
     var _a = props.bbox, left = _a[0], top = _a[1], width = _a[2], height = _a[3];
-    return React__default['default'].createElement(BboxDiv, { className: "pdf-bbox " + (props.selected && 'pdf-bbox_selected'), left: left, top: top, width: width, height: height, onClick: props.onClick });
+    return React__default['default'].createElement(BboxDiv, { className: "pdf-bbox " + (props.selected && 'pdf-bbox_selected'), left: left * props.scale, top: top * props.scale, width: width * props.scale, height: height * props.scale, onClick: props.onClick });
 };
+var Bbox$1 = React.memo(Bbox);
 var templateObject_1;
 
-___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n}\n.pdf-page + .pdf-page {\n  margin-top: 8px;\n}");
+var ViewerContext = React.createContext({});
+var ViewerProvider = function (props) {
+    var _a = React.useState(0), tempPage = _a[0], setTempPage = _a[1];
+    var _b = React.useState(0), page = _b[0], setPage = _b[1];
+    var _c = React.useState(0), scrollIntoPage = _c[0], setScrollIntoPage = _c[1];
+    var _d = React.useState(0), maxPage = _d[0], setMaxPage = _d[1];
+    var _e = React.useState(true), showBboxes = _e[0], setShowBboxes = _e[1];
+    reactUse.useDebounce(function () {
+        setPage(tempPage);
+    }, 30, [tempPage]);
+    var context = {
+        page: page,
+        setPage: setTempPage,
+        maxPage: maxPage,
+        setMaxPage: setMaxPage,
+        scrollIntoPage: scrollIntoPage,
+        setScrollIntoPage: setScrollIntoPage,
+        showBboxes: showBboxes,
+        setShowBboxes: setShowBboxes,
+    };
+    return React__default['default'].createElement(ViewerContext.Provider, { value: context }, props.children);
+};
 
-var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-53s4w0" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height + 'px' : 'auto'; }, function (props) { return props.width ? props.width + 'px' : 'auto'; });
+___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page + .pdf-page {\n  margin-top: 8px;\n}");
+
+var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-9rs558" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
 var PdfPage = function (props) {
-    var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a;
+    var _a = React.useContext(ViewerContext), scrollIntoPage = _a.scrollIntoPage, setScrollIntoPage = _a.setScrollIntoPage, showBboxes = _a.showBboxes;
+    var _b = props.bboxList, bboxList = _b === void 0 ? [] : _b, _c = props.scale, scale = _c === void 0 ? 1 : _c;
     var intersectionRef = React.useRef(null);
-    var _b = React.useState(false), isRendered = _b[0], setIsRendered = _b[1];
-    var intersection = useIntersection.useIntersection(intersectionRef, {
-        once: true,
+    var _d = React.useState(false), loaded = _d[0], setLoaded = _d[1];
+    var _e = React.useState(false), isRendered = _e[0], setIsRendered = _e[1];
+    var _f = React.useState(false), isIntersecting = _f[0], setIsIntersecting = _f[1];
+    var _g = React.useState(0), intersectionRatio = _g[0], setIntersectionRatio = _g[1];
+    useIntersection.useIntersection(intersectionRef, {
+        threshold: [.2, .4, .5, .6, .8, 1],
+    }, function (entry) {
+        if (isIntersecting !== entry.isIntersecting) {
+            setIsIntersecting(entry.isIntersecting);
+        }
+        if (intersectionRatio !== entry.intersectionRatio) {
+            setIntersectionRatio(entry.intersectionRatio);
+        }
     });
     var onPageClick = React.useCallback(function () {
         var _a;
@@ -151,51 +180,44 @@ var PdfPage = function (props) {
     }, []);
     React.useEffect(function () {
         var _a;
-        if (intersection) {
-            (_a = props.onPageInViewport) === null || _a === void 0 ? void 0 : _a.call(props, props.page);
+        if (!loaded && isIntersecting) {
+            setLoaded(true);
         }
-    }, [intersection]);
+        (_a = props.onPageInViewport) === null || _a === void 0 ? void 0 : _a.call(props, props.page, { isIntersecting: isIntersecting, intersectionRatio: intersectionRatio });
+    }, [isIntersecting, intersectionRatio, loaded]);
+    React.useEffect(function () {
+        var _a;
+        if (scrollIntoPage === props.page) {
+            (_a = intersectionRef.current) === null || _a === void 0 ? void 0 : _a.scrollIntoView();
+            setScrollIntoPage(0);
+        }
+    }, [scrollIntoPage]);
     var isBboxSelected = function (index) { return props.activeBbox === index; };
-    return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered", "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.defaultHeight : undefined, width: !isRendered ? props.defaultWidth : undefined, ref: intersectionRef },
+    return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered", "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.defaultHeight : undefined, width: !isRendered ? props.defaultWidth : undefined, scale: scale, ref: intersectionRef }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
         React__default['default'].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadProgress: props.onPageLoadProgress, onLoadSuccess: props.onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
-        isRendered ? bboxList.map(function (bbox, index) { return (React__default['default'].createElement(Bbox, { key: index, bbox: bbox, onClick: onBboxClick(index), selected: isBboxSelected(index) })); }) : null));
+        showBboxes && isRendered ? bboxList.map(function (bbox, index) { return (React__default['default'].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(index), selected: isBboxSelected(index), scale: scale })); }) : null) : null));
 };
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1$1;
-
-var StyledEmptyPage = styled__default['default'].div.withConfig({ displayName: "StyledEmptyPage", componentId: "sc-4zqg32" })(templateObject_1$2 || (templateObject_1$2 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height + 'px' : 'auto'; }, function (props) { return props.width ? props.width + 'px' : 'auto'; });
-var EmptyPage = function (props) {
-    var intersectionRef = React.useRef(null);
-    var intersection = useIntersection.useIntersection(intersectionRef, {
-        once: true,
-    });
-    React.useEffect(function () {
-        var _a;
-        if (intersection) {
-            (_a = props.onPageInViewport) === null || _a === void 0 ? void 0 : _a.call(props, props.page);
-        }
-    }, [intersection]);
-    return (React__default['default'].createElement(StyledEmptyPage, { className: "pdf-page", height: props.height, width: props.width, "data-page": props.page, ref: intersectionRef }));
-};
-var EmptyPage$1 = React.memo(EmptyPage);
-var templateObject_1$2;
 
 ___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n}");
 
 var PdfDocument = function (props) {
     // TODO: Add input param for worker path
     reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = React.useMemo(function () { return "//cdnjs.cloudflare.com/ajax/libs/pdf.js/" + reactPdf.pdfjs.version + "/pdf.worker.min.js"; }, []);
-    var _a = props.bboxMap, bboxMap = _a === void 0 ? {} : _a;
-    var _b = React.useState(0), numPages = _b[0], setNumPages = _b[1];
-    var _c = React.useState([props.page || 1]), renderedPages = _c[0], setRenderedPages = _c[1];
-    var _d = React.useState(0), defaultHeight = _d[0], setDefaultHeight = _d[1];
-    var _e = React.useState(0), defaultWidth = _e[0], setDefaultWidth = _e[1];
+    var _a = React.useContext(ViewerContext), page = _a.page, setPage = _a.setPage, maxPage = _a.maxPage, setMaxPage = _a.setMaxPage;
+    var _b = props.bboxMap, bboxMap = _b === void 0 ? {} : _b;
+    var _c = React.useState(false), loaded = _c[0], setLoaded = _c[1];
+    var _d = React.useState([]), pagesByViewport = _d[0], setPagesByViewport = _d[1];
+    var _e = React.useState([]), ratioArray = _e[0], setRatioArray = _e[1];
+    var _f = React.useState(0), defaultHeight = _f[0], setDefaultHeight = _f[1];
+    var _g = React.useState(0), defaultWidth = _g[0], setDefaultWidth = _g[1];
     var shownPages = React.useMemo(function () {
         if (props.showAllPages) {
-            return Array.from(new Array(numPages), function (_el, index) { return index + 1; });
+            return Array.from(new Array(maxPage), function (_el, index) { return index + 1; });
         }
         return [props.page || 1];
-    }, [numPages, props.showAllPages]);
+    }, [maxPage, props.showAllPages, props.page]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {
         var pageData;
         var _a;
@@ -206,7 +228,8 @@ var PdfDocument = function (props) {
                     pageData = _b.sent();
                     setDefaultHeight(pageData.view[3]);
                     setDefaultWidth(pageData.view[2]);
-                    setNumPages(data.numPages);
+                    setMaxPage(data.numPages);
+                    setLoaded(true);
                     (_a = props.onLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, data);
                     return [2 /*return*/];
             }
@@ -216,42 +239,237 @@ var PdfDocument = function (props) {
         var _a;
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, data);
     }, [props.onPageLoadSuccess]);
-    var onPageInViewport = React.useCallback(function (page) {
-        if (!numPages || !props.showAllPages || !defaultHeight) {
-            return;
+    var onPageInViewport = React.useCallback(function (page, intersection) {
+        if (props.showAllPages) {
+            setPageByViewport(page, intersection);
         }
-        var pagesToRender = [];
-        if (!renderedPages.includes(page - 1) && page > 1) {
-            pagesToRender.push(page - 1);
+        else {
+            setPage(page);
         }
-        if (!renderedPages.includes(page)) {
-            pagesToRender.push(page);
-        }
-        if (!renderedPages.includes(page + 1) && page < numPages) {
-            pagesToRender.push(page + 1);
-        }
-        setRenderedPages(__spreadArrays(renderedPages, pagesToRender));
-    }, [renderedPages, numPages, props.showAllPages]);
-    var isPageRendered = React.useMemo(function () { return function (page) { return renderedPages.includes(page); }; }, [renderedPages]);
+    }, [maxPage, props.showAllPages]);
     var getSelectedBbox = React.useMemo(function () { return function (page) { return props.activePage === page ? props.activeBboxIndex : undefined; }; }, [props.activeBboxIndex, props.activePage]);
     var onBboxClick = React.useCallback(function (data) {
         var _a;
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, data);
     }, []);
-    return (React__default['default'].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, shownPages.map(function (page) {
-        return isPageRendered(page) ?
-            React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBbox: getSelectedBbox(page), onBboxClick: onBboxClick }) :
-            React__default['default'].createElement(EmptyPage$1, { key: page, page: page, width: defaultWidth, height: defaultHeight, onPageInViewport: onPageInViewport });
-    })));
+    var setPageByViewport = React.useMemo(function () { return function (newPage, intersection) {
+        var isIntersecting = intersection.isIntersecting, intersectionRatio = intersection.intersectionRatio;
+        if (isIntersecting) {
+            if (!pagesByViewport.includes(newPage)) {
+                pagesByViewport.push(newPage);
+                ratioArray.push(intersectionRatio);
+                setPagesByViewport(pagesByViewport);
+                setRatioArray(ratioArray);
+            }
+            else {
+                ratioArray[pagesByViewport.indexOf(newPage)] = intersectionRatio;
+                setRatioArray(ratioArray);
+            }
+        }
+        else {
+            if (pagesByViewport.includes(newPage)) {
+                var prevPageIndex = pagesByViewport.indexOf(newPage);
+                pagesByViewport.splice(prevPageIndex, 1);
+                setPagesByViewport(pagesByViewport);
+                ratioArray.splice(prevPageIndex, 1);
+                setRatioArray(ratioArray);
+            }
+        }
+        var newPageIndex = -1;
+        pagesByViewport.forEach(function (_pageFromViewport, index) {
+            if (newPageIndex === -1) {
+                newPageIndex = index;
+            }
+            if (ratioArray[newPageIndex] < ratioArray[index]) {
+                newPageIndex = index;
+            }
+        });
+        if (newPageIndex !== -1 && pagesByViewport[newPageIndex]) {
+            setPage(pagesByViewport[newPageIndex]);
+        }
+    }; }, [pagesByViewport, page, ratioArray]);
+    React.useEffect(function () {
+        if (page !== props.page) {
+            setPage(props.page || 1);
+        }
+    }, [props.page]);
+    React.useEffect(function () {
+        setLoaded(false);
+        setPagesByViewport([]);
+        setRatioArray([]);
+        setDefaultHeight(0);
+        setDefaultWidth(0);
+        setMaxPage(0);
+        setPage(1);
+    }, [props.file]);
+    return (React__default['default'].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, loaded ? shownPages.map(function (page) {
+        return React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBbox: getSelectedBbox(page), onBboxClick: onBboxClick });
+    }) : null));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
-___$insertStyle(".pdf-viewer {\n  display: flex;\n  position: relative;\n  justify-content: center;\n}");
+var InputSize;
+(function (InputSize) {
+    InputSize["Sm"] = "32px";
+    InputSize["Md"] = "64px";
+    InputSize["Lg"] = "128px";
+    InputSize["Auto"] = "Auto";
+})(InputSize || (InputSize = {}));
+
+___$insertStyle(".viewer-input {\n  outline: none;\n}");
+
+var StyledInput = styled__default['default'].input.withConfig({ displayName: "StyledInput", componentId: "sc-j0wa4t" })(templateObject_1$2 || (templateObject_1$2 = __makeTemplateObject(["\n  width: ", ";\n"], ["\n  width: ", ";\n"])), function (props) { return props.width; });
+var InputControl = function (props) {
+    var _a = React.useState(props.defaultValue || ''), value = _a[0], setValue = _a[1];
+    var inputRef = React.useRef(null);
+    var _b = props.size, size = _b === void 0 ? InputSize.Auto : _b;
+    var onChange = React.useCallback(function (e) {
+        var _a;
+        if (!props.value) {
+            setValue(e.target.value);
+        }
+        (_a = props.onChange) === null || _a === void 0 ? void 0 : _a.call(props, e.target.value);
+    }, [props.onChange]);
+    var onBlur = React.useCallback(function (e) {
+        var _a;
+        (_a = props.onBlur) === null || _a === void 0 ? void 0 : _a.call(props, e.target.value);
+    }, [props.onBlur]);
+    if (props.onEnter) {
+        reactUse.useKey('Enter', function () { var _a, _b; return (_a = props.onEnter) === null || _a === void 0 ? void 0 : _a.call(props, ((_b = inputRef === null || inputRef === void 0 ? void 0 : inputRef.current) === null || _b === void 0 ? void 0 : _b.value) || ''); });
+    }
+    React.useEffect(function () {
+        setValue(props.defaultValue || '');
+    }, [props.defaultValue]);
+    return (React__default['default'].createElement(StyledInput, { ref: inputRef, onBlur: onBlur, className: "viewer-input", value: props.value || value, width: size, onChange: onChange }));
+};
+var templateObject_1$2;
+
+___$insertStyle(".viewer-btn {\n  outline: none;\n}");
+
+var ButtonControl = function (props) {
+    return (React__default['default'].createElement("button", { disabled: props.disabled, className: "viewer-btn", onClick: props.onClick }, props.children));
+};
+
+___$insertStyle(".pdf-toolbar {\n  width: 100%;\n  height: 32px;\n  background: #f9f9fa;\n  box-shadow: 0 1px 0 #cccccc;\n  position: sticky;\n  top: 0;\n  z-index: 100;\n  padding: 0 4px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.pdf-toolbar__label {\n  color: grey;\n}\n.pdf-toolbar__area > * + * {\n  margin-left: 4px;\n}\n.pdf-toolbar__area_center {\n  position: absolute;\n  left: 50%;\n  transform: translateX(-50%);\n}");
+
+var SelectSize;
+(function (SelectSize) {
+    SelectSize["Sm"] = "32px";
+    SelectSize["Md"] = "64px";
+    SelectSize["Lg"] = "128px";
+    SelectSize["Auto"] = "Auto";
+})(SelectSize || (SelectSize = {}));
+
+___$insertStyle(".viewer-select {\n  outline: none;\n}");
+
+var StyledSelect = styled__default['default'].select.withConfig({ displayName: "StyledSelect", componentId: "sc-12i62a3" })(templateObject_1$3 || (templateObject_1$3 = __makeTemplateObject(["\n  width: ", ";\n"], ["\n  width: ", ";\n"])), function (props) { return props.width; });
+var SelectControl = function (props) {
+    var _a = props.size, size = _a === void 0 ? SelectSize.Md : _a;
+    var onChange = React.useCallback(function (e) {
+        props.onChange(e.target.value);
+    }, []);
+    return (React__default['default'].createElement(StyledSelect, { className: "viewer-select", width: size, value: props.value, onChange: onChange }, props.options.map(function (option) {
+        return React__default['default'].createElement("option", { key: option.value, value: option.value }, option.label);
+    })));
+};
+var templateObject_1$3;
+
+___$insertStyle(".viewer-checkbox {\n  user-select: none;\n}\n.viewer-checkbox__control {\n  display: none;\n}\n.viewer-checkbox_checked > .viewer-checkbox__label:before, .viewer-checkbox > .viewer-checkbox__label:before {\n  content: \"\";\n  position: absolute;\n  left: 0px;\n  top: 0px;\n  width: 18px;\n  height: 18px;\n  border: 1px solid #dddddd;\n  background-color: #ffffff;\n}\n.viewer-checkbox_checked > .viewer-checkbox__label:before, .viewer-checkbox > .viewer-checkbox__label:before {\n  border-radius: 2px;\n}\n.viewer-checkbox > .viewer-checkbox__label:after {\n  opacity: 0;\n}\n.viewer-checkbox_checked > .viewer-checkbox__label:after {\n  opacity: 1;\n}\n.viewer-checkbox_checked > .viewer-checkbox__label, .viewer-checkbox > .viewer-checkbox__label {\n  position: relative;\n  padding-left: 28px;\n  line-height: 20px;\n  cursor: pointer;\n}\n.viewer-checkbox_checked > .viewer-checkbox__label:after, .viewer-checkbox > .viewer-checkbox__label:after {\n  content: \"\";\n  position: absolute;\n  -webkit-transition: all 0.2s ease;\n  -moz-transition: all 0.2s ease;\n  -o-transition: all 0.2s ease;\n  transition: all 0.2s ease;\n}\n.viewer-checkbox_checked > .viewer-checkbox__label:after, .viewer-checkbox > .viewer-checkbox__label:after {\n  left: 3px;\n  top: 4px;\n  width: 10px;\n  height: 5px;\n  border-radius: 1px;\n  border-left: 4px solid grey;\n  border-bottom: 4px solid grey;\n  -webkit-transform: rotate(-45deg);\n  -moz-transform: rotate(-45deg);\n  -o-transform: rotate(-45deg);\n  -ms-transform: rotate(-45deg);\n  transform: rotate(-45deg);\n}");
+
+var CheckboxControl = function (props) {
+    var _a = props.label, label = _a === void 0 ? '' : _a;
+    var onChange = React.useCallback(function (e) {
+        props.onChange(e.target.checked);
+    }, []);
+    return (React__default['default'].createElement("div", { className: "viewer-checkbox " + (props.checked ? 'viewer-checkbox_checked' : '') },
+        React__default['default'].createElement("label", { className: "viewer-checkbox__label" },
+            React__default['default'].createElement("input", { className: "viewer-checkbox__control", type: "checkbox", checked: props.checked, onChange: onChange }),
+            label)));
+};
+
+var StyledSection = styled__default['default'].section.withConfig({ displayName: "StyledSection", componentId: "sc-148io3q" })(templateObject_1$4 || (templateObject_1$4 = __makeTemplateObject(["\n  top: ", "px;\n"], ["\n  top: ", "px;\n"])), function (props) { return props.top || 0; });
+var Toolbar = function (props) {
+    var _a = props.scale, scale = _a === void 0 ? 1 : _a;
+    var _b = React.useContext(ViewerContext), page = _b.page, setPage = _b.setPage, setScrollIntoPage = _b.setScrollIntoPage, maxPage = _b.maxPage, showBboxes = _b.showBboxes, setShowBboxes = _b.setShowBboxes;
+    var scaleOptions = React.useMemo(function () {
+        return [
+            { value: .5, label: '50%' },
+            { value: .75, label: '75%' },
+            { value: 1, label: '100%' },
+            { value: 1.25, label: '125%' },
+            { value: 1.5, label: '150%' },
+        ];
+    }, []);
+    var _c = React.useState(page), pageValue = _c[0], setPageValue = _c[1];
+    var onNextPage = React.useCallback(function () {
+        var _a;
+        if (props.showAllPages) {
+            setScrollIntoPage(page + 1);
+        }
+        else {
+            setPage(page + 1);
+        }
+        (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, page + 1);
+    }, [page, props.showAllPages, props.onPageChange]);
+    var onPrevPage = React.useCallback(function () {
+        var _a;
+        if (page <= 1) {
+            return;
+        }
+        if (props.showAllPages) {
+            setScrollIntoPage(page - 1);
+        }
+        else {
+            setPage(page - 1);
+        }
+        (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, page - 1);
+    }, [page, props.showAllPages, props.onPageChange]);
+    var onPageChange = React.useCallback(function (value) {
+        var _a;
+        if (page !== parseInt(value)) {
+            if (props.showAllPages) {
+                setScrollIntoPage(parseInt(value));
+            }
+            else {
+                setPage(parseInt(value));
+            }
+            (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, parseInt(value));
+        }
+    }, [page]);
+    var onScaleChange = React.useCallback(function (value) {
+        var _a;
+        (_a = props.onScaleChange) === null || _a === void 0 ? void 0 : _a.call(props, parseFloat(value));
+    }, []);
+    var onShowBboxesChange = React.useCallback(function (checked) {
+        setShowBboxes(checked);
+    }, []);
+    React.useEffect(function () {
+        setPageValue(page);
+    }, [page]);
+    return (React__default['default'].createElement(StyledSection, { top: props.stickyTop, className: "pdf-toolbar" },
+        React__default['default'].createElement("div", { className: "pdf-toolbar__area pdf-toolbar__area_left" },
+            React__default['default'].createElement(ButtonControl, { disabled: pageValue < 2, onClick: onPrevPage }, "Prev page"),
+            React__default['default'].createElement(ButtonControl, { disabled: pageValue === maxPage, onClick: onNextPage }, "Next page"),
+            React__default['default'].createElement(InputControl, { defaultValue: pageValue, size: InputSize.Sm, onBlur: onPageChange, onEnter: onPageChange }),
+            React__default['default'].createElement("span", { className: "pdf-toolbar__label" },
+                " / ",
+                maxPage)),
+        React__default['default'].createElement("div", { className: "pdf-toolbar__area pdf-toolbar__area_center" },
+            React__default['default'].createElement(SelectControl, { options: scaleOptions, onChange: onScaleChange, value: scale })),
+        React__default['default'].createElement("div", { className: "pdf-toolbar__area pdf-toolbar__area_right" },
+            React__default['default'].createElement(CheckboxControl, { label: "Show bboxes", onChange: onShowBboxesChange, checked: showBboxes }))));
+};
+var Toolbar$1 = React.memo(Toolbar);
+var templateObject_1$4;
+
+___$insertStyle(".pdf-viewer {\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  align-items: center;\n  justify-content: flex-start;\n}\n.pdf-viewer .pdf-toolbar + * {\n  margin-top: 8px;\n}");
 
 var App = function (props) {
-    var _a = props.className, className = _a === void 0 ? '' : _a, pdfProps = __rest(props, ["className"]);
-    return (React__default['default'].createElement("div", { className: "pdf-viewer " + className },
-        React__default['default'].createElement(PdfDocument$1, __assign({}, pdfProps))));
+    var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.withToolbar, withToolbar = _b === void 0 ? false : _b, _c = props.stickyTop, stickyTop = _c === void 0 ? undefined : _c, pdfProps = __rest(props, ["className", "withToolbar", "stickyTop"]);
+    return (React__default['default'].createElement(ViewerProvider, null,
+        React__default['default'].createElement("div", { className: "pdf-viewer " + className },
+            withToolbar ? (React__default['default'].createElement(Toolbar$1, { stickyTop: stickyTop, onPageChange: props.onPageChange, showAllPages: props.showAllPages, scale: props.scale, onScaleChange: props.onScaleChange })) : null,
+            React__default['default'].createElement(PdfDocument$1, __assign({}, pdfProps)))));
 };
 
 exports.default = App;

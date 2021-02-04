@@ -1,13 +1,13 @@
-import React, {FC, memo, useCallback, useMemo, useState} from 'react';
+import React, {FC, memo, useCallback, useMemo, useState, useContext, useEffect} from 'react';
 import { Document, pdfjs } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist';
 
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
-import PdfPage from '../pdfPage/pdfPage';
-import EmptyPage from '../pdfPage/emptyPage';
+import PdfPage from '../pdfPage/PdfPage';
 import { TBbox } from '../../types/bbox';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
+import {ViewerContext} from '../viewerContext/ViewerContext';
 
 import './pdfDocument.scss';
 
@@ -23,27 +23,30 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   // TODO: Add input param for worker path
   pdfjs.GlobalWorkerOptions.workerSrc = useMemo(() => `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`, []);
+  const { page, setPage, maxPage, setMaxPage } = useContext(ViewerContext);
   const { bboxMap = {} } = props;
-  const [numPages, setNumPages] = useState<number>(0);
-  const [renderedPages, setRenderedPages] = useState<number[]>([props.page || 1]);
+  const [loaded, setLoaded] = useState(false);
+  const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
+  const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(0);
   const [defaultWidth, setDefaultWidth] = useState(0);
   const shownPages: number[] = useMemo(() => {
     if (props.showAllPages) {
       return Array.from(
-        new Array(numPages),
+        new Array(maxPage),
         (_el, index) => index + 1,
       );
     }
 
     return [props.page || 1];
-  }, [numPages, props.showAllPages]);
+  }, [maxPage, props.showAllPages, props.page]);
 
   const onDocumentLoadSuccess = useCallback(async (data: PDFDocumentProxy) => {
     const pageData = await data.getPage(1);
     setDefaultHeight(pageData.view[3]);
     setDefaultWidth(pageData.view[2]);
-    setNumPages(data.numPages);
+    setMaxPage(data.numPages);
+    setLoaded(true);
 
     props.onLoadSuccess?.(data);
   }, [props.onLoadSuccess]);
@@ -51,27 +54,71 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     props.onPageLoadSuccess?.(data);
   }, [props.onPageLoadSuccess]);
 
-  const onPageInViewport = useCallback((page: number) => {
-    if (!numPages || !props.showAllPages || !defaultHeight) {
-      return;
+  const onPageInViewport = useCallback((page: number, intersection: { isIntersecting: boolean, intersectionRatio: number }) => {
+    if (props.showAllPages) {
+      setPageByViewport(page, intersection);
+    } else {
+      setPage(page);
     }
-    const pagesToRender = [];
-    if (!renderedPages.includes(page - 1) && page > 1) {
-      pagesToRender.push(page - 1);
-    }
-    if (!renderedPages.includes(page)) {
-      pagesToRender.push(page);
-    }
-    if (!renderedPages.includes(page + 1) && page < numPages) {
-      pagesToRender.push(page + 1);
-    }
-    setRenderedPages([ ...renderedPages, ...pagesToRender ])
-  }, [renderedPages, numPages, props.showAllPages]);
-  const isPageRendered = useMemo(() => (page: number) => renderedPages.includes(page), [renderedPages]);
+  }, [maxPage, props.showAllPages]);
   const getSelectedBbox = useMemo(() => (page: number) => props.activePage === page ? props.activeBboxIndex : undefined, [props.activeBboxIndex, props.activePage]);
   const onBboxClick = useCallback((data) => {
       props.onBboxClick?.(data);
     }, []);
+
+  const setPageByViewport = useMemo(() => (newPage: number, intersection: { isIntersecting: boolean, intersectionRatio: number }) => {
+    const { isIntersecting, intersectionRatio } = intersection;
+    if (isIntersecting) {
+      if (!pagesByViewport.includes(newPage)) {
+        pagesByViewport.push(newPage);
+        ratioArray.push(intersectionRatio);
+        setPagesByViewport(pagesByViewport);
+        setRatioArray(ratioArray);
+      } else {
+        ratioArray[pagesByViewport.indexOf(newPage)] = intersectionRatio;
+        setRatioArray(ratioArray);
+      }
+    } else {
+      if (pagesByViewport.includes(newPage)) {
+        const prevPageIndex = pagesByViewport.indexOf(newPage);
+        pagesByViewport.splice(prevPageIndex, 1);
+        setPagesByViewport(pagesByViewport);
+        ratioArray.splice(prevPageIndex, 1);
+        setRatioArray(ratioArray);
+      }
+    }
+
+    let newPageIndex = -1;
+    pagesByViewport.forEach((_pageFromViewport, index) => {
+      if (newPageIndex === -1) {
+        newPageIndex = index;
+      }
+
+      if (ratioArray[newPageIndex] < ratioArray[index]) {
+        newPageIndex = index;
+      }
+    });
+
+    if (newPageIndex !== -1 && pagesByViewport[newPageIndex]) {
+      setPage(pagesByViewport[newPageIndex]);
+    }
+  }, [pagesByViewport, page, ratioArray]);
+
+  useEffect(() => {
+    if (page !== props.page) {
+      setPage(props.page || 1);
+    }
+  }, [props.page]);
+
+  useEffect(() => {
+    setLoaded(false);
+    setPagesByViewport([]);
+    setRatioArray([]);
+    setDefaultHeight(0);
+    setDefaultWidth(0);
+    setMaxPage(0);
+    setPage(1);
+  }, [props.file]);
 
   return (
     <Document
@@ -86,44 +133,36 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       onItemClick={props.onItemClick}
       rotate={props.rotate}
     >
-      {shownPages.map((page) =>
-        isPageRendered(page) ?
-          <PdfPage
-            defaultHeight={defaultHeight}
-            defaultWidth={defaultWidth}
-            key={page}
-            page={page}
-            pageError={props.pageError}
-            inputRef={props.inputRef}
-            height={props.height}
-            width={props.width}
-            pageLoading={props.pageLoading}
-            renderAnnotationLayer={props.renderAnnotationLayer}
-            renderInteractiveForms={props.renderInteractiveForms}
-            renderTextLayer={props.renderTextLayer}
-            scale={props.scale}
-            onPageLoadError={props.onPageLoadError}
-            onPageLoadProgress={props.onPageLoadProgress}
-            onPageLoadSuccess={onPageLoadSuccess}
-            onPageRenderError={props.onPageRenderError}
-            onPageRenderSuccess={props.onPageRenderSuccess}
-            onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
-            onGetAnnotationsError={props.onGetAnnotationsError}
-            onGetTextSuccess={props.onGetTextSuccess}
-            onGetTextError={props.onGetTextError}
-            onPageInViewport={onPageInViewport}
-            bboxList={bboxMap[page]}
-            activeBbox={getSelectedBbox(page)}
-            onBboxClick={onBboxClick}
-          /> :
-          <EmptyPage
-            key={page}
-            page={page}
-            width={defaultWidth}
-            height={defaultHeight}
-            onPageInViewport={onPageInViewport}
-          />
-      )}
+      {loaded ? shownPages.map((page) =>
+        <PdfPage
+          defaultHeight={defaultHeight}
+          defaultWidth={defaultWidth}
+          key={page}
+          page={page}
+          pageError={props.pageError}
+          inputRef={props.inputRef}
+          height={props.height}
+          width={props.width}
+          pageLoading={props.pageLoading}
+          renderAnnotationLayer={props.renderAnnotationLayer}
+          renderInteractiveForms={props.renderInteractiveForms}
+          renderTextLayer={props.renderTextLayer}
+          scale={props.scale}
+          onPageLoadError={props.onPageLoadError}
+          onPageLoadProgress={props.onPageLoadProgress}
+          onPageLoadSuccess={onPageLoadSuccess}
+          onPageRenderError={props.onPageRenderError}
+          onPageRenderSuccess={props.onPageRenderSuccess}
+          onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
+          onGetAnnotationsError={props.onGetAnnotationsError}
+          onGetTextSuccess={props.onGetTextSuccess}
+          onGetTextError={props.onGetTextError}
+          onPageInViewport={onPageInViewport}
+          bboxList={bboxMap[page]}
+          activeBbox={getSelectedBbox(page)}
+          onBboxClick={onBboxClick}
+        />
+      ) : null}
     </Document>
   );
 }

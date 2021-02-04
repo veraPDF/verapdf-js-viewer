@@ -1,10 +1,11 @@
-import { FC } from 'react';
+import React from 'react';
 import { TBbox } from '../../types/bbox';
 import './bbox.scss';
 interface IBboxProps {
     bbox: TBbox;
+    scale: number;
     selected?: boolean;
     onClick?(e: any): void;
 }
-declare const Bbox: FC<IBboxProps>;
-export default Bbox;
+declare const _default: React.NamedExoticComponent<IBboxProps>;
+export default _default;
