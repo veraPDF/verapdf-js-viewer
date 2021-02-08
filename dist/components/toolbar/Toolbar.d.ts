@@ -3,7 +3,6 @@ import './toolbar.scss';
 export interface IToolbarProps {
     scale?: number;
     showAllPages?: boolean;
-    stickyTop?: number;
     onPageChange?(page: number): void;
     onScaleChange?(scale: number): void;
 }

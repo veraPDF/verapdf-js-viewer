@@ -82,7 +82,7 @@ function MyApp() {
 |onGetTextError|Function called in case of an error while loading text layer items.|n/a|`(error) => alert('Error while loading text layer items! ' + error.message)`|
 |<b>Toolbar props</b>|
 |withToolbar|Boolean flag to show viewer toolbar or not|false|`true`|
-|stickyTop|Number of pixels from top where toolbar should be positioned during scroll|n/a|`75`|
+|withSidePanel|Boolean flag to show side panel with bbox list|false|`true`|
 |onPageChange|Function called when page changed from toolbar|n/a|`(page: number) => alert('New page ' + page);`|
 |onScaleChange|Function called when scale changed from toolbar|n/a|`(scale: number) => alert('New scale ' + scale);`|
 

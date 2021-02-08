@@ -133,7 +133,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       onItemClick={props.onItemClick}
       rotate={props.rotate}
     >
-      {loaded ? shownPages.map((page) =>
+      {useMemo(() => loaded ? shownPages.map((page) =>
         <PdfPage
           defaultHeight={defaultHeight}
           defaultWidth={defaultWidth}
@@ -162,7 +162,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           activeBbox={getSelectedBbox(page)}
           onBboxClick={onBboxClick}
         />
-      ) : null}
+      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])}
     </Document>
   );
 }

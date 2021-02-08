@@ -105,6 +105,13 @@ function __generator(thisArg, body) {
     }
 }
 
+function __spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+}
 function __makeTemplateObject(cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
@@ -143,7 +150,7 @@ var ViewerProvider = function (props) {
     return React__default['default'].createElement(ViewerContext.Provider, { value: context }, props.children);
 };
 
-___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page + .pdf-page {\n  margin-top: 8px;\n}");
+___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}");
 
 var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-9rs558" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
 var PdfPage = function (props) {
@@ -302,9 +309,9 @@ var PdfDocument = function (props) {
         setMaxPage(0);
         setPage(1);
     }, [props.file]);
-    return (React__default['default'].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, loaded ? shownPages.map(function (page) {
+    return (React__default['default'].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
         return React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBbox: getSelectedBbox(page), onBboxClick: onBboxClick });
-    }) : null));
+    }) : null; }, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
@@ -350,7 +357,7 @@ var ButtonControl = function (props) {
     return (React__default['default'].createElement("button", { disabled: props.disabled, className: "viewer-btn", onClick: props.onClick }, props.children));
 };
 
-___$insertStyle(".pdf-toolbar {\n  width: 100%;\n  height: 32px;\n  background: #f9f9fa;\n  box-shadow: 0 1px 0 #cccccc;\n  position: sticky;\n  top: 0;\n  z-index: 100;\n  padding: 0 4px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.pdf-toolbar__label {\n  color: grey;\n}\n.pdf-toolbar__area > * + * {\n  margin-left: 4px;\n}\n.pdf-toolbar__area_center {\n  position: absolute;\n  left: 50%;\n  transform: translateX(-50%);\n}");
+___$insertStyle(".pdf-toolbar {\n  width: 100%;\n  height: 32px;\n  background: #f9f9fa;\n  box-shadow: 0 1px 0 #cccccc;\n  position: sticky;\n  top: 0;\n  z-index: 100;\n  padding: 0 4px;\n  box-sizing: border-box;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\n.pdf-toolbar__label {\n  color: grey;\n}\n.pdf-toolbar__area > * + * {\n  margin-left: 4px;\n}\n.pdf-toolbar__area_center {\n  position: absolute;\n  left: 50%;\n  transform: translateX(-50%);\n}");
 
 var SelectSize;
 (function (SelectSize) {
@@ -387,7 +394,6 @@ var CheckboxControl = function (props) {
             label)));
 };
 
-var StyledSection = styled__default['default'].section.withConfig({ displayName: "StyledSection", componentId: "sc-148io3q" })(templateObject_1$4 || (templateObject_1$4 = __makeTemplateObject(["\n  top: ", "px;\n"], ["\n  top: ", "px;\n"])), function (props) { return props.top || 0; });
 var Toolbar = function (props) {
     var _a = props.scale, scale = _a === void 0 ? 1 : _a;
     var _b = React.useContext(ViewerContext), page = _b.page, setPage = _b.setPage, setScrollIntoPage = _b.setScrollIntoPage, maxPage = _b.maxPage, showBboxes = _b.showBboxes, setShowBboxes = _b.setShowBboxes;
@@ -446,7 +452,7 @@ var Toolbar = function (props) {
     React.useEffect(function () {
         setPageValue(page);
     }, [page]);
-    return (React__default['default'].createElement(StyledSection, { top: props.stickyTop, className: "pdf-toolbar" },
+    return (React__default['default'].createElement("section", { className: "pdf-toolbar" },
         React__default['default'].createElement("div", { className: "pdf-toolbar__area pdf-toolbar__area_left" },
             React__default['default'].createElement(ButtonControl, { disabled: pageValue < 2, onClick: onPrevPage }, "Prev page"),
             React__default['default'].createElement(ButtonControl, { disabled: pageValue === maxPage, onClick: onNextPage }, "Next page"),
@@ -460,16 +466,101 @@ var Toolbar = function (props) {
             React__default['default'].createElement(CheckboxControl, { label: "Show bboxes", onChange: onShowBboxesChange, checked: showBboxes }))));
 };
 var Toolbar$1 = React.memo(Toolbar);
-var templateObject_1$4;
 
-___$insertStyle(".pdf-viewer {\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  align-items: center;\n  justify-content: flex-start;\n}\n.pdf-viewer .pdf-toolbar + * {\n  margin-top: 8px;\n}");
+___$insertStyle("@charset \"UTF-8\";\n.viewer-list-item {\n  height: 50px;\n  width: 100%;\n  margin: 0;\n  cursor: pointer;\n  position: relative;\n  display: flex;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n  flex-direction: column;\n  -webkit-box-align: center;\n  justify-content: center;\n  align-items: flex-start;\n  padding: 0 25px;\n  border-bottom: 1px solid #e0e0e0;\n  box-sizing: border-box;\n}\n.viewer-list-item:hover {\n  box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, 0.1);\n}\n.viewer-list-item_active {\n  box-shadow: inset 0px 0px 3px 1px rgba(255, 69, 0, 0.5) !important;\n}\n.viewer-list-item_opened:after, .viewer-list-item_closed:after {\n  content: \"▼\";\n  position: absolute;\n  right: 0;\n  font-size: 16px;\n  transform: translate(-100%, 0) rotate(180deg);\n  color: grey;\n}\n.viewer-list-item_closed:after {\n  transform: translate(-100%, 0);\n}\n.viewer-list-item__title {\n  margin: 0;\n}\n.viewer-list-item__text {\n  font-size: 14px;\n}");
+
+var ListItem = function (props) {
+    var text = props.text, _a = props.title, title = _a === void 0 ? '' : _a, _b = props.isActive, isActive = _b === void 0 ? false : _b, onClick = props.onClick;
+    var className = React.useMemo(function () {
+        var classList = ['viewer-list-item'];
+        if (isActive) {
+            classList.push('viewer-list-item_active');
+        }
+        if (props.children) {
+            switch (props.isOpen) {
+                case true:
+                    classList.push('viewer-list-item_opened');
+                    break;
+                default:
+                    classList.push('viewer-list-item_closed');
+                    break;
+            }
+        }
+        return classList.join(' ');
+    }, [isActive, props.isOpen]);
+    return (React__default['default'].createElement("li", { className: className, onClick: onClick },
+        title ? React__default['default'].createElement("h4", { className: "viewer-list-item__title" }, title) : null,
+        React__default['default'].createElement("span", { className: "viewer-list-item__text" }, text)));
+};
+
+___$insertStyle(".viewer-list {\n  list-style: none;\n  padding: 0;\n  margin: 0;\n}");
+
+var List = function (props) {
+    var _a = props.items, items = _a === void 0 ? [] : _a;
+    return React__default['default'].createElement("ul", { className: "viewer-list" }, items.map(function (item, index) { return (React__default['default'].createElement(React__default['default'].Fragment, { key: index },
+        React__default['default'].createElement(ListItem, __assign({}, item)),
+        item.children && item.isOpen ? item.children.map(function (child, childIndex) {
+            return React__default['default'].createElement(ListItem, __assign({}, child, { key: index + '_' + childIndex }));
+        }) : null)); }));
+};
+
+___$insertStyle(".viewer-bbox-panel {\n  height: 100%;\n  min-width: 300px;\n  overflow: auto;\n  background: #f9f9fa;\n  box-shadow: 1px 0 0 #cccccc;\n}");
+
+var BboxPanel = function (props) {
+    var _a = React.useContext(ViewerContext), page = _a.page, setScrollIntoPage = _a.setScrollIntoPage;
+    var _b = props.bboxMap, bboxMap = _b === void 0 ? {} : _b;
+    var _c = React.useState(0), openedPage = _c[0], setOpenedPage = _c[1];
+    var items = React.useMemo(function () {
+        var bboxList = [];
+        Object.keys(bboxMap || {}).forEach(function (key) {
+            var pageNumber = parseInt(key);
+            bboxList = __spreadArrays(bboxList, [
+                {
+                    title: "Page " + pageNumber,
+                    text: bboxMap[pageNumber].length + " items",
+                    isActive: props.activePage === pageNumber && openedPage !== pageNumber,
+                    isOpen: openedPage === pageNumber,
+                    onClick: function (e) {
+                        e.stopPropagation();
+                        setOpenedPage(pageNumber === openedPage ? 0 : pageNumber);
+                    },
+                    children: bboxMap[key].map(function (bbox, index) {
+                        return {
+                            text: "" + JSON.stringify(bbox),
+                            title: '',
+                            isActive: props.activePage === pageNumber && props.activeBboxIndex === index,
+                            onClick: function (e) {
+                                var _a;
+                                e.stopPropagation();
+                                if (page !== pageNumber) {
+                                    setScrollIntoPage(pageNumber);
+                                }
+                                (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { page: pageNumber, index: index });
+                            }
+                        };
+                    })
+                }
+            ]);
+        });
+        return bboxList;
+    }, [props.bboxMap, props.activePage, props.activeBboxIndex, page, openedPage]);
+    return React__default['default'].createElement("section", { className: "viewer-bbox-panel" },
+        React__default['default'].createElement(List, { items: items }));
+};
+
+___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  align-items: center;\n  justify-content: flex-start;\n}\n.pdf-viewer__header {\n  width: 100%;\n  position: sticky;\n  top: 0;\n  z-index: 1000;\n}\n.pdf-viewer__content {\n  display: flex;\n  flex-direction: row;\n  flex: 1;\n  width: 100%;\n  overflow: auto;\n  position: relative;\n}\n.pdf-viewer__document-section {\n  overflow: auto;\n  height: 100%;\n  width: 100%;\n  display: flex;\n  justify-content: center;\n}");
 
 var App = function (props) {
-    var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.withToolbar, withToolbar = _b === void 0 ? false : _b, _c = props.stickyTop, stickyTop = _c === void 0 ? undefined : _c, pdfProps = __rest(props, ["className", "withToolbar", "stickyTop"]);
+    var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.withToolbar, withToolbar = _b === void 0 ? false : _b, _c = props.withSidePanel, withSidePanel = _c === void 0 ? false : _c, pdfProps = __rest(props, ["className", "withToolbar", "withSidePanel"]);
     return (React__default['default'].createElement(ViewerProvider, null,
         React__default['default'].createElement("div", { className: "pdf-viewer " + className },
-            withToolbar ? (React__default['default'].createElement(Toolbar$1, { stickyTop: stickyTop, onPageChange: props.onPageChange, showAllPages: props.showAllPages, scale: props.scale, onScaleChange: props.onScaleChange })) : null,
-            React__default['default'].createElement(PdfDocument$1, __assign({}, pdfProps)))));
+            withToolbar ? (React__default['default'].createElement("header", { className: "pdf-viewer__header" },
+                React__default['default'].createElement(Toolbar$1, { onPageChange: props.onPageChange, showAllPages: props.showAllPages, scale: props.scale, onScaleChange: props.onScaleChange }))) : null,
+            React__default['default'].createElement("section", { className: "pdf-viewer__content" },
+                withSidePanel ?
+                    React__default['default'].createElement(BboxPanel, { bboxMap: props.bboxMap, activeBboxIndex: props.activeBboxIndex, activePage: props.activePage, onBboxClick: props.onBboxClick }) : null,
+                React__default['default'].createElement("section", { className: "pdf-viewer__document-section" },
+                    React__default['default'].createElement(PdfDocument$1, __assign({}, pdfProps)))))));
 };
 
 exports.default = App;

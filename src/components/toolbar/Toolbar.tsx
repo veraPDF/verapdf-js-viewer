@@ -1,5 +1,4 @@
 import React, {FC, memo, useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import styled from 'styled-components';
 
 import {ViewerContext} from '../viewerContext/ViewerContext';
 import InputControl from '../../controls/input/InputControl';
@@ -14,14 +13,9 @@ import CheckboxControl from "../../controls/checkbox/CheckboxControl";
 export interface IToolbarProps {
   scale?: number;
   showAllPages?: boolean;
-  stickyTop?: number;
   onPageChange?(page: number): void;
   onScaleChange?(scale: number): void;
 }
-
-const StyledSection = styled.section`
-  top: ${(props: { top?: number }) => props.top || 0}px;
-`;
 
 const Toolbar: FC<IToolbarProps> = (props) => {
   const { scale = 1 } = props;
@@ -75,7 +69,7 @@ const Toolbar: FC<IToolbarProps> = (props) => {
     setPageValue(page);
   }, [page])
   return (
-    <StyledSection top={props.stickyTop} className="pdf-toolbar">
+    <section className="pdf-toolbar">
       <div className="pdf-toolbar__area pdf-toolbar__area_left">
         <ButtonControl disabled={pageValue < 2} onClick={onPrevPage}>Prev page</ButtonControl>
         <ButtonControl disabled={pageValue === maxPage} onClick={onNextPage}>Next page</ButtonControl>
@@ -88,7 +82,7 @@ const Toolbar: FC<IToolbarProps> = (props) => {
       <div className="pdf-toolbar__area pdf-toolbar__area_right">
         <CheckboxControl label="Show bboxes" onChange={onShowBboxesChange} checked={showBboxes} />
       </div>
-    </StyledSection>
+    </section>
   );
 }
 
