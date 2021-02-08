@@ -6,7 +6,10 @@ interface IPdfPageProps extends IPageProps {
     bboxList?: TBbox[];
     defaultHeight?: number;
     defaultWidth?: number;
-    onPageInViewport?(page: number): void;
+    onPageInViewport?(page: number, data: {
+        isIntersecting?: boolean;
+        intersectionRatio?: number;
+    }): void;
 }
 declare const _default: React.NamedExoticComponent<IPdfPageProps>;
 export default _default;

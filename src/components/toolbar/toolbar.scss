@@ -1,0 +1,33 @@
+@import "../../styles/variables";
+
+.pdf-toolbar {
+  width: 100%;
+  height: 32px;
+  background: $component-bg-color;
+  box-shadow: 0 1px 0 $component-shadow-color;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 4px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__label {
+    color: $color-secondary;
+  }
+
+  &__area {
+    & > * + * {
+      margin-left: 4px;
+    }
+
+    &_center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}

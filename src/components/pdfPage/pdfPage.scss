@@ -1,8 +1,11 @@
+@import "../../styles/variables";
+
 .pdf-page {
   position: relative;
   background: #fff;
+  margin-top: 8px;
 
-  & + .pdf-page {
-    margin-top: 8px;
-  }
+  -moz-box-shadow: 0 0 4px 2px $component-shadow-color;
+  -webkit-box-shadow: 0 0 4px 2px $component-shadow-color;
+  box-shadow: 0 0 4px 2px $component-shadow-color;
 }
