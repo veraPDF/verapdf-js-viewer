@@ -6,8 +6,6 @@ export declare const ViewerContext: React.Context<{
     setMaxPage(page: number): void;
     scrollIntoPage: number;
     setScrollIntoPage(page: number): void;
-    showBboxes: boolean;
-    setShowBboxes(show: boolean): void;
 }>;
 declare const ViewerProvider: FC;
 export default ViewerProvider;

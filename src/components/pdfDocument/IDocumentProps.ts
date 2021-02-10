@@ -9,6 +9,7 @@ export interface IDocumentProps {
   loading?: string | React.ReactElement | RenderFunction;
   noData?: string | React.ReactElement | RenderFunction;
   rotate?: number;
+  workerSrc?: string;
   onLoadSuccess?(pdf: PDFDocumentProxy): void;
   onLoadError?(error: Error): void;
   onItemClick?({ pageNumber }: { pageNumber: string }): void;

@@ -1,29 +1,30 @@
 import React, {FC, memo, useCallback, useMemo, useState, useContext, useEffect} from 'react';
 import { Document, pdfjs } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist';
+import { useDebounce } from 'react-use';
 
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
 import { TBbox } from '../../types/bbox';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
-import {ViewerContext} from '../viewerContext/ViewerContext';
+import { ViewerContext } from '../viewerContext/ViewerContext';
 
 import './pdfDocument.scss';
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
-  activePage?: number;
+  activeBboxPage?: number;
   activeBboxIndex?: number;
   bboxMap?: {
-    [key: number]: TBbox[]
-  },
+    [key: number]: TBbox[];
+  };
+  onPageChange?(page: number): void;
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
-  // TODO: Add input param for worker path
   pdfjs.GlobalWorkerOptions.workerSrc = useMemo(() => `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`, []);
-  const { page, setPage, maxPage, setMaxPage } = useContext(ViewerContext);
+  const { page, setPage, maxPage, setMaxPage, scrollIntoPage, setScrollIntoPage } = useContext(ViewerContext);
   const { bboxMap = {} } = props;
   const [loaded, setLoaded] = useState(false);
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
@@ -61,7 +62,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       setPage(page);
     }
   }, [maxPage, props.showAllPages]);
-  const getSelectedBbox = useMemo(() => (page: number) => props.activePage === page ? props.activeBboxIndex : undefined, [props.activeBboxIndex, props.activePage]);
+  const getSelectedBbox = useMemo(() => (page: number) => props.activeBboxPage === page ? props.activeBboxIndex : undefined, [props.activeBboxIndex, props.activeBboxPage]);
   const onBboxClick = useCallback((data) => {
       props.onBboxClick?.(data);
     }, []);
@@ -101,14 +102,23 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
     if (newPageIndex !== -1 && pagesByViewport[newPageIndex]) {
       setPage(pagesByViewport[newPageIndex]);
+      if (scrollIntoPage) {
+        setScrollIntoPage(0);
+      }
     }
-  }, [pagesByViewport, page, ratioArray]);
+  }, [pagesByViewport, page, ratioArray, scrollIntoPage]);
+  useDebounce(() => {
+    if (props.page !== page) props.onPageChange?.(page)
+  }, 30, [page]);
 
   useEffect(() => {
     if (page !== props.page) {
       setPage(props.page || 1);
+      if (props.showAllPages) {
+        setScrollIntoPage(props.page);
+      }
     }
-  }, [props.page]);
+  }, [props.page, props.showAllPages]);
 
   useEffect(() => {
     setLoaded(false);

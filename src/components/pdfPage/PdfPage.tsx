@@ -23,7 +23,7 @@ const StyledPdfPage = styled.div`
 `;
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
-  const { scrollIntoPage, setScrollIntoPage, showBboxes } = useContext(ViewerContext);
+  const { scrollIntoPage } = useContext(ViewerContext);
   const { bboxList = [], scale = 1 } = props;
   const intersectionRef = useRef(null);
   const [loaded, setLoaded] = useState(false);
@@ -62,7 +62,6 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   useEffect(() => {
     if (scrollIntoPage === props.page) {
       (intersectionRef.current as unknown as HTMLElement)?.scrollIntoView();
-      setScrollIntoPage(0);
     }
   }, [scrollIntoPage]);
   const isBboxSelected = (index: number) => props.activeBbox === index;
@@ -99,7 +98,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextSuccess={props.onGetTextSuccess}
           onGetTextError={props.onGetTextError}
         />
-        {showBboxes && isRendered ? bboxList.map((bbox: TBbox, index) => (
+        {isRendered ? bboxList.map((bbox: TBbox, index) => (
           <Bbox key={index} bbox={bbox} onClick={onBboxClick(index)} selected={isBboxSelected(index)} scale={scale} />
         )) : null}
       </> : null}
