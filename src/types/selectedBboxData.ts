@@ -1,1 +1,1 @@
-export type TSelectedBboxData = { page: number, index: number };
+export type TSelectedBboxData = { index: number };

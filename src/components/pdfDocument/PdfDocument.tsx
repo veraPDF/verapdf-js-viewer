@@ -6,18 +6,17 @@ import { useDebounce } from 'react-use';
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
-import { TBbox } from '../../types/bbox';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 
 import './pdfDocument.scss';
+import {IBbox} from "../bbox/Bbox";
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
-  activeBboxPage?: number;
   activeBboxIndex?: number;
   bboxMap?: {
-    [key: number]: TBbox[];
+    [page: number]: IBbox[];
   };
   onPageChange?(page: number): void;
 }
@@ -62,7 +61,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       setPage(page);
     }
   }, [maxPage, props.showAllPages]);
-  const getSelectedBbox = useMemo(() => (page: number) => props.activeBboxPage === page ? props.activeBboxIndex : undefined, [props.activeBboxIndex, props.activeBboxPage]);
   const onBboxClick = useCallback((data) => {
       props.onBboxClick?.(data);
     }, []);
@@ -169,7 +167,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onGetTextError={props.onGetTextError}
           onPageInViewport={onPageInViewport}
           bboxList={bboxMap[page]}
-          activeBbox={getSelectedBbox(page)}
+          activeBboxIndex={props.activeBboxIndex}
           onBboxClick={onBboxClick}
         />
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])}

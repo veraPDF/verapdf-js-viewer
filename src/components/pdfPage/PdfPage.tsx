@@ -3,15 +3,14 @@ import { Page } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 
-import Bbox from '../bbox/Bbox';
+import Bbox, {IBbox} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
-import { TBbox } from '../../types/bbox';
 import {ViewerContext} from '../viewerContext/ViewerContext';
 
 import './pdfPage.scss';
 
 interface IPdfPageProps extends IPageProps {
-  bboxList?: TBbox[];
+  bboxList?: IBbox[];
   defaultHeight?: number;
   defaultWidth?: number;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
@@ -46,7 +45,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, []);
   const onBboxClick = useCallback((index) => (e: Event) => {
     e.stopPropagation();
-    props.onBboxClick?.({ page: props.page, index })
+    props.onBboxClick?.({ index });
   }, [props.onBboxClick]);
   const onPageRenderSuccess = useCallback(() => {
     setIsRendered(true);
@@ -64,7 +63,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       (intersectionRef.current as unknown as HTMLElement)?.scrollIntoView();
     }
   }, [scrollIntoPage]);
-  const isBboxSelected = (index: number) => props.activeBbox === index;
+  const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
 
   return (
     <StyledPdfPage
@@ -98,8 +97,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextSuccess={props.onGetTextSuccess}
           onGetTextError={props.onGetTextError}
         />
-        {isRendered ? bboxList.map((bbox: TBbox, index) => (
-          <Bbox key={index} bbox={bbox} onClick={onBboxClick(index)} selected={isBboxSelected(index)} scale={scale} />
+        {isRendered ? bboxList.map((bbox: IBbox, index) => (
+          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} scale={scale} />
         )) : null}
       </> : null}
     </StyledPdfPage>

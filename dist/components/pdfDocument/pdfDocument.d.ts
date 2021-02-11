@@ -1,14 +1,13 @@
 import React from 'react';
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
-import { TBbox } from '../../types/bbox';
 import './pdfDocument.scss';
+import { IBbox } from "../bbox/Bbox";
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     showAllPages?: boolean;
-    activeBboxPage?: number;
     activeBboxIndex?: number;
     bboxMap?: {
-        [key: number]: TBbox[];
+        [page: number]: IBbox[];
     };
     onPageChange?(page: number): void;
 }

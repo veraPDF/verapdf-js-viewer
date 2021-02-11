@@ -105,6 +105,13 @@ function __generator(thisArg, body) {
     }
 }
 
+function __spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+}
 function __makeTemplateObject(cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
@@ -112,10 +119,25 @@ function __makeTemplateObject(cooked, raw) {
 
 ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 1;\n  background: rgba(255, 69, 0, 0.5);\n}");
 
-var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-wabgee" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  left: ", "px;\n  top: ", "px;\n  height: ", "px;\n  width: ", "px;\n"], ["\n  left: ", "px;\n  top: ", "px;\n  height: ", "px;\n  width: ", "px;\n"])), function (props) { return props.left; }, function (props) { return props.top; }, function (props) { return props.height; }, function (props) { return props.width; });
+var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-wabgee" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; });
 var Bbox = function (props) {
-    var _a = props.bbox, left = _a[0], top = _a[1], width = _a[2], height = _a[3];
-    return React__default['default'].createElement(BboxDiv, { className: "pdf-bbox " + (props.selected && 'pdf-bbox_selected'), left: left * props.scale, top: top * props.scale, width: width * props.scale, height: height * props.scale, onClick: props.onClick });
+    var _a = React.useMemo(function () {
+        return [
+            (parseFloat(props.bbox.location[0]) * props.scale) + 'px',
+            (props.bbox.location[3] === 'bottom'
+                ? '0'
+                : (parseFloat(props.bbox.location[1]) * props.scale) + 'px'),
+            (parseFloat(props.bbox.location[2]) * props.scale) + 'px',
+            (props.bbox.location[3] === 'top'
+                ? 'auto'
+                : (parseFloat(props.bbox.location[3]) * props.scale) + 'px'),
+            props.bbox.location[3] === 'top'
+                ? '0' : props.bbox.location[3] === 'bottom'
+                ? "calc(100% - " + parseFloat(props.bbox.location[1]) * props.scale + "px)"
+                : 'auto',
+        ];
+    }, [props.bbox.location]), left = _a[0], bottom = _a[1], width = _a[2], height = _a[3], top = _a[4];
+    return React__default['default'].createElement(BboxDiv, { className: "pdf-bbox " + (props.selected && 'pdf-bbox_selected'), left: left, bottom: bottom, width: width, height: height, top: top, onClick: props.onClick });
 };
 var Bbox$1 = React.memo(Bbox);
 var templateObject_1;
@@ -164,7 +186,7 @@ var PdfPage = function (props) {
     var onBboxClick = React.useCallback(function (index) { return function (e) {
         var _a;
         e.stopPropagation();
-        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { page: props.page, index: index });
+        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { index: index });
     }; }, [props.onBboxClick]);
     var onPageRenderSuccess = React.useCallback(function () {
         var _a;
@@ -184,10 +206,10 @@ var PdfPage = function (props) {
             (_a = intersectionRef.current) === null || _a === void 0 ? void 0 : _a.scrollIntoView();
         }
     }, [scrollIntoPage]);
-    var isBboxSelected = function (index) { return props.activeBbox === index; };
+    var isBboxSelected = function (bbox) { return props.activeBboxIndex === bbox.index; };
     return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered", "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.defaultHeight : undefined, width: !isRendered ? props.defaultWidth : undefined, scale: scale, ref: intersectionRef }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
         React__default['default'].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadProgress: props.onPageLoadProgress, onLoadSuccess: props.onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
-        isRendered ? bboxList.map(function (bbox, index) { return (React__default['default'].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(index), selected: isBboxSelected(index), scale: scale })); }) : null) : null));
+        isRendered ? bboxList.map(function (bbox, index) { return (React__default['default'].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index), selected: isBboxSelected(bbox), scale: scale })); }) : null) : null));
 };
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1$1;
@@ -238,7 +260,6 @@ var PdfDocument = function (props) {
             setPage(page);
         }
     }, [maxPage, props.showAllPages]);
-    var getSelectedBbox = React.useMemo(function () { return function (page) { return props.activeBboxPage === page ? props.activeBboxIndex : undefined; }; }, [props.activeBboxIndex, props.activeBboxPage]);
     var onBboxClick = React.useCallback(function (data) {
         var _a;
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, data);
@@ -305,18 +326,86 @@ var PdfDocument = function (props) {
         setPage(1);
     }, [props.file]);
     return (React__default['default'].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
-        return React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBbox: getSelectedBbox(page), onBboxClick: onBboxClick });
+        return React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBboxIndex: props.activeBboxIndex, onBboxClick: onBboxClick });
     }) : null; }, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
+var buildBboxMap = function (bboxes) {
+    var bboxMap = {};
+    bboxes.forEach(function (bbox, index) {
+        if (bbox.page) {
+            if (typeof bbox.location !== 'string') {
+                bboxMap[bbox.page] = __spreadArrays((bboxMap[bbox.page] || []), [
+                    {
+                        index: index,
+                        location: bbox.location,
+                    },
+                ]);
+            }
+            else {
+                var bboxesFromLocation = calculateLocation(bbox.location);
+                bboxesFromLocation.map(function (bbox) {
+                    bboxMap[bbox.page] = __spreadArrays((bboxMap[bbox.page] || []), [
+                        {
+                            index: index,
+                            location: bbox.location,
+                        },
+                    ]);
+                });
+            }
+        }
+    });
+    return bboxMap;
+};
+var calculateLocation = function (location) {
+    var bboxes = [];
+    var _a = location.split('/'), pages = _a[0], boundingBox = _a[1];
+    var _b = pages.replace('pages[', '').replace(']', '').split('-'), start = _b[0], end = _b[1];
+    var _c = boundingBox.replace('boundingBox[', '').replace(']', '').split(','), x = _c[0], y = _c[1], x1 = _c[2], y1 = _c[3];
+    var width = parseFloat(x1) - parseFloat(x);
+    if (end) {
+        for (var i = parseInt(start) + 1; i <= parseInt(end) + 1; i++) {
+            switch (i) {
+                case parseInt(start) + 1:
+                    bboxes.push({
+                        page: i,
+                        location: [parseFloat(x), parseFloat(y1), width, 'bottom'],
+                    });
+                    break;
+                case parseInt(end) + 1:
+                    bboxes.push({
+                        page: i,
+                        location: [parseFloat(x), parseFloat(y), width, 'top'],
+                    });
+                    break;
+                default:
+                    bboxes.push({
+                        page: i,
+                        location: [parseFloat(x), 0, width, 'top'],
+                    });
+                    break;
+            }
+        }
+    }
+    else {
+        var height = parseFloat(y1) - parseFloat(y);
+        bboxes.push({
+            page: parseFloat(start),
+            location: [parseFloat(x), parseFloat(y), width, height],
+        });
+    }
+    return bboxes;
+};
+
 ___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  align-items: center;\n  justify-content: flex-start;\n  overflow: auto;\n}");
 
 var App = function (props) {
-    var _a = props.className, className = _a === void 0 ? '' : _a, pdfProps = __rest(props, ["className"]);
+    var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, pdfProps = __rest(props, ["className", "bboxes"]);
+    var bboxMap = React.useMemo(function () { return buildBboxMap(bboxes); }, [bboxes]);
     return (React__default['default'].createElement(ViewerProvider, null,
         React__default['default'].createElement("div", { className: "pdf-viewer " + className },
-            React__default['default'].createElement(PdfDocument$1, __assign({}, pdfProps)))));
+            React__default['default'].createElement(PdfDocument$1, __assign({}, pdfProps, { bboxMap: bboxMap })))));
 };
 
 exports.default = App;

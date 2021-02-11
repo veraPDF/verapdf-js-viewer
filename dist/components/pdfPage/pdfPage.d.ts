@@ -1,9 +1,9 @@
 import React from 'react';
+import { IBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
-import { TBbox } from '../../types/bbox';
 import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
-    bboxList?: TBbox[];
+    bboxList?: IBbox[];
     defaultHeight?: number;
     defaultWidth?: number;
     onPageInViewport?(page: number, data: {
