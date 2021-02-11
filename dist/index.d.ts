@@ -1,10 +1,12 @@
 import { FC } from 'react';
 import { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
-import { IToolbarProps } from './components/toolbar/Toolbar';
 import './styles.scss';
-interface IPdfViewerProps extends IPdfDocumentProps, IToolbarProps {
-    withToolbar?: boolean;
-    withSidePanel?: boolean;
+export interface IBboxLocation {
+    page: number;
+    location: (number | string)[] | string;
+}
+interface IPdfViewerProps extends IPdfDocumentProps {
+    bboxes?: IBboxLocation[];
     className?: string;
 }
 declare const App: FC<IPdfViewerProps>;

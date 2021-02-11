@@ -1,8 +1,15 @@
 import React from 'react';
-import { TBbox } from '../../types/bbox';
 import './bbox.scss';
+export interface IBbox {
+    location: (number | string)[];
+    linked?: {
+        page: number;
+        index: number;
+    };
+    index: number;
+}
 interface IBboxProps {
-    bbox: TBbox;
+    bbox: IBbox;
     scale: number;
     selected?: boolean;
     onClick?(e: any): void;

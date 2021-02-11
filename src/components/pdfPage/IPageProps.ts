@@ -14,7 +14,7 @@ export interface IPageProps {
   renderInteractiveForms?: boolean;
   renderTextLayer?: boolean;
   scale?: number;
-  activeBbox?: number;
+  activeBboxIndex?: number;
   onPageLoadError?(error: Error): void;
   onPageLoadProgress?(data: LoadingProcessData): void;
   onPageLoadSuccess?(page: PDFPageProxy): void;

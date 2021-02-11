@@ -20,7 +20,6 @@ export default {
   plugins: [
     sass({ insert: true }),
     typescript({
-      objectHashIgnoreUnknownHack: true,
       transformers: [
         () => ({
           before: [styledComponentsTransformer],
@@ -28,5 +27,5 @@ export default {
       ],
     })
   ],
-  external: ['react', 'react-dom', 'react-pdf']
+  external: ['react', 'react-dom', 'react-pdf', 'react-use', 'use-intersection', 'styled-components']
 }

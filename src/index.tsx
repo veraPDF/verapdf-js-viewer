@@ -1,45 +1,28 @@
-import React, { FC } from 'react';
+import React, {FC, useMemo} from 'react';
 
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
-import Toolbar, { IToolbarProps } from './components/toolbar/Toolbar';
 import ViewerProvider from './components/viewerContext/ViewerContext';
-import BboxPanel from './components/bboxPanel/BboxPanel';
+import {buildBboxMap} from './services/bboxService';
 
 import './styles.scss'
 
-interface IPdfViewerProps extends IPdfDocumentProps, IToolbarProps {
-  withToolbar?: boolean;
-  withSidePanel?: boolean;
+export interface IBboxLocation {
+  page: number;
+  location: (number | string)[] | string;
+}
+
+interface IPdfViewerProps extends IPdfDocumentProps {
+  bboxes?: IBboxLocation[];
   className?: string
 }
 
 const App: FC<IPdfViewerProps> = (props) => {
-  const { className = '', withToolbar = false, withSidePanel = false, ...pdfProps } = props;
+  const { className = '', bboxes = [], ...pdfProps } = props;
+  const bboxMap = useMemo(() => buildBboxMap(bboxes), [bboxes]);
   return (
     <ViewerProvider>
       <div className={`pdf-viewer ${className}`}>
-        {withToolbar ? (
-          <header className="pdf-viewer__header">
-            <Toolbar
-              onPageChange={props.onPageChange}
-              showAllPages={props.showAllPages}
-              scale={props.scale}
-              onScaleChange={props.onScaleChange}
-            />
-          </header>
-        ) : null}
-        <section className="pdf-viewer__content">
-          {withSidePanel ?
-            <BboxPanel
-              bboxMap={props.bboxMap}
-              activeBboxIndex={props.activeBboxIndex}
-              activePage={props.activePage}
-              onBboxClick={props.onBboxClick}
-          /> : null}
-          <section className="pdf-viewer__document-section">
-            <PdfDocument {...pdfProps} />
-          </section>
-        </section>
+        <PdfDocument {...pdfProps} bboxMap={bboxMap}/>
       </div>
     </ViewerProvider>
   );
