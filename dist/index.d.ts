@@ -6,7 +6,7 @@ export interface IBboxLocation {
     location: (number | string)[] | string;
 }
 interface IPdfViewerProps extends IPdfDocumentProps {
-    bboxes?: IBboxLocation[];
+    bboxes: IBboxLocation[];
     className?: string;
 }
 declare const App: FC<IPdfViewerProps>;

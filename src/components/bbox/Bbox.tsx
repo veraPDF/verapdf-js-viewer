@@ -7,6 +7,7 @@ export interface IBbox {
   location: (number | string)[];
   linked?: { page: number, index: number };
   index: number;
+  mcidList?: number[];
 }
 
 interface IBboxProps {

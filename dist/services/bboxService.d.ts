@@ -1,2 +1,4 @@
 import { IBboxLocation } from '../index';
-export declare const buildBboxMap: (bboxes: IBboxLocation[]) => {};
+import { AnyObject } from '../types/generics';
+export declare const buildBboxMap: (bboxes: IBboxLocation[], structure: AnyObject) => {};
+export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject) => any[];
