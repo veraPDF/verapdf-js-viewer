@@ -122,7 +122,7 @@ function __makeTemplateObject(cooked, raw) {
 
 ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 1;\n  background: rgba(255, 69, 0, 0.5);\n}");
 
-var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-wabgee" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; });
+var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-17xnjpp" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -412,7 +412,7 @@ function concatBoundingBoxes(newBoundingBox, oldBoundingBox) {
 
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}");
 
-var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-9rs558" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
+var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-1spr7aw" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
 var PdfPage = function (props) {
     var scrollIntoPage = React.useContext(ViewerContext).scrollIntoPage;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
