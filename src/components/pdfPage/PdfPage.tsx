@@ -2,10 +2,13 @@ import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext,} 
 import { Page } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 import Bbox, {IBbox} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
-import {ViewerContext} from '../viewerContext/ViewerContext';
+import { ViewerContext } from '../viewerContext/ViewerContext';
+import { AnyObject } from '../../types/generics';
+import { parseMcidToBbox } from '../../services/bboxService';
 
 import './pdfPage.scss';
 
@@ -13,6 +16,7 @@ interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
   defaultHeight?: number;
   defaultWidth?: number;
+  structure?: AnyObject;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
 }
 
@@ -25,6 +29,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const { scrollIntoPage } = useContext(ViewerContext);
   const { bboxList = [], scale = 1 } = props;
   const intersectionRef = useRef(null);
+  const [bboxes, setBboxes] = useState<IBbox[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -51,6 +56,21 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setIsRendered(true);
     props.onPageRenderSuccess?.();
   }, []);
+  const onPageLoadSuccess = useCallback((page) => {
+    setIsRendered(true);
+    Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
+      const positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
+      const bboxes = bboxList.map((bbox) => {
+        if (bbox.mcidList) {
+          bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations);
+        }
+
+        return bbox;
+      });
+      setBboxes(bboxes);
+    });
+    props.onPageLoadSuccess?.(page);
+  }, [bboxList]);
 
   useEffect(() => {
     if (!loaded && isIntersecting) {
@@ -89,7 +109,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           scale={props.scale}
           onLoadError={props.onPageLoadError}
           onLoadProgress={props.onPageLoadProgress}
-          onLoadSuccess={props.onPageLoadSuccess}
+          onLoadSuccess={onPageLoadSuccess}
           onRenderError={props.onPageRenderError}
           onRenderSuccess={onPageRenderSuccess}
           onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
@@ -97,7 +117,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextSuccess={props.onGetTextSuccess}
           onGetTextError={props.onGetTextError}
         />
-        {isRendered ? bboxList.map((bbox: IBbox, index) => (
+        {isRendered ? bboxes.map((bbox: IBbox, index) => (
           <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} scale={scale} />
         )) : null}
       </> : null}

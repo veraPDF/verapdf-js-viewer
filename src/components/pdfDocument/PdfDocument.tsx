@@ -1,5 +1,5 @@
 import React, {FC, memo, useCallback, useMemo, useState, useContext, useEffect} from 'react';
-import { Document, pdfjs } from 'react-pdf';
+import { Document } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist';
 import { useDebounce } from 'react-use';
 
@@ -8,24 +8,32 @@ import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
+import { AnyObject } from '../../types/generics';
+import { IBboxLocation } from '../../index';
+import { buildBboxMap } from '../../services/bboxService';
+// @ts-ignore
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
 import './pdfDocument.scss';
-import {IBbox} from "../bbox/Bbox";
+
+interface IDocumentData extends PDFDocumentProxy {
+  _pdfInfo: {
+    structureTree: AnyObject;
+  }
+}
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
   activeBboxIndex?: number;
-  bboxMap?: {
-    [page: number]: IBbox[];
-  };
+  bboxes: IBboxLocation[];
   onPageChange?(page: number): void;
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
-  pdfjs.GlobalWorkerOptions.workerSrc = useMemo(() => `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`, []);
   const { page, setPage, maxPage, setMaxPage, scrollIntoPage, setScrollIntoPage } = useContext(ViewerContext);
-  const { bboxMap = {} } = props;
+  const { bboxes = [] } = props;
   const [loaded, setLoaded] = useState(false);
+  const [bboxMap, setBboxMap] = useState({});
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
   const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(0);
@@ -41,7 +49,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return [props.page || 1];
   }, [maxPage, props.showAllPages, props.page]);
 
-  const onDocumentLoadSuccess = useCallback(async (data: PDFDocumentProxy) => {
+  const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
+    setBboxMap(buildBboxMap(bboxes, data._pdfInfo.structureTree));
     const pageData = await data.getPage(1);
     setDefaultHeight(pageData.view[3]);
     setDefaultWidth(pageData.view[2]);
@@ -49,7 +58,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setLoaded(true);
 
     props.onLoadSuccess?.(data);
-  }, [props.onLoadSuccess]);
+  }, [props.onLoadSuccess, bboxes]);
   const onPageLoadSuccess = useCallback((data: PDFPageProxy) => {
     props.onPageLoadSuccess?.(data);
   }, [props.onPageLoadSuccess]);
@@ -140,6 +149,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       noData={props.noData}
       onItemClick={props.onItemClick}
       rotate={props.rotate}
+      options={{
+        workerSrc: pdfjsWorker,
+      }}
     >
       {useMemo(() => loaded ? shownPages.map((page) =>
         <PdfPage

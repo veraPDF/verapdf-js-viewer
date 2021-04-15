@@ -1,8 +1,7 @@
-import React, {FC, useMemo} from 'react';
+import React, { FC } from 'react';
 
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import ViewerProvider from './components/viewerContext/ViewerContext';
-import {buildBboxMap} from './services/bboxService';
 
 import './styles.scss'
 
@@ -12,17 +11,16 @@ export interface IBboxLocation {
 }
 
 interface IPdfViewerProps extends IPdfDocumentProps {
-  bboxes?: IBboxLocation[];
+  bboxes: IBboxLocation[];
   className?: string
 }
 
 const App: FC<IPdfViewerProps> = (props) => {
   const { className = '', bboxes = [], ...pdfProps } = props;
-  const bboxMap = useMemo(() => buildBboxMap(bboxes), [bboxes]);
   return (
     <ViewerProvider>
       <div className={`pdf-viewer ${className}`}>
-        <PdfDocument {...pdfProps} bboxMap={bboxMap}/>
+        <PdfDocument {...pdfProps} bboxes={bboxes}/>
       </div>
     </ViewerProvider>
   );

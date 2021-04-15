@@ -7,6 +7,7 @@ export interface IBbox {
         index: number;
     };
     index: number;
+    mcidList?: number[];
 }
 interface IBboxProps {
     bbox: IBbox;
