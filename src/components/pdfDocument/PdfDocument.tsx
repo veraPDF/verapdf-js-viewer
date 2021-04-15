@@ -1,5 +1,5 @@
 import React, {FC, memo, useCallback, useMemo, useState, useContext, useEffect} from 'react';
-import { Document, pdfjs } from 'react-pdf';
+import { Document } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist';
 import { useDebounce } from 'react-use';
 
@@ -11,6 +11,8 @@ import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
 import { IBboxLocation } from '../../index';
 import { buildBboxMap } from '../../services/bboxService';
+// @ts-ignore
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
 import './pdfDocument.scss';
 
@@ -26,9 +28,6 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   bboxes: IBboxLocation[];
   onPageChange?(page: number): void;
 }
-
-const { PUBLIC_URL } = process.env;
-pdfjs.GlobalWorkerOptions.workerSrc = `${PUBLIC_URL}/pdf.worker.js`;
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const { page, setPage, maxPage, setMaxPage, scrollIntoPage, setScrollIntoPage } = useContext(ViewerContext);
@@ -150,6 +149,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       noData={props.noData}
       onItemClick={props.onItemClick}
       rotate={props.rotate}
+      options={{
+        workerSrc: pdfjsWorker,
+      }}
     >
       {useMemo(() => loaded ? shownPages.map((page) =>
         <PdfPage
