@@ -98,7 +98,7 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
     return [{ annot: selectedTag.annot }, selectedTag.pageIndex];
   } else if (selectedTag instanceof Array) {
     let objectOfErrors = { ...structure };
-    selectedTag.forEach(node => {
+    selectedTag.forEach((node, index) => {
       let nextStepObject;
       if (!objectOfErrors.children) {
         nextStepObject = objectOfErrors[node[0]];
@@ -109,7 +109,7 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
           nextStepObject = objectOfErrors;
         }
       } else {
-        if (objectOfErrors?.name === 'Document' && objectOfErrors?.name === node[1]) {
+        if (objectOfErrors?.name === node[1] && index === 0) {
           nextStepObject = objectOfErrors;
         } else {
           nextStepObject = { ...objectOfErrors.children[node[0]] };
