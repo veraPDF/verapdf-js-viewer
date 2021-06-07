@@ -2,6 +2,7 @@ import sass from 'rollup-plugin-sass'
 import typescript from 'rollup-plugin-typescript2'
 import createStyledComponentsTransformer from 'typescript-plugin-styled-components';
 import copy from 'rollup-plugin-copy';
+import commonjs from 'rollup-plugin-commonjs';
 
 import pkg from './package.json'
 
@@ -31,7 +32,12 @@ export default {
       targets: [
         { src: 'node_modules/pdfjs-dist/build/pdf.worker.js', dest: 'dist/public' },
       ]
-    })
+    }),
+	commonjs({
+      namedExports: {
+        'node_modules/pdfjs-dist/build/pdf.worker.entry': ['pdfjsWorker'],
+      },
+    }),
   ],
-  external: ['react', 'react-dom', 'react-pdf', 'react-use', 'use-intersection', 'styled-components', 'lodash', 'pdfjs-dist/build/pdf.worker.entry']
+  external: ['react', 'react-dom']
 }
