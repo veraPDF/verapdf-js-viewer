@@ -26,7 +26,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             },
           ];
         } else {
-          const bboxesFromLocation = calculateLocation(bbox.location as string);
+          const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
           bboxesFromLocation.map((bbox: IBboxLocation) => {
             bboxMap[bbox.page] = [
               ...(bboxMap[bbox.page] || []),
@@ -81,6 +81,22 @@ const calculateLocation = (location: string) => {
     })
   }
 
+  return bboxes;
+}
+
+const calculateLocationJSON = (location: string) => {
+  const bboxes: AnyObject[] = [];
+  const bboxMap = JSON.parse(location);
+
+  bboxMap.bbox.forEach(({ p, rect }: {p: string, rect: string[]}) => {
+    const [x, y, x1, y1] = rect;
+    const width = parseFloat(x1) - parseFloat(x);
+    const height = parseFloat(y1) - parseFloat(y);
+    bboxes.push({
+      page: parseFloat(p) + 1,
+      location: [parseFloat(x), parseFloat(y), width, height],
+    });
+  });
   return bboxes;
 }
 
