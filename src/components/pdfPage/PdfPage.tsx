@@ -2,9 +2,8 @@ import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext,} 
 import { Page } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
-import _ from 'lodash';
 
-import Bbox, {IBbox} from '../bbox/Bbox';
+import Bbox, {IBbox, IColorScheme} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
@@ -17,6 +16,7 @@ interface IPdfPageProps extends IPageProps {
   defaultHeight?: number;
   defaultWidth?: number;
   structure?: AnyObject;
+  colorScheme?: IColorScheme;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
 }
 
@@ -31,6 +31,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const intersectionRef = useRef(null);
   const [bboxes, setBboxes] = useState<IBbox[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [pageScale, setPageScale] = useState(scale);
+  const [pageViewport, setPageViewport] = useState([]);
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
@@ -58,6 +60,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, []);
   const onPageLoadSuccess = useCallback((page) => {
     setIsRendered(true);
+    setPageViewport(page.view);
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
       const bboxes = bboxList.map((bbox) => {
@@ -70,7 +73,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxes(bboxes);
     });
     props.onPageLoadSuccess?.(page);
-  }, [bboxList]);
+  }, [bboxList, props.width, props.height, scale]);
 
   useEffect(() => {
     if (!loaded && isIntersecting) {
@@ -83,6 +86,17 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       (intersectionRef.current as unknown as HTMLElement)?.scrollIntoView();
     }
   }, [scrollIntoPage]);
+  useEffect(() => {
+    const width = pageViewport[2] - pageViewport[0];
+    const height = pageViewport[3] - pageViewport[1];
+    if (props.width && width) {
+      return setPageScale((props.width / width) * scale);
+    } else if (props.height && height) {
+      return setPageScale((props.height / height) * scale);
+    }
+
+    setPageScale(scale);
+  }, [pageViewport, scale, props.width, props.height]);
   const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
 
   return (
@@ -90,9 +104,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       className="pdf-page pdf-page_rendered"
       data-page={props.page}
       onClick={onPageClick}
-      height={!isRendered ? props.defaultHeight : undefined}
-      width={!isRendered ? props.defaultWidth : undefined}
-      scale={scale}
+      height={!isRendered ? props.height || props.defaultHeight : undefined}
+      width={!isRendered ? props.width || props.defaultWidth : undefined}
+      scale={pageScale}
       ref={intersectionRef}
     >
       {loaded ? <>
@@ -118,7 +132,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextError={props.onGetTextError}
         />
         {isRendered ? bboxes.map((bbox: IBbox, index) => (
-          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} scale={scale} />
+          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} scale={pageScale} colorScheme={props.colorScheme} />
         )) : null}
       </> : null}
     </StyledPdfPage>

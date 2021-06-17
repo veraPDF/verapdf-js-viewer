@@ -120,7 +120,11 @@ function __makeTemplateObject(cooked, raw) {
 
 ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 1;\n  background: rgba(255, 69, 0, 0.5);\n}");
 
-var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-wabgee" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";;\n  top: ", ";\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; });
+var bboxBg = 'rgba(255, 255, 255, 0)';
+var bboxBorder = 'grey';
+var bboxBorderHover = 'orangered';
+var bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
+var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-wabgee" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -137,8 +141,8 @@ var Bbox = function (props) {
                 ? "calc(100% - " + parseFloat(props.bbox.location[1]) * props.scale + "px)"
                 : 'auto',
         ];
-    }, [props.bbox.location]), left = _a[0], bottom = _a[1], width = _a[2], height = _a[3], top = _a[4];
-    return React__default['default'].createElement(BboxDiv, { className: "pdf-bbox " + (props.selected && 'pdf-bbox_selected'), left: left, bottom: bottom, width: width, height: height, top: top, onClick: props.onClick });
+    }, [props.bbox.location, props.scale]), left = _a[0], bottom = _a[1], width = _a[2], height = _a[3], top = _a[4];
+    return React__default['default'].createElement(BboxDiv, { className: "pdf-bbox " + (props.selected && 'pdf-bbox_selected'), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, onClick: props.onClick });
 };
 var Bbox$1 = React.memo(Bbox);
 var templateObject_1$1;
@@ -182,7 +186,7 @@ var buildBboxMap = function (bboxes, structure) {
                     ]);
                 }
                 else {
-                    var bboxesFromLocation = calculateLocation(bbox.location);
+                    var bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
                     bboxesFromLocation.map(function (bbox) {
                         bboxMap[bbox.page] = __spreadArray(__spreadArray([], (bboxMap[bbox.page] || [])), [
                             {
@@ -234,6 +238,21 @@ var calculateLocation = function (location) {
             location: [parseFloat(x), parseFloat(y), width, height],
         });
     }
+    return bboxes;
+};
+var calculateLocationJSON = function (location) {
+    var bboxes = [];
+    var bboxMap = JSON.parse(location);
+    bboxMap.bbox.forEach(function (_a) {
+        var p = _a.p, rect = _a.rect;
+        var x = rect[0], y = rect[1], x1 = rect[2], y1 = rect[3];
+        var width = parseFloat(x1) - parseFloat(x);
+        var height = parseFloat(y1) - parseFloat(y);
+        bboxes.push({
+            page: parseFloat(p) + 1,
+            location: [parseFloat(x), parseFloat(y), width, height],
+        });
+    });
     return bboxes;
 };
 var getTagsFromErrorPlace = function (context, structure) {
@@ -365,6 +384,7 @@ function findAllMcid(tagObject) {
     return [listOfMcid, pageIndex];
 }
 var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
+    var _a;
     var coords = {};
     if (listOfMcid instanceof Array) {
         listOfMcid.forEach(function (mcid) {
@@ -379,13 +399,15 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
         });
     }
     else if (listOfMcid.hasOwnProperty('annot')) {
-        var rect = annotations[listOfMcid.annot].rect;
-        coords = {
-            x: rect[0],
-            y: rect[1],
-            width: Math.abs(rect[0] - rect[2]),
-            height: Math.abs(rect[1] - rect[3]),
-        };
+        var rect = (_a = annotations[listOfMcid.annot]) === null || _a === void 0 ? void 0 : _a.rect;
+        if (rect) {
+            coords = {
+                x: rect[0],
+                y: rect[1],
+                width: Math.abs(rect[0] - rect[2]),
+                height: Math.abs(rect[1] - rect[3]),
+            };
+        }
     }
     return coords ? [coords.x, coords.y, coords.width, coords.height] : [];
 };
@@ -418,9 +440,11 @@ var PdfPage = function (props) {
     var intersectionRef = React.useRef(null);
     var _c = React.useState([]), bboxes = _c[0], setBboxes = _c[1];
     var _d = React.useState(false), loaded = _d[0], setLoaded = _d[1];
-    var _e = React.useState(false), isRendered = _e[0], setIsRendered = _e[1];
-    var _f = React.useState(false), isIntersecting = _f[0], setIsIntersecting = _f[1];
-    var _g = React.useState(0), intersectionRatio = _g[0], setIntersectionRatio = _g[1];
+    var _e = React.useState(scale), pageScale = _e[0], setPageScale = _e[1];
+    var _f = React.useState([]), pageViewport = _f[0], setPageViewport = _f[1];
+    var _g = React.useState(false), isRendered = _g[0], setIsRendered = _g[1];
+    var _h = React.useState(false), isIntersecting = _h[0], setIsIntersecting = _h[1];
+    var _j = React.useState(0), intersectionRatio = _j[0], setIntersectionRatio = _j[1];
     useIntersection.useIntersection(intersectionRef, {
         threshold: [.2, .4, .5, .6, .8, 1],
     }, function (entry) {
@@ -448,6 +472,7 @@ var PdfPage = function (props) {
     var onPageLoadSuccess = React.useCallback(function (page) {
         var _a;
         setIsRendered(true);
+        setPageViewport(page.view);
         Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
             var operatorList = _a[0], annotations = _a[1];
             var positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
@@ -460,7 +485,7 @@ var PdfPage = function (props) {
             setBboxes(bboxes);
         });
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
-    }, [bboxList]);
+    }, [bboxList, props.width, props.height, scale]);
     React.useEffect(function () {
         var _a;
         if (!loaded && isIntersecting) {
@@ -474,10 +499,21 @@ var PdfPage = function (props) {
             (_a = intersectionRef.current) === null || _a === void 0 ? void 0 : _a.scrollIntoView();
         }
     }, [scrollIntoPage]);
+    React.useEffect(function () {
+        var width = pageViewport[2] - pageViewport[0];
+        var height = pageViewport[3] - pageViewport[1];
+        if (props.width && width) {
+            return setPageScale((props.width / width) * scale);
+        }
+        else if (props.height && height) {
+            return setPageScale((props.height / height) * scale);
+        }
+        setPageScale(scale);
+    }, [pageViewport, scale, props.width, props.height]);
     var isBboxSelected = function (bbox) { return props.activeBboxIndex === bbox.index; };
-    return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered", "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.defaultHeight : undefined, width: !isRendered ? props.defaultWidth : undefined, scale: scale, ref: intersectionRef }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
+    return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered", "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
         React__default['default'].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadProgress: props.onPageLoadProgress, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
-        isRendered ? bboxes.map(function (bbox, index) { return (React__default['default'].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index), selected: isBboxSelected(bbox), scale: scale })); }) : null) : null));
+        isRendered ? bboxes.map(function (bbox, index) { return (React__default['default'].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index), selected: isBboxSelected(bbox), scale: pageScale, colorScheme: props.colorScheme })); }) : null) : null));
 };
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1;
@@ -47264,7 +47300,7 @@ var PdfDocument = function (props) {
     return (React__default['default'].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate, options: {
             workerSrc: pdf_worker_entry,
         } }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
-        return React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBboxIndex: props.activeBboxIndex, onBboxClick: onBboxClick });
+        return React__default['default'].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadProgress: props.onPageLoadProgress, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], activeBboxIndex: props.activeBboxIndex, onBboxClick: onBboxClick, colorScheme: props.colorScheme });
     }) : null; }, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);

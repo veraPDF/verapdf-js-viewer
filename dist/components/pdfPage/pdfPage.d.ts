@@ -1,5 +1,5 @@
 import React from 'react';
-import { IBbox } from '../bbox/Bbox';
+import { IBbox, IColorScheme } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { AnyObject } from '../../types/generics';
 import './pdfPage.scss';
@@ -8,6 +8,7 @@ interface IPdfPageProps extends IPageProps {
     defaultHeight?: number;
     defaultWidth?: number;
     structure?: AnyObject;
+    colorScheme?: IColorScheme;
     onPageInViewport?(page: number, data: {
         isIntersecting?: boolean;
         intersectionRatio?: number;

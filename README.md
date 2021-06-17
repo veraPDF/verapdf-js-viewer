@@ -80,6 +80,8 @@ function MyApp() {
 |onGetAnnotationsError|Function called in case of an error while loading annotations.|n/a|`(error) => alert('Error while loading annotations! ' + error.message)`|
 |onGetTextSuccess|Function called when text layer items are successfully loaded.|n/a|`(items) => alert('Now displaying ' + items.length + ' text layer items!')`|
 |onGetTextError|Function called in case of an error while loading text layer items.|n/a|`(error) => alert('Error while loading text layer items! ' + error.message)`|
+|<b>Bbox props</b>|
+|colorScheme|Set custom colors for bbox|```{ border?: string; borderHovered?: string; borderSelected?: string; background?: string; backgroundSelected?: string; backgroundHovered?: string;}```|n/a|
 
 ## Useful links
 

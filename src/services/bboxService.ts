@@ -247,13 +247,15 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
       }
     });
   } else if (listOfMcid.hasOwnProperty('annot')) {
-    const rect = annotations[listOfMcid.annot].rect;
-    coords = {
-      x: rect[0],
-      y: rect[1],
-      width: Math.abs(rect[0] - rect[2]),
-      height: Math.abs(rect[1] - rect[3]),
-    };
+    const rect = annotations[listOfMcid.annot]?.rect;
+    if (rect) {
+      coords = {
+        x: rect[0],
+        y: rect[1],
+        width: Math.abs(rect[0] - rect[2]),
+        height: Math.abs(rect[1] - rect[3]),
+      };
+    }
   }
 
   return coords ? [coords.x, coords.y, coords.width, coords.height] : [];

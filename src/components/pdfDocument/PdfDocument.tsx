@@ -11,6 +11,7 @@ import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
 import { IBboxLocation } from '../../index';
 import { buildBboxMap } from '../../services/bboxService';
+import {IColorScheme} from '../bbox/Bbox';
 // @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
@@ -26,6 +27,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
   activeBboxIndex?: number;
   bboxes: IBboxLocation[];
+  colorScheme?: IColorScheme;
   onPageChange?(page: number): void;
 }
 
@@ -181,6 +183,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           bboxList={bboxMap[page]}
           activeBboxIndex={props.activeBboxIndex}
           onBboxClick={onBboxClick}
+          colorScheme={props.colorScheme}
         />
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])}
     </Document>
