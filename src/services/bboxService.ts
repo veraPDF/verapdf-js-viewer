@@ -264,6 +264,40 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
   return coords ? [coords.x, coords.y, coords.width, coords.height] : [];
 }
 
+export const activeBboxInViewport = (): boolean => {
+  let isInView = false;
+  const bboxes = document.querySelectorAll('.pdf-bbox_selected');
+  for (let index = 0; index < bboxes.length; index++) {
+    isInView = elementInViewport(bboxes[index]);
+    if (isInView) {
+      break;
+    }
+  }
+
+  return isInView;
+}
+
+function elementInViewport (el: any): boolean {
+  let top = el.offsetTop;
+  let left = el.offsetLeft;
+  let width = el.offsetWidth;
+  let height = el.offsetHeight;
+  while(el.offsetParent && !el.offsetParent.className.includes('pdf-viewer')) {
+    el = el.offsetParent;
+    top += el.offsetTop;
+    left += el.offsetLeft;
+  }
+  const parent = (document.querySelector('.pdf-viewer') as any);
+  const parentScrollTop = parent.scrollTop as unknown as number;
+  const parentScrollLeft = parent.scrollLeft as unknown as number;
+  return (
+    top >= parentScrollTop &&
+    left >= parentScrollLeft &&
+    (top + height) <= (parentScrollTop + parent.offsetHeight) &&
+    (left + width) <= (parentScrollLeft + parent.offsetWidth)
+  );
+}
+
 function concatBoundingBoxes(newBoundingBox: AnyObject, oldBoundingBox?: AnyObject): AnyObject {
   if (_.isNil(oldBoundingBox) && _.isNil(newBoundingBox)) {
     return {};
