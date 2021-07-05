@@ -4,6 +4,7 @@ import './styles.scss';
 export interface IBboxLocation {
     page: number;
     location: (number | string)[] | string;
+    groupId?: string;
 }
 interface IPdfViewerProps extends IPdfDocumentProps {
     bboxes: IBboxLocation[];
