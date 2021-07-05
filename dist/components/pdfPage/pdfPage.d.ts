@@ -9,6 +9,7 @@ interface IPdfPageProps extends IPageProps {
     defaultWidth?: number;
     structure?: AnyObject;
     colorScheme?: IColorScheme;
+    groupId?: string;
     onPageInViewport?(page: number, data: {
         isIntersecting?: boolean;
         intersectionRatio?: number;

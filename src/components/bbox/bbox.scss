@@ -3,6 +3,7 @@
 .pdf-bbox {
   position: absolute;
   border: 2px solid $bbox-border-color;
+  box-sizing: border-box;
   cursor: pointer;
   z-index: 2;
 
@@ -11,7 +12,13 @@
   }
 
   &_selected {
-    z-index: 1;
+    pointer-events: none;
+    z-index: 100;
     background: $bbox-bg-color--selected;
+  }
+
+  &_related {
+    pointer-events: none;
+    z-index: 99;
   }
 }

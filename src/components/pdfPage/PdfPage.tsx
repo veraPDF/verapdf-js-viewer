@@ -17,6 +17,7 @@ interface IPdfPageProps extends IPageProps {
   defaultWidth?: number;
   structure?: AnyObject;
   colorScheme?: IColorScheme;
+  groupId?: string;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
 }
 
@@ -98,6 +99,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setPageScale(scale);
   }, [pageViewport, scale, props.width, props.height]);
   const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
+  const isRelated = (bbox: IBbox) => props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false;
 
   return (
     <StyledPdfPage
@@ -132,7 +134,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextError={props.onGetTextError}
         />
         {isRendered ? bboxes.map((bbox: IBbox, index) => (
-          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} scale={pageScale} colorScheme={props.colorScheme} />
+          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} related={isRelated(bbox)} scale={pageScale} colorScheme={props.colorScheme} />
         )) : null}
       </> : null}
     </StyledPdfPage>

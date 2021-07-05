@@ -13,6 +13,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
           {
             index,
             location: bbox.location,
+            groupId: bbox.groupId || undefined,
           },
         ];
       } else {
@@ -23,16 +24,18 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             {
               index,
               mcidList,
+              groupId: bbox.groupId || undefined,
             },
           ];
         } else {
           const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
-          bboxesFromLocation.map((bbox: IBboxLocation) => {
-            bboxMap[bbox.page] = [
-              ...(bboxMap[bbox.page] || []),
+          bboxesFromLocation.forEach((bboxWithLocation: IBboxLocation) => {
+            bboxMap[bboxWithLocation.page] = [
+              ...(bboxMap[bboxWithLocation.page] || []),
               {
                 index,
-                location: bbox.location,
+                location: bboxWithLocation.location,
+                groupId: bbox.groupId || undefined,
               },
             ];
           })

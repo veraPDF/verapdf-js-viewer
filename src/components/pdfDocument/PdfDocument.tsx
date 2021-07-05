@@ -35,6 +35,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const { page, setPage, maxPage, setMaxPage, scrollIntoPage, setScrollIntoPage } = useContext(ViewerContext);
   const { bboxes = [] } = props;
   const [loaded, setLoaded] = useState(false);
+  const [structureTree, setStructureTree] = useState({});
   const [bboxMap, setBboxMap] = useState({});
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
   const [ratioArray, setRatioArray] = useState<number[]>([]);
@@ -51,8 +52,21 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return [props.page || 1];
   }, [maxPage, props.showAllPages, props.page]);
 
+  useEffect(() => {
+    setBboxMap(buildBboxMap(bboxes, structureTree));
+  }, [bboxes, structureTree]);
+
+  useEffect(() => {
+    if ((props.activeBboxIndex ?? false) === false) {
+      return;
+    }
+    if (bboxes?.[props.activeBboxIndex as number]?.page > 0 && bboxes?.[props.activeBboxIndex as number]?.page !== page) {
+      setScrollIntoPage(bboxes[props.activeBboxIndex as number].page);
+    }
+  }, [props.activeBboxIndex])
+
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
-    setBboxMap(buildBboxMap(bboxes, data._pdfInfo.structureTree));
+    setStructureTree(data._pdfInfo.structureTree);
     const pageData = await data.getPage(1);
     setDefaultHeight(pageData.view[3]);
     setDefaultWidth(pageData.view[2]);
@@ -181,6 +195,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onGetTextError={props.onGetTextError}
           onPageInViewport={onPageInViewport}
           bboxList={bboxMap[page]}
+          groupId={bboxes[props.activeBboxIndex as number]?.groupId}
           activeBboxIndex={props.activeBboxIndex}
           onBboxClick={onBboxClick}
           colorScheme={props.colorScheme}
