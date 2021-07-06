@@ -2,6 +2,7 @@ import React, {FC, memo, useCallback, useMemo, useState, useContext, useEffect} 
 import { Document } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist';
 import { useDebounce } from 'react-use';
+import _ from 'lodash';
 
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
@@ -60,9 +61,16 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     if ((props.activeBboxIndex ?? false) === false) {
       return;
     }
-    if (bboxes?.[props.activeBboxIndex as number]?.page > 0 && !activeBboxInViewport()) {
-      if (bboxes?.[props.activeBboxIndex as number]?.page !== page) {
-        setScrollIntoPage(bboxes[props.activeBboxIndex as number].page);
+    let bboxPage = 0;
+    for (const [key, value] of Object.entries(bboxMap)) {
+      if (_.find(value as AnyObject[], { index: props.activeBboxIndex })) {
+        bboxPage = parseInt(key);
+        break;
+      }
+    }
+    if (bboxPage > 0 && !activeBboxInViewport()) {
+      if (bboxPage !== page) {
+        setScrollIntoPage(bboxPage);
         const el: any = document.querySelector('.pdf-bbox_selected');
         if (!el) return;
         el.scrollIntoView();
@@ -72,7 +80,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
         }
       }
     }
-  }, [props.activeBboxIndex])
+  }, [props.activeBboxIndex, bboxMap])
 
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
     setStructureTree(data._pdfInfo.structureTree);

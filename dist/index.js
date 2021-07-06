@@ -21,16 +21,16 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var React = require('react');
 var reactPdf = require('react-pdf');
 var reactUse = require('react-use');
+var _ = require('lodash');
 var useIntersection = require('use-intersection');
 var styled = require('styled-components');
-var _ = require('lodash');
 var pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
-var styled__default = /*#__PURE__*/_interopDefaultLegacy(styled);
 var ___default = /*#__PURE__*/_interopDefaultLegacy(_);
+var styled__default = /*#__PURE__*/_interopDefaultLegacy(styled);
 var pdfjsWorker__default = /*#__PURE__*/_interopDefaultLegacy(pdfjsWorker);
 
 /*! *****************************************************************************
@@ -570,13 +570,21 @@ var PdfDocument = function (props) {
         setBboxMap(buildBboxMap(bboxes, structureTree));
     }, [bboxes, structureTree]);
     React.useEffect(function () {
-        var _a, _b, _c;
+        var _a;
         if (((_a = props.activeBboxIndex) !== null && _a !== void 0 ? _a : false) === false) {
             return;
         }
-        if (((_b = bboxes === null || bboxes === void 0 ? void 0 : bboxes[props.activeBboxIndex]) === null || _b === void 0 ? void 0 : _b.page) > 0 && !activeBboxInViewport()) {
-            if (((_c = bboxes === null || bboxes === void 0 ? void 0 : bboxes[props.activeBboxIndex]) === null || _c === void 0 ? void 0 : _c.page) !== page) {
-                setScrollIntoPage(bboxes[props.activeBboxIndex].page);
+        var bboxPage = 0;
+        for (var _i = 0, _b = Object.entries(bboxMap); _i < _b.length; _i++) {
+            var _c = _b[_i], key = _c[0], value = _c[1];
+            if (___default['default'].find(value, { index: props.activeBboxIndex })) {
+                bboxPage = parseInt(key);
+                break;
+            }
+        }
+        if (bboxPage > 0 && !activeBboxInViewport()) {
+            if (bboxPage !== page) {
+                setScrollIntoPage(bboxPage);
                 var el = document.querySelector('.pdf-bbox_selected');
                 if (!el)
                     return;
@@ -587,7 +595,7 @@ var PdfDocument = function (props) {
                 }
             }
         }
-    }, [props.activeBboxIndex]);
+    }, [props.activeBboxIndex, bboxMap]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {
         var pageData;
         var _a;
