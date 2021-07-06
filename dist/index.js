@@ -170,40 +170,33 @@ var ViewerProvider = function (props) {
 var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
     bboxes.forEach(function (bbox, index) {
-        if (bbox.page) {
-            if (typeof bbox.location !== 'string') {
-                bboxMap[bbox.page] = __spreadArray(__spreadArray([], (bboxMap[bbox.page] || [])), [
+        try {
+            if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc')) {
+                var _a = getTagsFromErrorPlace(bbox.location, structure), mcidList = _a[0], pageIndex = _a[1];
+                bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
                     {
                         index: index,
-                        location: bbox.location,
+                        mcidList: mcidList,
                         groupId: bbox.groupId || undefined,
                     },
                 ]);
             }
             else {
-                if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc')) {
-                    var _a = getTagsFromErrorPlace(bbox.location, structure), mcidList = _a[0], pageIndex = _a[1];
-                    bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
+                var bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
+                bboxesFromLocation.forEach(function (bboxWithLocation) {
+                    bboxMap[bboxWithLocation.page] = __spreadArray(__spreadArray([], (bboxMap[bboxWithLocation.page] || [])), [
                         {
                             index: index,
-                            mcidList: mcidList,
+                            location: bboxWithLocation.location,
                             groupId: bbox.groupId || undefined,
                         },
                     ]);
-                }
-                else {
-                    var bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
-                    bboxesFromLocation.forEach(function (bboxWithLocation) {
-                        bboxMap[bboxWithLocation.page] = __spreadArray(__spreadArray([], (bboxMap[bboxWithLocation.page] || [])), [
-                            {
-                                index: index,
-                                location: bboxWithLocation.location,
-                                groupId: bbox.groupId || undefined,
-                            },
-                        ]);
-                    });
-                }
+                });
             }
+        }
+        catch (e) {
+            console.error(e);
+            console.error("Location not supported: " + bbox.location);
         }
     });
     return bboxMap;

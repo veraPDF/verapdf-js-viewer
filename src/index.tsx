@@ -7,7 +7,7 @@ import './styles.scss'
 
 export interface IBboxLocation {
   page: number;
-  location: (number | string)[] | string;
+  location: string;
   groupId?: string;
 }
 

@@ -3,7 +3,7 @@ import { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import './styles.scss';
 export interface IBboxLocation {
     page: number;
-    location: (number | string)[] | string;
+    location: string;
     groupId?: string;
 }
 interface IPdfViewerProps extends IPdfDocumentProps {

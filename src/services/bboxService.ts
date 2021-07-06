@@ -6,41 +6,33 @@ import {AnyObject} from '../types/generics';
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
   bboxes.forEach((bbox, index) => {
-    if (bbox.page) {
-      if (typeof bbox.location !== 'string') {
-        bboxMap[bbox.page] = [
-          ...(bboxMap[bbox.page] || []),
+    try {
+      if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc')) {
+        const [mcidList, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
+        bboxMap[pageIndex + 1] = [
+          ...(bboxMap[pageIndex + 1] || []),
           {
             index,
-            location: bbox.location,
+            mcidList,
             groupId: bbox.groupId || undefined,
           },
         ];
       } else {
-        if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc')) {
-          const [mcidList, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
-          bboxMap[pageIndex + 1] = [
-            ...(bboxMap[pageIndex + 1] || []),
+        const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
+        bboxesFromLocation.forEach((bboxWithLocation: IBboxLocation) => {
+          bboxMap[bboxWithLocation.page] = [
+            ...(bboxMap[bboxWithLocation.page] || []),
             {
               index,
-              mcidList,
+              location: bboxWithLocation.location,
               groupId: bbox.groupId || undefined,
             },
           ];
-        } else {
-          const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
-          bboxesFromLocation.forEach((bboxWithLocation: IBboxLocation) => {
-            bboxMap[bboxWithLocation.page] = [
-              ...(bboxMap[bboxWithLocation.page] || []),
-              {
-                index,
-                location: bboxWithLocation.location,
-                groupId: bbox.groupId || undefined,
-              },
-            ];
-          })
-        }
+        })
       }
+    } catch (e) {
+      console.error(e);
+      console.error(`Location not supported: ${bbox.location}`);
     }
   });
   return bboxMap;
