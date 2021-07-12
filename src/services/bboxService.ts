@@ -31,7 +31,6 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
         })
       }
     } catch (e) {
-      console.error(e);
       console.error(`Location not supported: ${bbox.location}`);
     }
   });

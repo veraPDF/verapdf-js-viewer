@@ -195,7 +195,6 @@ var buildBboxMap = function (bboxes, structure) {
             }
         }
         catch (e) {
-            console.error(e);
             console.error("Location not supported: " + bbox.location);
         }
     });
@@ -460,7 +459,7 @@ function concatBoundingBoxes(newBoundingBox, oldBoundingBox) {
     };
 }
 
-___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}");
+___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}");
 
 var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-9rs558" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
 var PdfPage = function (props) {
@@ -548,7 +547,7 @@ var PdfPage = function (props) {
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1;
 
-___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n}");
+___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  margin: auto;\n}");
 
 var PdfDocument = function (props) {
     var _a = React.useContext(ViewerContext), page = _a.page, setPage = _a.setPage, maxPage = _a.maxPage, setMaxPage = _a.setMaxPage, scrollIntoPage = _a.scrollIntoPage, setScrollIntoPage = _a.setScrollIntoPage;
@@ -701,7 +700,7 @@ var PdfDocument = function (props) {
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
-___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  align-items: center;\n  justify-content: flex-start;\n  overflow: auto;\n}");
+___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  justify-content: flex-start;\n  overflow: auto;\n}");
 
 var App = function (props) {
     var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, pdfProps = __rest(props, ["className", "bboxes"]);
