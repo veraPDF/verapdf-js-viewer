@@ -76,6 +76,7 @@ function MyApp() {
 |onPageLoadSuccess|Function called when the page is successfully loaded.|n/a|`(page) => alert('Now displaying a page number ' + page.pageNumber + '!')`|
 |onPageRenderError|Function called in case of an error while rendering the page.|n/a|`(error) => alert('Error while loading page! ' + error.message)`|
 |onPageRenderSuccess|Function called when the page is successfully rendered on the screen.|n/a|`() => alert('Rendered the page!')`|
+|onBboxesParsed|Function called after bboxes were parsed and returns array of pages.|n/a|`(pages) => console.log(pages)`|
 |onGetAnnotationsSuccess|Function called when annotations are successfully loaded.|n/a|`(annotations) => alert('Now displaying ' + annotations.length + ' annotations!')`|
 |onGetAnnotationsError|Function called in case of an error while loading annotations.|n/a|`(error) => alert('Error while loading annotations! ' + error.message)`|
 |onGetTextSuccess|Function called when text layer items are successfully loaded.|n/a|`(items) => alert('Now displaying ' + items.length + ' text layer items!')`|

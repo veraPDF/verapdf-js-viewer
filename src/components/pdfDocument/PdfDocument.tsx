@@ -9,9 +9,9 @@ import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
-import { AnyObject } from '../../types/generics';
+import {AnyObject} from '../../types/generics';
 import { IBboxLocation } from '../../index';
-import {activeBboxInViewport, buildBboxMap} from '../../services/bboxService';
+import {activeBboxInViewport, buildBboxMap, getBboxPages} from '../../services/bboxService';
 import {IColorScheme} from '../bbox/Bbox';
 // @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
@@ -29,6 +29,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   activeBboxIndex?: number;
   bboxes: IBboxLocation[];
   colorScheme?: IColorScheme;
+  onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;
 }
 
@@ -55,6 +56,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   useEffect(() => {
     setBboxMap(buildBboxMap(bboxes, structureTree));
+    props.onBboxesParsed?.(getBboxPages(bboxes, structureTree));
   }, [bboxes, structureTree]);
 
   useEffect(() => {
@@ -89,7 +91,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setDefaultWidth(pageData.view[2]);
     setMaxPage(data.numPages);
     setLoaded(true);
-
     props.onLoadSuccess?.(data);
   }, [props.onLoadSuccess, bboxes]);
   const onPageLoadSuccess = useCallback((data: PDFPageProxy) => {

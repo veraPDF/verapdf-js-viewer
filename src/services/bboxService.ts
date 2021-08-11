@@ -7,7 +7,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
   bboxes.forEach((bbox, index) => {
     try {
-      if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc')) {
+      if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
         const [mcidList, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
         bboxMap[pageIndex + 1] = [
           ...(bboxMap[pageIndex + 1] || []),
@@ -35,6 +35,22 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
     }
   });
   return bboxMap;
+}
+
+export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
+  return bboxes.map((bbox) => {
+    try {
+      if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
+        const [, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
+        return pageIndex + 1;
+      } else {
+        const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
+        return bboxesFromLocation.length ? bboxesFromLocation[0].page : 0;
+      }
+    } catch (e) {
+      console.error(`Location not supported: ${bbox.location}`);
+    }
+  });
 }
 
 const calculateLocation = (location: string) => {

@@ -171,7 +171,7 @@ var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
     bboxes.forEach(function (bbox, index) {
         try {
-            if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc')) {
+            if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
                 var _a = getTagsFromErrorPlace(bbox.location, structure), mcidList = _a[0], pageIndex = _a[1];
                 bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
                     {
@@ -199,6 +199,23 @@ var buildBboxMap = function (bboxes, structure) {
         }
     });
     return bboxMap;
+};
+var getBboxPages = function (bboxes, structure) {
+    return bboxes.map(function (bbox) {
+        try {
+            if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
+                var _a = getTagsFromErrorPlace(bbox.location, structure), pageIndex = _a[1];
+                return pageIndex + 1;
+            }
+            else {
+                var bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
+                return bboxesFromLocation.length ? bboxesFromLocation[0].page : 0;
+            }
+        }
+        catch (e) {
+            console.error("Location not supported: " + bbox.location);
+        }
+    });
 };
 var calculateLocation = function (location) {
     var bboxes = [];
@@ -566,7 +583,9 @@ var PdfDocument = function (props) {
         return [props.page || 1];
     }, [maxPage, props.showAllPages, props.page]);
     React.useEffect(function () {
+        var _a;
         setBboxMap(buildBboxMap(bboxes, structureTree));
+        (_a = props.onBboxesParsed) === null || _a === void 0 ? void 0 : _a.call(props, getBboxPages(bboxes, structureTree));
     }, [bboxes, structureTree]);
     React.useEffect(function () {
         var _a;
