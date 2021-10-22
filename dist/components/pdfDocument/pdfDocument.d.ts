@@ -1,4 +1,5 @@
 import React from 'react';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
 import { IBboxLocation } from '../../index';
