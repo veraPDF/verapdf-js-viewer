@@ -200,7 +200,6 @@ var buildBboxMap = function (bboxes, structure) {
             console.error("Location not supported: " + bbox.location);
         }
     });
-    console.log('bboxMap', bboxMap);
     return bboxMap;
 };
 var getBboxPages = function (bboxes, structure) {
@@ -282,10 +281,10 @@ var getTagsFromErrorPlace = function (context, structure) {
         return defaultValue;
     }
     if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-        return [[selectedTag.mcid], selectedTag.pageIndex];
+        return [[[selectedTag.mcid], selectedTag.pageIndex]];
     }
     else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
-        return [{ annot: selectedTag.annot }, selectedTag.pageIndex];
+        return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
     }
     else if (selectedTag instanceof Array) {
         var objectOfErrors_1 = __assign({}, structure);
@@ -402,7 +401,7 @@ function findAllMcid(tagObject) {
     func(tagObject);
     return ___default['default'].map(mcidMap, function (value, key) { return [value, ___default['default'].toNumber(key)]; });
 }
-var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
+var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport) {
     var _a;
     var coords = {};
     if (listOfMcid instanceof Array) {
@@ -428,7 +427,7 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
             };
         }
     }
-    return coords ? [coords.x, coords.y, coords.width, coords.height] : [];
+    return coords ? [coords.x - viewport[0], coords.y - viewport[1], coords.width, coords.height] : [];
 };
 var activeBboxInViewport = function () {
     var isInView = false;
@@ -526,7 +525,7 @@ var PdfPage = function (props) {
             var positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
             var bboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
-                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations);
+                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view);
                 }
                 return bbox;
             });

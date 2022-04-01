@@ -122,9 +122,9 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
   }
 
   if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-    return [[selectedTag.mcid], selectedTag.pageIndex];
+    return [[[selectedTag.mcid], selectedTag.pageIndex]];
   } else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
-    return [{ annot: selectedTag.annot }, selectedTag.pageIndex];
+    return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
   } else if (selectedTag instanceof Array) {
     let objectOfErrors = { ...structure };
     selectedTag.forEach((node, index) => {
@@ -242,7 +242,7 @@ function findAllMcid(tagObject: AnyObject) {
   return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
 }
 
-export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject) => {
+export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[]) => {
   let coords: AnyObject = {};
 
   if (listOfMcid instanceof Array) {
@@ -270,7 +270,7 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
     }
   }
 
-  return coords ? [coords.x, coords.y, coords.width, coords.height] : [];
+  return coords ? [coords.x - viewport[0], coords.y - viewport[1], coords.width, coords.height] : [];
 }
 
 export const activeBboxInViewport = (): boolean => {
