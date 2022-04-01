@@ -401,7 +401,7 @@ function findAllMcid(tagObject) {
     func(tagObject);
     return ___default['default'].map(mcidMap, function (value, key) { return [value, ___default['default'].toNumber(key)]; });
 }
-var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport) {
+var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rotateAngle) {
     var _a;
     var coords = {};
     if (listOfMcid instanceof Array) {
@@ -427,7 +427,42 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport) {
             };
         }
     }
-    return coords ? [coords.x - viewport[0], coords.y - viewport[1], coords.width, coords.height] : [];
+    if (!coords)
+        return [];
+    var coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
+    var rotatedViewport = rotateViewport(rotateAngle, viewport);
+    return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
+};
+var rotateViewport = function (rotateAngle, viewport) {
+    if ([0, 180].includes(rotateAngle)) {
+        return viewport;
+    }
+    return [viewport[1], viewport[0], viewport[3], viewport[2]];
+};
+var rotateCoordinates = function (coords, rotateAngle, viewport) {
+    if (rotateAngle === 0)
+        return coords;
+    var _a = rotatePoint(rotateAngle, [coords[0], coords[1]], viewport), x1 = _a[0], y1 = _a[1];
+    var _b = rotatePoint(rotateAngle, [coords[0] + coords[2], coords[1] + coords[3]], viewport), x2 = _b[0], y2 = _b[1];
+    return [Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2)];
+};
+var rotatePoint = function (rotateAngle, point, viewport) {
+    var rad = (rotateAngle * Math.PI) / 180;
+    var x = point[0] * Math.cos(rad) + point[1] * Math.sin(rad);
+    var y = -point[0] * Math.sin(rad) + point[1] * Math.cos(rad);
+    switch (rotateAngle) {
+        case 90:
+            y += viewport[2] + viewport[0];
+            break;
+        case 180:
+            x += viewport[2] + viewport[0];
+            y += viewport[3] + viewport[1];
+            break;
+        case 270:
+            x += viewport[3] + viewport[1];
+            break;
+    }
+    return [x, y];
 };
 var activeBboxInViewport = function () {
     var isInView = false;
@@ -525,7 +560,7 @@ var PdfPage = function (props) {
             var positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
             var bboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
-                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view);
+                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
                 }
                 return bbox;
             });

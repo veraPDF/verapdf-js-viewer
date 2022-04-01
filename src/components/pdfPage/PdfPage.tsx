@@ -66,7 +66,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       const positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
       const bboxes = bboxList.map((bbox) => {
         if (bbox.mcidList) {
-          bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view);
+          bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
         }
 
         return bbox;

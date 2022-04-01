@@ -242,7 +242,7 @@ function findAllMcid(tagObject: AnyObject) {
   return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
 }
 
-export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[]) => {
+export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => {
   let coords: AnyObject = {};
 
   if (listOfMcid instanceof Array) {
@@ -269,8 +269,45 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
       };
     }
   }
+  if (!coords) return [];
+  const coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
+  const rotatedViewport = rotateViewport(rotateAngle, viewport);
+  return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
+}
 
-  return coords ? [coords.x - viewport[0], coords.y - viewport[1], coords.width, coords.height] : [];
+export const rotateViewport = (rotateAngle: number, viewport: number[]): number[] => {
+  if ([0, 180].includes(rotateAngle)) {
+    return viewport;
+  }
+  return [viewport[1], viewport[0], viewport[3], viewport[2]];
+}
+
+export const rotateCoordinates = (coords: number[], rotateAngle: number, viewport: number[]): number[] => {
+  if (rotateAngle === 0) return coords;
+  const [x1, y1] = rotatePoint(rotateAngle, [coords[0], coords[1]], viewport);
+  const [x2, y2] = rotatePoint(rotateAngle, [coords[0] + coords[2], coords[1] + coords[3]], viewport);
+  return [Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2)];
+}
+
+export const rotatePoint = (rotateAngle: number, point: number[], viewport: number[]): number[] => {
+  const rad = (rotateAngle * Math.PI) / 180;
+  let x = point[0] * Math.cos(rad) + point[1] * Math.sin(rad);
+  let y = -point[0] * Math.sin(rad) + point[1] * Math.cos(rad);
+  switch (rotateAngle) {
+    case 90:
+      y += viewport[2] + viewport[0];
+      break;
+    case 180:
+      x += viewport[2] + viewport[0];
+      y += viewport[3] + viewport[1];
+      break;
+    case 270:
+      x += viewport[3] + viewport[1];
+      break;
+    default:
+      break;
+  }
+  return [x, y];
 }
 
 export const activeBboxInViewport = (): boolean => {
