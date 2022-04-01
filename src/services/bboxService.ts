@@ -8,15 +8,17 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   bboxes.forEach((bbox, index) => {
     try {
       if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-        const [mcidList, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
-        bboxMap[pageIndex + 1] = [
-          ...(bboxMap[pageIndex + 1] || []),
-          {
-            index,
-            mcidList,
-            groupId: bbox.groupId || undefined,
-          },
-        ];
+        const mcidData = getTagsFromErrorPlace(bbox.location, structure);
+        mcidData.forEach(([mcidList, pageIndex]) => {
+          bboxMap[pageIndex + 1] = [
+            ...(bboxMap[pageIndex + 1] || []),
+            {
+              index,
+              mcidList,
+              groupId: bbox.groupId || undefined,
+            },
+          ];
+        });
       } else {
         const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
         bboxesFromLocation.forEach((bboxWithLocation: IBboxLocation) => {
@@ -41,7 +43,8 @@ export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
   return bboxes.map((bbox) => {
     try {
       if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-        const [, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
+        const mcidData = getTagsFromErrorPlace(bbox.location, structure);
+        const pageIndex = mcidData[0][1];
         return pageIndex + 1;
       } else {
         const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
@@ -111,7 +114,7 @@ const calculateLocationJSON = (location: string) => {
 }
 
 const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
-  const defaultValue = [[], -1];
+  const defaultValue = [[[], -1]];
   let selectedTag = convertContextToPath(context);
 
   if (_.isEmpty(selectedTag)) {
@@ -212,17 +215,16 @@ const convertContextToPath = (errorContext = '') => {
  *
  *  @param {Object} of tags
  *
- *  @return [{Array}, {Number}] - [[array of mcids], page of error]
+ *  @return [[{Array}, {Number}]] - [[[array of mcids], page of error]]
  */
 function findAllMcid(tagObject: AnyObject) {
-  const listOfMcid: string[] = [];
-  let pageIndex = -1;
+  const mcidMap: any = {};
 
   function func(obj: AnyObject) {
     if (!obj) return;
     if (obj.mcid || obj.mcid === 0) {
-      listOfMcid.push(obj.mcid);
-      if (pageIndex === -1) pageIndex = obj.pageIndex;
+      if (!mcidMap[obj.pageIndex]) mcidMap[obj.pageIndex] = [];
+      mcidMap[obj.pageIndex].push(obj.mcid);
     }
     if (!obj.children) {
       return;
@@ -237,7 +239,7 @@ function findAllMcid(tagObject: AnyObject) {
 
   func(tagObject);
 
-  return [listOfMcid, pageIndex];
+  return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
 }
 
 export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject) => {

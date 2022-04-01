@@ -171,14 +171,17 @@ var buildBboxMap = function (bboxes, structure) {
     bboxes.forEach(function (bbox, index) {
         try {
             if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-                var _a = getTagsFromErrorPlace(bbox.location, structure), mcidList = _a[0], pageIndex = _a[1];
-                bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
-                    {
-                        index: index,
-                        mcidList: mcidList,
-                        groupId: bbox.groupId || undefined,
-                    },
-                ]);
+                var mcidData = getTagsFromErrorPlace(bbox.location, structure);
+                mcidData.forEach(function (_a) {
+                    var mcidList = _a[0], pageIndex = _a[1];
+                    bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
+                        {
+                            index: index,
+                            mcidList: mcidList,
+                            groupId: bbox.groupId || undefined,
+                        },
+                    ]);
+                });
             }
             else {
                 var bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
@@ -197,13 +200,15 @@ var buildBboxMap = function (bboxes, structure) {
             console.error("Location not supported: " + bbox.location);
         }
     });
+    console.log('bboxMap', bboxMap);
     return bboxMap;
 };
 var getBboxPages = function (bboxes, structure) {
     return bboxes.map(function (bbox) {
         try {
             if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-                var _a = getTagsFromErrorPlace(bbox.location, structure), pageIndex = _a[1];
+                var mcidData = getTagsFromErrorPlace(bbox.location, structure);
+                var pageIndex = mcidData[0][1];
                 return pageIndex + 1;
             }
             else {
@@ -271,7 +276,7 @@ var calculateLocationJSON = function (location) {
     return bboxes;
 };
 var getTagsFromErrorPlace = function (context, structure) {
-    var defaultValue = [[], -1];
+    var defaultValue = [[[], -1]];
     var selectedTag = convertContextToPath(context);
     if (___default['default'].isEmpty(selectedTag)) {
         return defaultValue;
@@ -372,18 +377,17 @@ var convertContextToPath = function (errorContext) {
  *
  *  @param {Object} of tags
  *
- *  @return [{Array}, {Number}] - [[array of mcids], page of error]
+ *  @return [[{Array}, {Number}]] - [[[array of mcids], page of error]]
  */
 function findAllMcid(tagObject) {
-    var listOfMcid = [];
-    var pageIndex = -1;
+    var mcidMap = {};
     function func(obj) {
         if (!obj)
             return;
         if (obj.mcid || obj.mcid === 0) {
-            listOfMcid.push(obj.mcid);
-            if (pageIndex === -1)
-                pageIndex = obj.pageIndex;
+            if (!mcidMap[obj.pageIndex])
+                mcidMap[obj.pageIndex] = [];
+            mcidMap[obj.pageIndex].push(obj.mcid);
         }
         if (!obj.children) {
             return;
@@ -396,7 +400,7 @@ function findAllMcid(tagObject) {
         }
     }
     func(tagObject);
-    return [listOfMcid, pageIndex];
+    return ___default['default'].map(mcidMap, function (value, key) { return [value, ___default['default'].toNumber(key)]; });
 }
 var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
     var _a;
