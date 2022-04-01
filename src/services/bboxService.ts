@@ -138,7 +138,7 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
         if (objectOfErrors?.name === node[1] && index === 0) {
           nextStepObject = objectOfErrors;
         } else {
-          const clearedChildrenArray = objectOfErrors.children.filter((tag: AnyObject) => !tag?.mcid);
+          const clearedChildrenArray = [...objectOfErrors.children].filter((tag: AnyObject) =>  !tag?.mcid);
           nextStepObject = { ...(clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors.children)[node[0]] };
         }
       }
@@ -231,7 +231,7 @@ function findAllMcid(tagObject: AnyObject) {
     if (!(obj.children instanceof Array)) {
       func(obj.children);
     } else {
-      obj.children.forEach(child => func(child));
+      [...obj.children].forEach(child => func(child));
     }
   }
 

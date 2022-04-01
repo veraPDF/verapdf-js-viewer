@@ -302,7 +302,7 @@ var getTagsFromErrorPlace = function (context, structure) {
                     nextStepObject = objectOfErrors_1;
                 }
                 else {
-                    var clearedChildrenArray = objectOfErrors_1.children.filter(function (tag) { return !(tag === null || tag === void 0 ? void 0 : tag.mcid); });
+                    var clearedChildrenArray = __spreadArray([], objectOfErrors_1.children).filter(function (tag) { return !(tag === null || tag === void 0 ? void 0 : tag.mcid); });
                     nextStepObject = __assign({}, (clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors_1.children)[node[0]]);
                 }
             }
@@ -392,7 +392,7 @@ function findAllMcid(tagObject) {
             func(obj.children);
         }
         else {
-            obj.children.forEach(function (child) { return func(child); });
+            __spreadArray([], obj.children).forEach(function (child) { return func(child); });
         }
     }
     func(tagObject);
