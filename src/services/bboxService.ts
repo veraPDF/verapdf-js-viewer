@@ -8,15 +8,17 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   bboxes.forEach((bbox, index) => {
     try {
       if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-        const [mcidList, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
-        bboxMap[pageIndex + 1] = [
-          ...(bboxMap[pageIndex + 1] || []),
-          {
-            index,
-            mcidList,
-            groupId: bbox.groupId || undefined,
-          },
-        ];
+        const mcidData = getTagsFromErrorPlace(bbox.location, structure);
+        mcidData.forEach(([mcidList, pageIndex]) => {
+          bboxMap[pageIndex + 1] = [
+            ...(bboxMap[pageIndex + 1] || []),
+            {
+              index,
+              mcidList,
+              groupId: bbox.groupId || undefined,
+            },
+          ];
+        });
       } else {
         const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
         bboxesFromLocation.forEach((bboxWithLocation: IBboxLocation) => {
@@ -41,7 +43,8 @@ export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
   return bboxes.map((bbox) => {
     try {
       if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-        const [, pageIndex] = getTagsFromErrorPlace(bbox.location, structure);
+        const mcidData = getTagsFromErrorPlace(bbox.location, structure);
+        const pageIndex = mcidData[0][1];
         return pageIndex + 1;
       } else {
         const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location as string) : calculateLocationJSON(bbox.location as string);
@@ -111,7 +114,7 @@ const calculateLocationJSON = (location: string) => {
 }
 
 const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
-  const defaultValue = [[], -1];
+  const defaultValue = [[[], -1]];
   let selectedTag = convertContextToPath(context);
 
   if (_.isEmpty(selectedTag)) {
@@ -119,9 +122,9 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
   }
 
   if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-    return [[selectedTag.mcid], selectedTag.pageIndex];
+    return [[[selectedTag.mcid], selectedTag.pageIndex]];
   } else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
-    return [{ annot: selectedTag.annot }, selectedTag.pageIndex];
+    return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
   } else if (selectedTag instanceof Array) {
     let objectOfErrors = { ...structure };
     selectedTag.forEach((node, index) => {
@@ -138,7 +141,7 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
         if (objectOfErrors?.name === node[1] && index === 0) {
           nextStepObject = objectOfErrors;
         } else {
-          const clearedChildrenArray = objectOfErrors.children.filter((tag: AnyObject) => !tag?.mcid);
+          const clearedChildrenArray = [...objectOfErrors.children].filter((tag: AnyObject) =>  !tag?.mcid);
           nextStepObject = { ...(clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors.children)[node[0]] };
         }
       }
@@ -212,17 +215,16 @@ const convertContextToPath = (errorContext = '') => {
  *
  *  @param {Object} of tags
  *
- *  @return [{Array}, {Number}] - [[array of mcids], page of error]
+ *  @return [[{Array}, {Number}]] - [[[array of mcids], page of error]]
  */
 function findAllMcid(tagObject: AnyObject) {
-  const listOfMcid: string[] = [];
-  let pageIndex = -1;
+  const mcidMap: any = {};
 
   function func(obj: AnyObject) {
     if (!obj) return;
     if (obj.mcid || obj.mcid === 0) {
-      listOfMcid.push(obj.mcid);
-      if (pageIndex === -1) pageIndex = obj.pageIndex;
+      if (!mcidMap[obj.pageIndex]) mcidMap[obj.pageIndex] = [];
+      mcidMap[obj.pageIndex].push(obj.mcid);
     }
     if (!obj.children) {
       return;
@@ -231,16 +233,16 @@ function findAllMcid(tagObject: AnyObject) {
     if (!(obj.children instanceof Array)) {
       func(obj.children);
     } else {
-      obj.children.forEach(child => func(child));
+      [...obj.children].forEach(child => func(child));
     }
   }
 
   func(tagObject);
 
-  return [listOfMcid, pageIndex];
+  return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
 }
 
-export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject) => {
+export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => {
   let coords: AnyObject = {};
 
   if (listOfMcid instanceof Array) {
@@ -267,8 +269,45 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
       };
     }
   }
+  if (!coords) return [];
+  const coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
+  const rotatedViewport = rotateViewport(rotateAngle, viewport);
+  return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
+}
 
-  return coords ? [coords.x, coords.y, coords.width, coords.height] : [];
+export const rotateViewport = (rotateAngle: number, viewport: number[]): number[] => {
+  if ([0, 180].includes(rotateAngle)) {
+    return viewport;
+  }
+  return [viewport[1], viewport[0], viewport[3], viewport[2]];
+}
+
+export const rotateCoordinates = (coords: number[], rotateAngle: number, viewport: number[]): number[] => {
+  if (rotateAngle === 0) return coords;
+  const [x1, y1] = rotatePoint(rotateAngle, [coords[0], coords[1]], viewport);
+  const [x2, y2] = rotatePoint(rotateAngle, [coords[0] + coords[2], coords[1] + coords[3]], viewport);
+  return [Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2)];
+}
+
+export const rotatePoint = (rotateAngle: number, point: number[], viewport: number[]): number[] => {
+  const rad = (rotateAngle * Math.PI) / 180;
+  let x = point[0] * Math.cos(rad) + point[1] * Math.sin(rad);
+  let y = -point[0] * Math.sin(rad) + point[1] * Math.cos(rad);
+  switch (rotateAngle) {
+    case 90:
+      y += viewport[2] + viewport[0];
+      break;
+    case 180:
+      x += viewport[2] + viewport[0];
+      y += viewport[3] + viewport[1];
+      break;
+    case 270:
+      x += viewport[3] + viewport[1];
+      break;
+    default:
+      break;
+  }
+  return [x, y];
 }
 
 export const activeBboxInViewport = (): boolean => {

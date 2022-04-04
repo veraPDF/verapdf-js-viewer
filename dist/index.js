@@ -171,14 +171,17 @@ var buildBboxMap = function (bboxes, structure) {
     bboxes.forEach(function (bbox, index) {
         try {
             if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-                var _a = getTagsFromErrorPlace(bbox.location, structure), mcidList = _a[0], pageIndex = _a[1];
-                bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
-                    {
-                        index: index,
-                        mcidList: mcidList,
-                        groupId: bbox.groupId || undefined,
-                    },
-                ]);
+                var mcidData = getTagsFromErrorPlace(bbox.location, structure);
+                mcidData.forEach(function (_a) {
+                    var mcidList = _a[0], pageIndex = _a[1];
+                    bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || [])), [
+                        {
+                            index: index,
+                            mcidList: mcidList,
+                            groupId: bbox.groupId || undefined,
+                        },
+                    ]);
+                });
             }
             else {
                 var bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
@@ -203,7 +206,8 @@ var getBboxPages = function (bboxes, structure) {
     return bboxes.map(function (bbox) {
         try {
             if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
-                var _a = getTagsFromErrorPlace(bbox.location, structure), pageIndex = _a[1];
+                var mcidData = getTagsFromErrorPlace(bbox.location, structure);
+                var pageIndex = mcidData[0][1];
                 return pageIndex + 1;
             }
             else {
@@ -271,16 +275,16 @@ var calculateLocationJSON = function (location) {
     return bboxes;
 };
 var getTagsFromErrorPlace = function (context, structure) {
-    var defaultValue = [[], -1];
+    var defaultValue = [[[], -1]];
     var selectedTag = convertContextToPath(context);
     if (___default['default'].isEmpty(selectedTag)) {
         return defaultValue;
     }
     if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-        return [[selectedTag.mcid], selectedTag.pageIndex];
+        return [[[selectedTag.mcid], selectedTag.pageIndex]];
     }
     else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
-        return [{ annot: selectedTag.annot }, selectedTag.pageIndex];
+        return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
     }
     else if (selectedTag instanceof Array) {
         var objectOfErrors_1 = __assign({}, structure);
@@ -302,7 +306,7 @@ var getTagsFromErrorPlace = function (context, structure) {
                     nextStepObject = objectOfErrors_1;
                 }
                 else {
-                    var clearedChildrenArray = objectOfErrors_1.children.filter(function (tag) { return !(tag === null || tag === void 0 ? void 0 : tag.mcid); });
+                    var clearedChildrenArray = __spreadArray([], objectOfErrors_1.children).filter(function (tag) { return !(tag === null || tag === void 0 ? void 0 : tag.mcid); });
                     nextStepObject = __assign({}, (clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors_1.children)[node[0]]);
                 }
             }
@@ -372,18 +376,17 @@ var convertContextToPath = function (errorContext) {
  *
  *  @param {Object} of tags
  *
- *  @return [{Array}, {Number}] - [[array of mcids], page of error]
+ *  @return [[{Array}, {Number}]] - [[[array of mcids], page of error]]
  */
 function findAllMcid(tagObject) {
-    var listOfMcid = [];
-    var pageIndex = -1;
+    var mcidMap = {};
     function func(obj) {
         if (!obj)
             return;
         if (obj.mcid || obj.mcid === 0) {
-            listOfMcid.push(obj.mcid);
-            if (pageIndex === -1)
-                pageIndex = obj.pageIndex;
+            if (!mcidMap[obj.pageIndex])
+                mcidMap[obj.pageIndex] = [];
+            mcidMap[obj.pageIndex].push(obj.mcid);
         }
         if (!obj.children) {
             return;
@@ -392,13 +395,13 @@ function findAllMcid(tagObject) {
             func(obj.children);
         }
         else {
-            obj.children.forEach(function (child) { return func(child); });
+            __spreadArray([], obj.children).forEach(function (child) { return func(child); });
         }
     }
     func(tagObject);
-    return [listOfMcid, pageIndex];
+    return ___default['default'].map(mcidMap, function (value, key) { return [value, ___default['default'].toNumber(key)]; });
 }
-var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
+var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rotateAngle) {
     var _a;
     var coords = {};
     if (listOfMcid instanceof Array) {
@@ -424,7 +427,42 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations) {
             };
         }
     }
-    return coords ? [coords.x, coords.y, coords.width, coords.height] : [];
+    if (!coords)
+        return [];
+    var coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
+    var rotatedViewport = rotateViewport(rotateAngle, viewport);
+    return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
+};
+var rotateViewport = function (rotateAngle, viewport) {
+    if ([0, 180].includes(rotateAngle)) {
+        return viewport;
+    }
+    return [viewport[1], viewport[0], viewport[3], viewport[2]];
+};
+var rotateCoordinates = function (coords, rotateAngle, viewport) {
+    if (rotateAngle === 0)
+        return coords;
+    var _a = rotatePoint(rotateAngle, [coords[0], coords[1]], viewport), x1 = _a[0], y1 = _a[1];
+    var _b = rotatePoint(rotateAngle, [coords[0] + coords[2], coords[1] + coords[3]], viewport), x2 = _b[0], y2 = _b[1];
+    return [Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2)];
+};
+var rotatePoint = function (rotateAngle, point, viewport) {
+    var rad = (rotateAngle * Math.PI) / 180;
+    var x = point[0] * Math.cos(rad) + point[1] * Math.sin(rad);
+    var y = -point[0] * Math.sin(rad) + point[1] * Math.cos(rad);
+    switch (rotateAngle) {
+        case 90:
+            y += viewport[2] + viewport[0];
+            break;
+        case 180:
+            x += viewport[2] + viewport[0];
+            y += viewport[3] + viewport[1];
+            break;
+        case 270:
+            x += viewport[3] + viewport[1];
+            break;
+    }
+    return [x, y];
 };
 var activeBboxInViewport = function () {
     var isInView = false;
@@ -522,7 +560,7 @@ var PdfPage = function (props) {
             var positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
             var bboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
-                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations);
+                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
                 }
                 return bbox;
             });
@@ -47266,16 +47304,14 @@ var PdfDocument = function (props) {
             }
         }
         if (bboxPage > 0 && !activeBboxInViewport()) {
-            if (bboxPage !== page) {
-                setScrollIntoPage(bboxPage);
-                var el = document.querySelector('.pdf-bbox_selected');
-                if (!el)
-                    return;
+            setScrollIntoPage(bboxPage);
+            var el = document.querySelector('.pdf-bbox_selected');
+            if (!el)
+                return;
+            el.scrollIntoView();
+            document.querySelector('.pdf-viewer').scrollTop -= 150;
+            if (!activeBboxInViewport()) {
                 el.scrollIntoView();
-                document.querySelector('.pdf-viewer').scrollTop -= 150;
-                if (!activeBboxInViewport()) {
-                    el.scrollIntoView();
-                }
             }
         }
     }, [props.activeBboxIndex, bboxMap]);

@@ -72,15 +72,13 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       }
     }
     if (bboxPage > 0 && !activeBboxInViewport()) {
-      if (bboxPage !== page) {
-        setScrollIntoPage(bboxPage);
-        const el: any = document.querySelector('.pdf-bbox_selected');
-        if (!el) return;
+      setScrollIntoPage(bboxPage);
+      const el: any = document.querySelector('.pdf-bbox_selected');
+      if (!el) return;
+      el.scrollIntoView();
+      (document.querySelector('.pdf-viewer') as any).scrollTop -= 150;
+      if (!activeBboxInViewport()) {
         el.scrollIntoView();
-        (document.querySelector('.pdf-viewer') as any).scrollTop -= 150;
-        if (!activeBboxInViewport()) {
-          el.scrollIntoView();
-        }
       }
     }
   }, [props.activeBboxIndex, bboxMap])
