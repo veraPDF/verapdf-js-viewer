@@ -47304,16 +47304,14 @@ var PdfDocument = function (props) {
             }
         }
         if (bboxPage > 0 && !activeBboxInViewport()) {
-            if (bboxPage !== page) {
-                setScrollIntoPage(bboxPage);
-                var el = document.querySelector('.pdf-bbox_selected');
-                if (!el)
-                    return;
+            setScrollIntoPage(bboxPage);
+            var el = document.querySelector('.pdf-bbox_selected');
+            if (!el)
+                return;
+            el.scrollIntoView();
+            document.querySelector('.pdf-viewer').scrollTop -= 150;
+            if (!activeBboxInViewport()) {
                 el.scrollIntoView();
-                document.querySelector('.pdf-viewer').scrollTop -= 150;
-                if (!activeBboxInViewport()) {
-                    el.scrollIntoView();
-                }
             }
         }
     }, [props.activeBboxIndex, bboxMap]);
