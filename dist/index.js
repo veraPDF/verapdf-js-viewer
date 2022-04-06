@@ -475,6 +475,19 @@ var activeBboxInViewport = function () {
     }
     return isInView;
 };
+var scrollToActiveBbox = function () {
+    if (activeBboxInViewport()) {
+        return;
+    }
+    var el = document.querySelector('.pdf-bbox_selected');
+    if (!el)
+        return;
+    el.scrollIntoView();
+    document.querySelector('.pdf-viewer').scrollTop -= 150;
+    if (!activeBboxInViewport()) {
+        el.scrollIntoView();
+    }
+};
 function elementInViewport(el) {
     var top = el.offsetTop;
     var left = el.offsetLeft;
@@ -47305,14 +47318,8 @@ var PdfDocument = function (props) {
         }
         if (bboxPage > 0 && !activeBboxInViewport()) {
             setScrollIntoPage(bboxPage);
-            var el = document.querySelector('.pdf-bbox_selected');
-            if (!el)
-                return;
-            el.scrollIntoView();
-            document.querySelector('.pdf-viewer').scrollTop -= 150;
-            if (!activeBboxInViewport()) {
-                el.scrollIntoView();
-            }
+            // To be sure that page is loaded before scrolling to the active bbox
+            setTimeout(function () { return scrollToActiveBbox(); }, 100);
         }
     }, [props.activeBboxIndex, bboxMap]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {

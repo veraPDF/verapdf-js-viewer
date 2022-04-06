@@ -323,6 +323,19 @@ export const activeBboxInViewport = (): boolean => {
   return isInView;
 }
 
+export const scrollToActiveBbox = (): void => {
+  if (activeBboxInViewport()) {
+    return;
+  }
+  const el: any = document.querySelector('.pdf-bbox_selected');
+  if (!el) return;
+  el.scrollIntoView();
+  (document.querySelector('.pdf-viewer') as any).scrollTop -= 150;
+  if (!activeBboxInViewport()) {
+    el.scrollIntoView();
+  }
+}
+
 function elementInViewport (el: any): boolean {
   let top = el.offsetTop;
   let left = el.offsetLeft;
