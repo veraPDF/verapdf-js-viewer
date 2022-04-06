@@ -12,7 +12,7 @@ import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import {AnyObject} from '../../types/generics';
 import { IBboxLocation } from '../../index';
-import {activeBboxInViewport, buildBboxMap, getBboxPages} from '../../services/bboxService';
+import {activeBboxInViewport, buildBboxMap, getBboxPages, scrollToActiveBbox} from '../../services/bboxService';
 import {IColorScheme} from '../bbox/Bbox';
 // @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
@@ -73,13 +73,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     }
     if (bboxPage > 0 && !activeBboxInViewport()) {
       setScrollIntoPage(bboxPage);
-      const el: any = document.querySelector('.pdf-bbox_selected');
-      if (!el) return;
-      el.scrollIntoView();
-      (document.querySelector('.pdf-viewer') as any).scrollTop -= 150;
-      if (!activeBboxInViewport()) {
-        el.scrollIntoView();
-      }
+      // To be sure that page is loaded before scrolling to the active bbox
+      setTimeout(() => scrollToActiveBbox(), 100);
     }
   }, [props.activeBboxIndex, bboxMap])
 
