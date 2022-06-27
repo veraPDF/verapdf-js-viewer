@@ -761,7 +761,7 @@ var _worker = __w_pdfjs_require__(1);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.WorkerMessageHandler = exports.WorkerTask = void 0;
+exports.WorkerTask = exports.WorkerMessageHandler = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -1303,11 +1303,14 @@ if (typeof window === "undefined" && !_is_node.isNodeJS && typeof self !== "unde
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.VerbosityLevel = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.UNSUPPORTED_FEATURES = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.OPS = exports.MissingPDFException = exports.IsLittleEndianCached = exports.IsEvalSupportedCached = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FONT_IDENTITY_MATRIX = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AbortException = void 0;
 exports.arrayByteLength = arrayByteLength;
 exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
 exports.bytesToString = bytesToString;
+exports.createObjectURL = void 0;
 exports.createPromiseCapability = createPromiseCapability;
+exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
 exports.getVerbosityLevel = getVerbosityLevel;
 exports.info = info;
 exports.isArrayBuffer = isArrayBuffer;
@@ -1315,9 +1318,8 @@ exports.isArrayEqual = isArrayEqual;
 exports.isBool = isBool;
 exports.isEmptyObj = isEmptyObj;
 exports.isNum = isNum;
-exports.isString = isString;
 exports.isSameOrigin = isSameOrigin;
-exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
+exports.isString = isString;
 exports.removeNullCharacters = removeNullCharacters;
 exports.setVerbosityLevel = setVerbosityLevel;
 exports.shadow = shadow;
@@ -1325,10 +1327,9 @@ exports.string32 = string32;
 exports.stringToBytes = stringToBytes;
 exports.stringToPDFString = stringToPDFString;
 exports.stringToUTF8String = stringToUTF8String;
+exports.unreachable = unreachable;
 exports.utf8StringToString = utf8StringToString;
 exports.warn = warn;
-exports.unreachable = unreachable;
-exports.IsEvalSupportedCached = exports.IsLittleEndianCached = exports.createObjectURL = exports.FormatError = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.MissingPDFException = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = exports.BaseException = void 0;
 
 __w_pdfjs_require__(3);
 
@@ -2148,15 +2149,15 @@ exports.isNodeJS = isNodeJS;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.RefSetCache = exports.RefSet = exports.Ref = exports.Name = exports.EOF = exports.Dict = exports.Cmd = void 0;
 exports.clearPrimitiveCaches = clearPrimitiveCaches;
-exports.isEOF = isEOF;
 exports.isCmd = isCmd;
 exports.isDict = isDict;
+exports.isEOF = isEOF;
 exports.isName = isName;
 exports.isRef = isRef;
 exports.isRefsEqual = isRefsEqual;
 exports.isStream = isStream;
-exports.RefSetCache = exports.RefSet = exports.Ref = exports.Name = exports.Dict = exports.Cmd = exports.EOF = void 0;
 
 __w_pdfjs_require__(2);
 
@@ -3280,15 +3281,15 @@ exports.ChunkedStreamManager = ChunkedStreamManager;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getLookupTableFactory = getLookupTableFactory;
+exports.XRefParseException = exports.XRefEntryException = exports.MissingDataException = void 0;
 exports.getInheritableProperty = getInheritableProperty;
-exports.toRomanNumerals = toRomanNumerals;
+exports.getLookupTableFactory = getLookupTableFactory;
+exports.isWhiteSpace = isWhiteSpace;
 exports.log2 = log2;
 exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
-exports.isWhiteSpace = isWhiteSpace;
-exports.XRefParseException = exports.XRefEntryException = exports.MissingDataException = void 0;
+exports.toRomanNumerals = toRomanNumerals;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -3415,7 +3416,7 @@ function isWhiteSpace(ch) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.PDFDocument = exports.Page = void 0;
+exports.Page = exports.PDFDocument = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -4185,7 +4186,7 @@ exports.PDFDocument = ExtendedPDFDocument;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.FileSpec = exports.XRef = exports.ObjectLoader = exports.Catalog = void 0;
+exports.XRef = exports.ObjectLoader = exports.FileSpec = exports.Catalog = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -7884,7 +7885,7 @@ exports.Linearization = Linearization;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.LZWStream = exports.StringStream = exports.StreamsSequenceStream = exports.Stream = exports.RunLengthStream = exports.PredictorStream = exports.NullStream = exports.FlateStream = exports.DecodeStream = exports.DecryptStream = exports.AsciiHexStream = exports.Ascii85Stream = void 0;
+exports.StringStream = exports.StreamsSequenceStream = exports.Stream = exports.RunLengthStream = exports.PredictorStream = exports.NullStream = exports.LZWStream = exports.FlateStream = exports.DecryptStream = exports.DecodeStream = exports.AsciiHexStream = exports.Ascii85Stream = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -18987,7 +18988,7 @@ const LabCS = function LabCSClosure() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.GlobalImageCache = exports.LocalImageCache = void 0;
+exports.LocalImageCache = exports.GlobalImageCache = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -19140,8 +19141,8 @@ exports.GlobalImageCache = GlobalImageCache;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getQuadPoints = getQuadPoints;
 exports.MarkupAnnotation = exports.AnnotationFactory = exports.AnnotationBorderStyle = exports.Annotation = void 0;
+exports.getQuadPoints = getQuadPoints;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -24493,7 +24494,7 @@ var EvaluatorPreprocessor = function EvaluatorPreprocessorClosure() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CMapFactory = exports.IdentityCMap = exports.CMap = void 0;
+exports.IdentityCMap = exports.CMapFactory = exports.CMap = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -25401,8 +25402,8 @@ exports.CMapFactory = CMapFactory;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ToUnicodeMap = exports.SEAC_ANALYSIS_ENABLED = exports.IdentityToUnicodeMap = exports.FontFlags = exports.Font = exports.ErrorFont = void 0;
 exports.getFontType = getFontType;
-exports.IdentityToUnicodeMap = exports.ToUnicodeMap = exports.FontFlags = exports.Font = exports.ErrorFont = exports.SEAC_ANALYSIS_ENABLED = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -28639,7 +28640,7 @@ var CFFFont = function CFFFontClosure() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CFFFDSelect = exports.CFFCompiler = exports.CFFPrivateDict = exports.CFFTopDict = exports.CFFCharset = exports.CFFIndex = exports.CFFStrings = exports.CFFHeader = exports.CFF = exports.CFFParser = exports.CFFStandardStrings = void 0;
+exports.CFFTopDict = exports.CFFStrings = exports.CFFStandardStrings = exports.CFFPrivateDict = exports.CFFParser = exports.CFFIndex = exports.CFFHeader = exports.CFFFDSelect = exports.CFFCompiler = exports.CFFCharset = exports.CFF = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -30440,7 +30441,7 @@ exports.CFFCompiler = CFFCompiler;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ExpertSubsetCharset = exports.ExpertCharset = exports.ISOAdobeCharset = void 0;
+exports.ISOAdobeCharset = exports.ExpertSubsetCharset = exports.ExpertCharset = void 0;
 const ISOAdobeCharset = [".notdef", "space", "exclam", "quotedbl", "numbersign", "dollar", "percent", "ampersand", "quoteright", "parenleft", "parenright", "asterisk", "plus", "comma", "hyphen", "period", "slash", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "colon", "semicolon", "less", "equal", "greater", "question", "at", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "bracketleft", "backslash", "bracketright", "asciicircum", "underscore", "quoteleft", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "braceleft", "bar", "braceright", "asciitilde", "exclamdown", "cent", "sterling", "fraction", "yen", "florin", "section", "currency", "quotesingle", "quotedblleft", "guillemotleft", "guilsinglleft", "guilsinglright", "fi", "fl", "endash", "dagger", "daggerdbl", "periodcentered", "paragraph", "bullet", "quotesinglbase", "quotedblbase", "quotedblright", "guillemotright", "ellipsis", "perthousand", "questiondown", "grave", "acute", "circumflex", "tilde", "macron", "breve", "dotaccent", "dieresis", "ring", "cedilla", "hungarumlaut", "ogonek", "caron", "emdash", "AE", "ordfeminine", "Lslash", "Oslash", "OE", "ordmasculine", "ae", "dotlessi", "lslash", "oslash", "oe", "germandbls", "onesuperior", "logicalnot", "mu", "trademark", "Eth", "onehalf", "plusminus", "Thorn", "onequarter", "divide", "brokenbar", "degree", "thorn", "threequarters", "twosuperior", "registered", "minus", "eth", "multiply", "threesuperior", "copyright", "Aacute", "Acircumflex", "Adieresis", "Agrave", "Aring", "Atilde", "Ccedilla", "Eacute", "Ecircumflex", "Edieresis", "Egrave", "Iacute", "Icircumflex", "Idieresis", "Igrave", "Ntilde", "Oacute", "Ocircumflex", "Odieresis", "Ograve", "Otilde", "Scaron", "Uacute", "Ucircumflex", "Udieresis", "Ugrave", "Yacute", "Ydieresis", "Zcaron", "aacute", "acircumflex", "adieresis", "agrave", "aring", "atilde", "ccedilla", "eacute", "ecircumflex", "edieresis", "egrave", "iacute", "icircumflex", "idieresis", "igrave", "ntilde", "oacute", "ocircumflex", "odieresis", "ograve", "otilde", "scaron", "uacute", "ucircumflex", "udieresis", "ugrave", "yacute", "ydieresis", "zcaron"];
 exports.ISOAdobeCharset = ISOAdobeCharset;
 const ExpertCharset = [".notdef", "space", "exclamsmall", "Hungarumlautsmall", "dollaroldstyle", "dollarsuperior", "ampersandsmall", "Acutesmall", "parenleftsuperior", "parenrightsuperior", "twodotenleader", "onedotenleader", "comma", "hyphen", "period", "fraction", "zerooldstyle", "oneoldstyle", "twooldstyle", "threeoldstyle", "fouroldstyle", "fiveoldstyle", "sixoldstyle", "sevenoldstyle", "eightoldstyle", "nineoldstyle", "colon", "semicolon", "commasuperior", "threequartersemdash", "periodsuperior", "questionsmall", "asuperior", "bsuperior", "centsuperior", "dsuperior", "esuperior", "isuperior", "lsuperior", "msuperior", "nsuperior", "osuperior", "rsuperior", "ssuperior", "tsuperior", "ff", "fi", "fl", "ffi", "ffl", "parenleftinferior", "parenrightinferior", "Circumflexsmall", "hyphensuperior", "Gravesmall", "Asmall", "Bsmall", "Csmall", "Dsmall", "Esmall", "Fsmall", "Gsmall", "Hsmall", "Ismall", "Jsmall", "Ksmall", "Lsmall", "Msmall", "Nsmall", "Osmall", "Psmall", "Qsmall", "Rsmall", "Ssmall", "Tsmall", "Usmall", "Vsmall", "Wsmall", "Xsmall", "Ysmall", "Zsmall", "colonmonetary", "onefitted", "rupiah", "Tildesmall", "exclamdownsmall", "centoldstyle", "Lslashsmall", "Scaronsmall", "Zcaronsmall", "Dieresissmall", "Brevesmall", "Caronsmall", "Dotaccentsmall", "Macronsmall", "figuredash", "hypheninferior", "Ogoneksmall", "Ringsmall", "Cedillasmall", "onequarter", "onehalf", "threequarters", "questiondownsmall", "oneeighth", "threeeighths", "fiveeighths", "seveneighths", "onethird", "twothirds", "zerosuperior", "onesuperior", "twosuperior", "threesuperior", "foursuperior", "fivesuperior", "sixsuperior", "sevensuperior", "eightsuperior", "ninesuperior", "zeroinferior", "oneinferior", "twoinferior", "threeinferior", "fourinferior", "fiveinferior", "sixinferior", "seveninferior", "eightinferior", "nineinferior", "centinferior", "dollarinferior", "periodinferior", "commainferior", "Agravesmall", "Aacutesmall", "Acircumflexsmall", "Atildesmall", "Adieresissmall", "Aringsmall", "AEsmall", "Ccedillasmall", "Egravesmall", "Eacutesmall", "Ecircumflexsmall", "Edieresissmall", "Igravesmall", "Iacutesmall", "Icircumflexsmall", "Idieresissmall", "Ethsmall", "Ntildesmall", "Ogravesmall", "Oacutesmall", "Ocircumflexsmall", "Otildesmall", "Odieresissmall", "OEsmall", "Oslashsmall", "Ugravesmall", "Uacutesmall", "Ucircumflexsmall", "Udieresissmall", "Yacutesmall", "Thornsmall", "Ydieresissmall"];
@@ -30456,8 +30457,8 @@ exports.ExpertSubsetCharset = ExpertSubsetCharset;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ZapfDingbatsEncoding = exports.WinAnsiEncoding = exports.SymbolSetEncoding = exports.StandardEncoding = exports.MacRomanEncoding = exports.ExpertEncoding = void 0;
 exports.getEncoding = getEncoding;
-exports.ExpertEncoding = exports.ZapfDingbatsEncoding = exports.SymbolSetEncoding = exports.MacRomanEncoding = exports.StandardEncoding = exports.WinAnsiEncoding = void 0;
 const ExpertEncoding = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "space", "exclamsmall", "Hungarumlautsmall", "", "dollaroldstyle", "dollarsuperior", "ampersandsmall", "Acutesmall", "parenleftsuperior", "parenrightsuperior", "twodotenleader", "onedotenleader", "comma", "hyphen", "period", "fraction", "zerooldstyle", "oneoldstyle", "twooldstyle", "threeoldstyle", "fouroldstyle", "fiveoldstyle", "sixoldstyle", "sevenoldstyle", "eightoldstyle", "nineoldstyle", "colon", "semicolon", "commasuperior", "threequartersemdash", "periodsuperior", "questionsmall", "", "asuperior", "bsuperior", "centsuperior", "dsuperior", "esuperior", "", "", "", "isuperior", "", "", "lsuperior", "msuperior", "nsuperior", "osuperior", "", "", "rsuperior", "ssuperior", "tsuperior", "", "ff", "fi", "fl", "ffi", "ffl", "parenleftinferior", "", "parenrightinferior", "Circumflexsmall", "hyphensuperior", "Gravesmall", "Asmall", "Bsmall", "Csmall", "Dsmall", "Esmall", "Fsmall", "Gsmall", "Hsmall", "Ismall", "Jsmall", "Ksmall", "Lsmall", "Msmall", "Nsmall", "Osmall", "Psmall", "Qsmall", "Rsmall", "Ssmall", "Tsmall", "Usmall", "Vsmall", "Wsmall", "Xsmall", "Ysmall", "Zsmall", "colonmonetary", "onefitted", "rupiah", "Tildesmall", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "exclamdownsmall", "centoldstyle", "Lslashsmall", "", "", "Scaronsmall", "Zcaronsmall", "Dieresissmall", "Brevesmall", "Caronsmall", "", "Dotaccentsmall", "", "", "Macronsmall", "", "", "figuredash", "hypheninferior", "", "", "Ogoneksmall", "Ringsmall", "Cedillasmall", "", "", "", "onequarter", "onehalf", "threequarters", "questiondownsmall", "oneeighth", "threeeighths", "fiveeighths", "seveneighths", "onethird", "twothirds", "", "", "zerosuperior", "onesuperior", "twosuperior", "threesuperior", "foursuperior", "fivesuperior", "sixsuperior", "sevensuperior", "eightsuperior", "ninesuperior", "zeroinferior", "oneinferior", "twoinferior", "threeinferior", "fourinferior", "fiveinferior", "sixinferior", "seveninferior", "eightinferior", "nineinferior", "centinferior", "dollarinferior", "periodinferior", "commainferior", "Agravesmall", "Aacutesmall", "Acircumflexsmall", "Atildesmall", "Adieresissmall", "Aringsmall", "AEsmall", "Ccedillasmall", "Egravesmall", "Eacutesmall", "Ecircumflexsmall", "Edieresissmall", "Igravesmall", "Iacutesmall", "Icircumflexsmall", "Idieresissmall", "Ethsmall", "Ntildesmall", "Ogravesmall", "Oacutesmall", "Ocircumflexsmall", "Otildesmall", "Odieresissmall", "OEsmall", "Oslashsmall", "Ugravesmall", "Uacutesmall", "Ucircumflexsmall", "Udieresissmall", "Yacutesmall", "Thornsmall", "Ydieresissmall"];
 exports.ExpertEncoding = ExpertEncoding;
 const MacExpertEncoding = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "space", "exclamsmall", "Hungarumlautsmall", "centoldstyle", "dollaroldstyle", "dollarsuperior", "ampersandsmall", "Acutesmall", "parenleftsuperior", "parenrightsuperior", "twodotenleader", "onedotenleader", "comma", "hyphen", "period", "fraction", "zerooldstyle", "oneoldstyle", "twooldstyle", "threeoldstyle", "fouroldstyle", "fiveoldstyle", "sixoldstyle", "sevenoldstyle", "eightoldstyle", "nineoldstyle", "colon", "semicolon", "", "threequartersemdash", "", "questionsmall", "", "", "", "", "Ethsmall", "", "", "onequarter", "onehalf", "threequarters", "oneeighth", "threeeighths", "fiveeighths", "seveneighths", "onethird", "twothirds", "", "", "", "", "", "", "ff", "fi", "fl", "ffi", "ffl", "parenleftinferior", "", "parenrightinferior", "Circumflexsmall", "hypheninferior", "Gravesmall", "Asmall", "Bsmall", "Csmall", "Dsmall", "Esmall", "Fsmall", "Gsmall", "Hsmall", "Ismall", "Jsmall", "Ksmall", "Lsmall", "Msmall", "Nsmall", "Osmall", "Psmall", "Qsmall", "Rsmall", "Ssmall", "Tsmall", "Usmall", "Vsmall", "Wsmall", "Xsmall", "Ysmall", "Zsmall", "colonmonetary", "onefitted", "rupiah", "Tildesmall", "", "", "asuperior", "centsuperior", "", "", "", "", "Aacutesmall", "Agravesmall", "Acircumflexsmall", "Adieresissmall", "Atildesmall", "Aringsmall", "Ccedillasmall", "Eacutesmall", "Egravesmall", "Ecircumflexsmall", "Edieresissmall", "Iacutesmall", "Igravesmall", "Icircumflexsmall", "Idieresissmall", "Ntildesmall", "Oacutesmall", "Ogravesmall", "Ocircumflexsmall", "Odieresissmall", "Otildesmall", "Uacutesmall", "Ugravesmall", "Ucircumflexsmall", "Udieresissmall", "", "eightsuperior", "fourinferior", "threeinferior", "sixinferior", "eightinferior", "seveninferior", "Scaronsmall", "", "centinferior", "twoinferior", "", "Dieresissmall", "", "Caronsmall", "osuperior", "fiveinferior", "", "commainferior", "periodinferior", "Yacutesmall", "", "dollarinferior", "", "", "Thornsmall", "", "nineinferior", "zeroinferior", "Zcaronsmall", "AEsmall", "Oslashsmall", "questiondownsmall", "oneinferior", "Lslashsmall", "", "", "", "", "", "", "Cedillasmall", "", "", "", "", "", "OEsmall", "figuredash", "hyphensuperior", "", "", "", "", "exclamdownsmall", "", "Ydieresissmall", "", "onesuperior", "twosuperior", "threesuperior", "foursuperior", "fivesuperior", "sixsuperior", "sevensuperior", "ninesuperior", "zerosuperior", "", "esuperior", "rsuperior", "tsuperior", "", "", "isuperior", "ssuperior", "dsuperior", "", "", "", "", "", "lsuperior", "Ogoneksmall", "Brevesmall", "Macronsmall", "bsuperior", "nsuperior", "msuperior", "commasuperior", "periodsuperior", "Dotaccentsmall", "Ringsmall", "", "", "", ""];
@@ -35045,7 +35046,7 @@ exports.getDingbatsGlyphsUnicode = getDingbatsGlyphsUnicode;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getSupplementalGlyphMapForCalibri = exports.getSupplementalGlyphMapForArialBlack = exports.getGlyphMapForStandardFonts = exports.getSymbolsFonts = exports.getSerifFonts = exports.getNonStdFontMap = exports.getStdFontMap = void 0;
+exports.getSymbolsFonts = exports.getSupplementalGlyphMapForCalibri = exports.getSupplementalGlyphMapForArialBlack = exports.getStdFontMap = exports.getSerifFonts = exports.getNonStdFontMap = exports.getGlyphMapForStandardFonts = void 0;
 
 var _core_utils = __w_pdfjs_require__(8);
 
@@ -39425,8 +39426,8 @@ exports.Type1Parser = Type1Parser;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTilingPatternIR = getTilingPatternIR;
 exports.Pattern = void 0;
+exports.getTilingPatternIR = getTilingPatternIR;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -43621,8 +43622,8 @@ exports.getMetrics = getMetrics;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.PostScriptEvaluator = exports.PostScriptCompiler = exports.PDFFunctionFactory = void 0;
 exports.isPDFFunction = isPDFFunction;
-exports.PostScriptCompiler = exports.PostScriptEvaluator = exports.PDFFunctionFactory = void 0;
 
 var _util = __w_pdfjs_require__(2);
 
@@ -46092,7 +46093,14 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       }
 
       let [tx1, ty1] = [this.textState.textMatrix[4] + shift[0], this.textState.textMatrix[5] + shift[1]];
-      let [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, this.textState.textMatrix[4] + shift[0], this.textState.textMatrix[5] + shift[1], height);
+      let [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, tx1, ty1, height);
+
+      if (this.textState.textMatrix[3] < 0) {
+        ty0 += height * this.textState.textMatrix[3];
+        ty1 += height * this.textState.textMatrix[3];
+        ty2 += height * this.textState.textMatrix[3];
+        ty3 += height * this.textState.textMatrix[3];
+      }
 
       let [x0, y0] = _util.Util.applyTransform([tx0, ty0], ctm);
 
@@ -46532,7 +46540,6 @@ var GraphicsState = function GraphicsState() {
       this.h = null;
       this.move_x = 0;
       this.move_y = 0;
-      this.ctm = _util.IDENTITY_MATRIX.slice();
     }
   };
   return GraphicsState;
