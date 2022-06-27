@@ -5883,7 +5883,7 @@ class ExtendedCatalog extends Catalog {
 
     if ((0, _primitives.isDict)(el) && el.has('K')) {
       return {
-        name: (0, _util.stringToUTF8String)(el.get('S').name),
+        name: el.has('S') ? (0, _util.stringToUTF8String)(el.get('S').name) : null,
         children: this.getTreeElement(el.get('K'), page, el.getRaw('K')),
         ref: ref
       };
