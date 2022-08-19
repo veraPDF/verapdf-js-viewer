@@ -127,7 +127,7 @@ var bboxBorderHover = 'orangered';
 var bboxRelatedBorder = 'rgba(255,176,0,0.5)';
 var bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
 var bboxRelatedBackground = 'rgba(255,176,0,0.3)';
-var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-1h1iji3" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
+var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-1hhzntc" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -528,7 +528,7 @@ function concatBoundingBoxes(newBoundingBox, oldBoundingBox) {
 
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}");
 
-var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-vdtjfh" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
+var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-1ogphwr" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
 var PdfPage = function (props) {
     var scrollIntoPage = React.useContext(ViewerContext).scrollIntoPage;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
@@ -46021,7 +46021,7 @@ var _primitives = __w_pdfjs_require__(5);
 
 var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
   function BoundingBoxesCalculator(ignoreCalculations) {
-    this.textState = new _evaluator.TextState();
+    this.textStateManager = new _evaluator.StateManager(new _evaluator.TextState());
     this.graphicsStateManager = new _evaluator.StateManager(new GraphicsState());
     this.clipping = false;
     this.boundingBoxesStack = new BoundingBoxStack();
@@ -46046,60 +46046,60 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       let tx = 0;
       let ty = 0;
       let ctm = this.graphicsStateManager.state.ctm;
-      let descent = (this.textState.font.descent || 0) * this.textState.fontSize;
-      let ascent = (this.textState.font.ascent || 1) * this.textState.fontSize;
-      let rise = this.textState.textRise * this.textState.fontSize;
+      let descent = (this.textStateManager.state.font.descent || 0) * this.textStateManager.state.fontSize;
+      let ascent = (this.textStateManager.state.font.ascent || 1) * this.textStateManager.state.fontSize;
+      let rise = this.textStateManager.state.textRise * this.textStateManager.state.fontSize;
 
-      let shift = _util.Util.applyTransform([0, descent + rise], this.textState.textMatrix);
+      let shift = _util.Util.applyTransform([0, descent + rise], this.textStateManager.state.textMatrix);
 
-      shift[0] -= this.textState.textMatrix[4];
-      shift[1] -= this.textState.textMatrix[5];
+      shift[0] -= this.textStateManager.state.textMatrix[4];
+      shift[1] -= this.textStateManager.state.textMatrix[5];
 
-      let height = _util.Util.applyTransform([0, ascent + rise], this.textState.textMatrix);
+      let height = _util.Util.applyTransform([0, ascent + rise], this.textStateManager.state.textMatrix);
 
-      height[0] -= this.textState.textMatrix[4] + shift[0];
-      height[1] -= this.textState.textMatrix[5] + shift[1];
+      height[0] -= this.textStateManager.state.textMatrix[4] + shift[0];
+      height[1] -= this.textStateManager.state.textMatrix[5] + shift[1];
       height = Math.sqrt(height[0] * height[0] + height[1] * height[1]);
-      let [tx0, ty0] = [this.textState.textMatrix[4] + shift[0], this.textState.textMatrix[5] + shift[1]];
+      let [tx0, ty0] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
 
       for (let i = 0; i < glyphs.length; i++) {
         let glyph = glyphs[i];
 
         if ((0, _util.isNum)(glyph)) {
-          if (this.textState.font.vertical) {
-            ty = -glyph / 1000 * this.textState.fontSize * this.textState.textHScale;
+          if (this.textStateManager.state.font.vertical) {
+            ty = -glyph / 1000 * this.textStateManager.state.fontSize * this.textStateManager.state.textHScale;
           } else {
-            tx = -glyph / 1000 * this.textState.fontSize * this.textState.textHScale;
+            tx = -glyph / 1000 * this.textStateManager.state.fontSize * this.textStateManager.state.textHScale;
           }
         } else {
           let glyphWidth = null;
 
-          if (this.textState.font.vertical && glyph.vmetric) {
+          if (this.textStateManager.state.font.vertical && glyph.vmetric) {
             glyphWidth = glyph.vmetric[0];
           } else {
             glyphWidth = glyph.width;
           }
 
-          if (!this.textState.font.vertical) {
-            let w0 = glyphWidth * (this.textState.fontMatrix ? this.textState.fontMatrix[0] : 1 / 1000);
-            tx = (w0 * this.textState.fontSize + this.textState.charSpacing + (glyph.isSpace ? this.textState.wordSpacing : 0)) * this.textState.textHScale;
+          if (!this.textStateManager.state.font.vertical) {
+            let w0 = glyphWidth * (this.textStateManager.state.fontMatrix ? this.textStateManager.state.fontMatrix[0] : 1 / 1000);
+            tx = (w0 * this.textStateManager.state.fontSize + this.textStateManager.state.charSpacing + (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0)) * this.textStateManager.state.textHScale;
           } else {
-            let w1 = glyphWidth * (this.textState.fontMatrix ? this.textState.fontMatrix[0] : 1 / 1000);
-            ty = w1 * this.textState.fontSize + this.textState.charSpacing + (glyph.isSpace ? this.textState.wordSpacing : 0);
+            let w1 = glyphWidth * (this.textStateManager.state.fontMatrix ? this.textStateManager.state.fontMatrix[0] : 1 / 1000);
+            ty = w1 * this.textStateManager.state.fontSize + this.textStateManager.state.charSpacing + (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0);
           }
         }
 
-        this.textState.translateTextMatrix(tx, ty);
+        this.textStateManager.state.translateTextMatrix(tx, ty);
       }
 
-      let [tx1, ty1] = [this.textState.textMatrix[4] + shift[0], this.textState.textMatrix[5] + shift[1]];
+      let [tx1, ty1] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
       let [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, tx1, ty1, height);
 
-      if (this.textState.textMatrix[3] < 0) {
-        ty0 += height * this.textState.textMatrix[3];
-        ty1 += height * this.textState.textMatrix[3];
-        ty2 += height * this.textState.textMatrix[3];
-        ty3 += height * this.textState.textMatrix[3];
+      if (this.textStateManager.state.textMatrix[3] < 0) {
+        ty0 += height * this.textStateManager.state.textMatrix[3];
+        ty1 += height * this.textStateManager.state.textMatrix[3];
+        ty2 += height * this.textStateManager.state.textMatrix[3];
+        ty3 += height * this.textStateManager.state.textMatrix[3];
       }
 
       let [x0, y0] = _util.Util.applyTransform([tx0, ty0], ctm);
@@ -46351,10 +46351,12 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       switch (fn | 0) {
         case _util.OPS.restore:
           this.graphicsStateManager.restore();
+          this.textStateManager.restore();
           break;
 
         case _util.OPS.save:
           this.graphicsStateManager.save();
+          this.textStateManager.save();
           break;
 
         case _util.OPS.fill:
@@ -46384,54 +46386,54 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
           break;
 
         case _util.OPS.setFont:
-          this.textState.fontSize = args[0];
-          this.textState.fontMatrix = args[1].font.fontMatrix;
-          this.textState.font = args[1].font;
+          this.textStateManager.state.fontSize = args[0];
+          this.textStateManager.state.fontMatrix = args[1].font.fontMatrix;
+          this.textStateManager.state.font = args[1].font;
           break;
 
         case _util.OPS.setTextMatrix:
-          this.textState.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
-          this.textState.setTextLineMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
+          this.textStateManager.state.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
+          this.textStateManager.state.setTextLineMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
           break;
 
         case _util.OPS.nextLine:
-          this.textState.carriageReturn();
+          this.textStateManager.state.carriageReturn();
           break;
 
         case _util.OPS.setCharSpacing:
-          this.textState.charSpacing = args[0];
+          this.textStateManager.state.charSpacing = args[0];
           break;
 
         case _util.OPS.setWordSpacing:
-          this.textState.wordSpacing = args[0];
+          this.textStateManager.state.wordSpacing = args[0];
           break;
 
         case _util.OPS.setHScale:
-          this.textState.textHScale = args[0] / 100;
+          this.textStateManager.state.textHScale = args[0] / 100;
           break;
 
         case _util.OPS.setLeading:
-          this.textState.leading = args[0];
+          this.textStateManager.state.leading = args[0];
           break;
 
         case _util.OPS.setTextRise:
-          this.textState.textRise = args[0];
+          this.textStateManager.state.textRise = args[0];
           break;
 
         case _util.OPS.setLeadingMoveText:
-          this.textState.leading = -args[1];
-          this.textState.translateTextLineMatrix(...args);
-          this.textState.textMatrix = this.textState.textLineMatrix.slice();
+          this.textStateManager.state.leading = -args[1];
+          this.textStateManager.state.translateTextLineMatrix(...args);
+          this.textStateManager.state.textMatrix = this.textStateManager.state.textLineMatrix.slice();
           break;
 
         case _util.OPS.moveText:
-          this.textState.translateTextLineMatrix(args[0], args[1]);
-          this.textState.textMatrix = this.textState.textLineMatrix.slice();
+          this.textStateManager.state.translateTextLineMatrix(args[0], args[1]);
+          this.textStateManager.state.textMatrix = this.textStateManager.state.textLineMatrix.slice();
           break;
 
         case _util.OPS.beginText:
-          this.textState.textMatrix = _util.IDENTITY_MATRIX.slice();
-          this.textState.textLineMatrix = _util.IDENTITY_MATRIX.slice();
+          this.textStateManager.state.textMatrix = _util.IDENTITY_MATRIX.slice();
+          this.textStateManager.state.textLineMatrix = _util.IDENTITY_MATRIX.slice();
           break;
 
         case _util.OPS.moveTo:
@@ -46506,8 +46508,8 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       }
     },
     setFont: function BoundingBoxesCalculator_setFont(translated) {
-      this.textState.fontMatrix = translated.font.fontMatrix;
-      this.textState.font = translated.font;
+      this.textStateManager.state.fontMatrix = translated.font.fontMatrix;
+      this.textStateManager.state.font = translated.font;
     }
   };
   return BoundingBoxesCalculator;
