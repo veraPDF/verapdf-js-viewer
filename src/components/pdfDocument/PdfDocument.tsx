@@ -12,7 +12,13 @@ import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import {AnyObject} from '../../types/generics';
 import { IBboxLocation } from '../../index';
-import {activeBboxInViewport, buildBboxMap, getBboxPages, scrollToActiveBbox} from '../../services/bboxService';
+import {
+  activeBboxInViewport,
+  buildBboxMap,
+  getBboxPage,
+  getBboxPages,
+  scrollToActiveBbox
+} from '../../services/bboxService';
 import {IColorScheme} from '../bbox/Bbox';
 // @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
@@ -101,6 +107,10 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const onBboxClick = useCallback((data) => {
       props.onBboxClick?.(data);
     }, []);
+
+  const isPageSelected = useCallback((page: number) => {
+    return props.activeBboxIndex !== undefined && page === getBboxPage(bboxes[props.activeBboxIndex]?.location);
+  }, [props.activeBboxIndex, bboxes]);
 
   const setPageByViewport = useMemo(() => (newPage: number, intersection: { isIntersecting: boolean, intersectionRatio: number }) => {
     const { isIntersecting, intersectionRatio } = intersection;
@@ -211,6 +221,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           activeBboxIndex={props.activeBboxIndex}
           onBboxClick={onBboxClick}
           colorScheme={props.colorScheme}
+          isPageSelected={isPageSelected(page)}
         />
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])}
     </Document>

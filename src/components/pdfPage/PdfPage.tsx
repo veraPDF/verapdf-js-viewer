@@ -19,6 +19,7 @@ interface IPdfPageProps extends IPageProps {
   colorScheme?: IColorScheme;
   groupId?: string;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
+  isPageSelected?: boolean;
 }
 
 const StyledPdfPage = styled.div`
@@ -103,7 +104,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
 
   return (
     <StyledPdfPage
-      className="pdf-page pdf-page_rendered"
+      className={`pdf-page pdf-page_rendered ${props.isPageSelected  && 'pdf-page_selected'}`}
       data-page={props.page}
       onClick={onPageClick}
       height={!isRendered ? props.height || props.defaultHeight : undefined}
