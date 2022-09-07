@@ -11,6 +11,6 @@
   box-shadow: 0 0 4px 2px $component-shadow-color;
 
   &_selected {
-    border: 2px solid $bbox-border-color--hover;
+    outline: 2px solid $bbox-border-color--hover;
   }
 }

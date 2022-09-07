@@ -39,10 +39,10 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   return bboxMap;
 }
 
-export const getBboxPage = (bboxLocation: string) => {
+export const getSelectedPageByLocation = (bboxLocation: string) => {
   const location = bboxLocation;
   let pageNumber = -1;
-  if (location?.includes('pages')) {
+  if (location?.includes('pages') && !location?.includes('annots')) {
     location.split('/').forEach(nodeString => {
       if (nodeString.includes('pages')) {
         pageNumber = parseInt(nodeString.split(/[[\]]/)[1], 10) + 1;

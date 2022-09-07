@@ -15,7 +15,7 @@ import { IBboxLocation } from '../../index';
 import {
   activeBboxInViewport,
   buildBboxMap,
-  getBboxPage,
+  getSelectedPageByLocation,
   getBboxPages,
   scrollToActiveBbox
 } from '../../services/bboxService';
@@ -50,6 +50,10 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(0);
   const [defaultWidth, setDefaultWidth] = useState(0);
+  const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
+  const activeBbox = useMemo(() => {
+    return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null
+  }, [props.activeBboxIndex, bboxes]);
   const shownPages: number[] = useMemo(() => {
     if (props.showAllPages) {
       return Array.from(
@@ -84,6 +88,14 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     }
   }, [props.activeBboxIndex, bboxMap])
 
+  useEffect(() => {
+    if(activeBbox) {
+      const selectedPage = getSelectedPageByLocation(activeBbox.location);
+      setSelectedPage(selectedPage);
+      setPage(selectedPage);
+    }
+  }, [activeBbox]);
+
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
     setStructureTree(data._pdfInfo.structureTree);
     const pageData = await data.getPage(1);
@@ -107,10 +119,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const onBboxClick = useCallback((data) => {
       props.onBboxClick?.(data);
     }, []);
-
-  const isPageSelected = useCallback((page: number) => {
-    return props.activeBboxIndex !== undefined && page === getBboxPage(bboxes[props.activeBboxIndex]?.location);
-  }, [props.activeBboxIndex, bboxes]);
 
   const setPageByViewport = useMemo(() => (newPage: number, intersection: { isIntersecting: boolean, intersectionRatio: number }) => {
     const { isIntersecting, intersectionRatio } = intersection;
@@ -221,9 +229,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           activeBboxIndex={props.activeBboxIndex}
           onBboxClick={onBboxClick}
           colorScheme={props.colorScheme}
-          isPageSelected={isPageSelected(page)}
+          isPageSelected={selectedPage === page}
         />
-      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])}
+      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props, selectedPage])}
     </Document>
   );
 }
