@@ -47354,9 +47354,9 @@ var PdfDocument = function (props) {
         if (activeBbox) {
             var selectedPage_1 = getSelectedPageByLocation(activeBbox.location);
             if (selectedPage_1 > -1) {
-                setSelectedPage(selectedPage_1);
                 setPage(selectedPage_1);
             }
+            setSelectedPage(selectedPage_1);
         }
         else {
             setSelectedPage(undefined);
