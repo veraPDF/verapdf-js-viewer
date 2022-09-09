@@ -47353,8 +47353,13 @@ var PdfDocument = function (props) {
     React.useEffect(function () {
         if (activeBbox) {
             var selectedPage_1 = getSelectedPageByLocation(activeBbox.location);
-            setSelectedPage(selectedPage_1);
-            setPage(selectedPage_1);
+            if (selectedPage_1 > -1) {
+                setSelectedPage(selectedPage_1);
+                setPage(selectedPage_1);
+            }
+        }
+        else {
+            setSelectedPage(undefined);
         }
     }, [activeBbox]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {

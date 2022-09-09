@@ -89,10 +89,14 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [props.activeBboxIndex, bboxMap])
 
   useEffect(() => {
-    if(activeBbox) {
+    if (activeBbox) {
       const selectedPage = getSelectedPageByLocation(activeBbox.location);
-      setSelectedPage(selectedPage);
-      setPage(selectedPage);
+      if (selectedPage > -1) {
+        setSelectedPage(selectedPage);
+        setPage(selectedPage);
+      }
+    } else {
+      setSelectedPage(undefined);
     }
   }, [activeBbox]);
 
