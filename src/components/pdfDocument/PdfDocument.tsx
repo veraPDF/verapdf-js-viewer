@@ -12,7 +12,13 @@ import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import {AnyObject} from '../../types/generics';
 import { IBboxLocation } from '../../index';
-import {activeBboxInViewport, buildBboxMap, getBboxPages, scrollToActiveBbox} from '../../services/bboxService';
+import {
+  activeBboxInViewport,
+  buildBboxMap,
+  getSelectedPageByLocation,
+  getBboxPages,
+  scrollToActiveBbox
+} from '../../services/bboxService';
 import {IColorScheme} from '../bbox/Bbox';
 // @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
@@ -44,6 +50,10 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(0);
   const [defaultWidth, setDefaultWidth] = useState(0);
+  const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
+  const activeBbox = useMemo(() => {
+    return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null
+  }, [props.activeBboxIndex, bboxes]);
   const shownPages: number[] = useMemo(() => {
     if (props.showAllPages) {
       return Array.from(
@@ -77,6 +87,18 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       setTimeout(() => scrollToActiveBbox(), 100);
     }
   }, [props.activeBboxIndex, bboxMap])
+
+  useEffect(() => {
+    if (activeBbox) {
+      const selectedPage = getSelectedPageByLocation(activeBbox.location);
+      if (selectedPage > -1) {
+        setPage(selectedPage);
+      }
+      setSelectedPage(selectedPage);
+    } else {
+      setSelectedPage(undefined);
+    }
+  }, [activeBbox]);
 
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
     setStructureTree(data._pdfInfo.structureTree);
@@ -211,8 +233,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           activeBboxIndex={props.activeBboxIndex}
           onBboxClick={onBboxClick}
           colorScheme={props.colorScheme}
+          isPageSelected={selectedPage === page}
         />
-      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props])}
+      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props, selectedPage])}
     </Document>
   );
 }
