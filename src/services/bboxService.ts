@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import {IBboxLocation} from '../index';
 import {AnyObject} from '../types/generics';
+import {IBbox} from "../components/bbox/Bbox";
 
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
@@ -101,6 +102,24 @@ export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
       console.error(`Location not supported: ${bbox.location}`);
     }
   });
+}
+
+export const checkIsBboxOutOfThePage = (bbox: IBbox, scale: number) => {
+  const parent = (document.querySelector('.pdf-viewer') as any);
+  const parentHeight = parent.offsetHeight * scale;
+  const parentWidth = parent.offsetWidth * scale;
+
+  const left = parseFloat(bbox.location[0] as string) * scale;
+  const top = parseFloat(bbox.location[1] as string) * scale;
+  const width = parseFloat(bbox.location[2] as string) * scale;
+  const height = parseFloat(bbox.location[3] as string) * scale;
+
+  return (
+      top <= 0 && (top + height) <= 1 ||
+      left <= 0 && (left + width) <= 1 ||
+      parentHeight - top <= 1 && (top + height) >= parentHeight ||
+      parentWidth - left <= 1 && (left + width) >= parentWidth
+  );
 }
 
 const calculateLocation = (location: string) => {

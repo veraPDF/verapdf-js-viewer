@@ -8,7 +8,8 @@ import Bbox, {IBbox, IColorScheme} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
-import { getBboxForGlyph, parseMcidToBbox } from '../../services/bboxService';
+import { getBboxForGlyph, parseMcidToBbox, checkIsBboxOutOfThePage } from '../../services/bboxService';
+import { WARNING_CODES } from "../../services/constants";
 
 import './pdfPage.scss';
 
@@ -21,6 +22,7 @@ interface IPdfPageProps extends IPageProps {
   groupId?: string;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
   isPageSelected?: boolean;
+  onWarning?(warningCode: string | null): void;
 }
 
 interface IStyledPdfPageProps {
@@ -51,6 +53,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
+  const [activeBbox, setActiveBbox] = useState<IBbox | null>(null);
   useIntersection(intersectionRef, {
     threshold: [.2, .4, .5, .6, .8, 1],
   }, (entry) => {
@@ -119,6 +122,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
   const isRelated = (bbox: IBbox) => props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false;
 
+  useEffect(() => {
+    props.onWarning?.(
+        activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale) ? WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT : null);
+  }, [activeBbox, scale, props.activeBboxIndex]);
+
   return (
     <StyledPdfPage
       className={`pdf-page pdf-page_rendered ${props.isPageSelected  && 'pdf-page_selected'}`}
@@ -153,7 +161,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextError={props.onGetTextError}
         />
         {isRendered ? bboxes.map((bbox: IBbox, index) => (
-          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} related={isRelated(bbox)} scale={pageScale} colorScheme={props.colorScheme} />
+          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} related={isRelated(bbox)} scale={pageScale} colorScheme={props.colorScheme} setActiveBbox={setActiveBbox} />
         )) : null}
       </> : null}
     </StyledPdfPage>

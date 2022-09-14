@@ -25,6 +25,7 @@ interface IBboxProps {
     selected?: boolean;
     colorScheme?: IColorScheme;
     onClick?(e: any): void;
+    setActiveBbox?(bbox: IBbox | null): void;
 }
 declare const _default: React.NamedExoticComponent<IBboxProps>;
 export default _default;

@@ -15,6 +15,7 @@ interface IPdfPageProps extends IPageProps {
         intersectionRatio?: number;
     }): void;
     isPageSelected?: boolean;
+    onWarning?(warningCode: string | null): void;
 }
 declare const _default: React.NamedExoticComponent<IPdfPageProps>;
 export default _default;
