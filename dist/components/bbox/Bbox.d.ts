@@ -5,6 +5,8 @@ export interface IBbox {
     index: number;
     groupId?: string;
     mcidList?: number[];
+    glyphIndex?: number;
+    operatorIndex?: number;
 }
 export interface IColorScheme {
     border?: string;

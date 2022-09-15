@@ -7,7 +7,17 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
   bboxes.forEach((bbox, index) => {
     try {
-      if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
+      if (bbox.location.includes('contentStream')) {
+        const bboxPosition = calculateLocationInStream(bbox.location);
+        bboxMap[bboxPosition.pageIndex + 1] = [
+          ...(bboxMap[bboxPosition.pageIndex + 1] || []),
+          {
+            index,
+            operatorIndex: bboxPosition.operatorIndex,
+            glyphIndex: bboxPosition.glyphIndex,
+          }
+        ];
+      } else if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
         const mcidData = getTagsFromErrorPlace(bbox.location, structure);
         mcidData.forEach(([mcidList, pageIndex]) => {
           bboxMap[pageIndex + 1] = [
@@ -39,10 +49,34 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   return bboxMap;
 }
 
+export const calculateLocationInStream = (location: string) => {
+  const path = location.split("/");
+  let pageIndex = -1;
+  let operatorIndex = -1;
+  let glyphIndex = -1;
+  path.forEach((step) => {
+    if (step.startsWith('pages')) {
+      pageIndex = parseInt(step.split(/[\[\]]/)[1]);
+    }
+    if (step.startsWith('operators')) {
+      operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
+    }
+    if (step.startsWith("usedGlyphs")) {
+      glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
+    }
+  });
+  return {
+    pageIndex,
+    operatorIndex,
+    glyphIndex
+  }
+}
+
 export const getSelectedPageByLocation = (bboxLocation: string) => {
   const location = bboxLocation;
+  const path = location.split('/')
   let pageNumber = -1;
-  if (location?.includes('pages') && !location?.includes('annots')) {
+  if (location?.includes('pages') && path[path.length - 1].startsWith('pages')) {
     location.split('/').forEach(nodeString => {
       if (nodeString.includes('pages')) {
         pageNumber = parseInt(nodeString.split(/[[\]]/)[1], 10) + 1;
@@ -253,6 +287,16 @@ function findAllMcid(tagObject: AnyObject) {
   func(tagObject);
 
   return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
+}
+
+export const getBboxForGlyph = (operatorIndex: number, glyphIndex: number, operationsList: number[][][], viewport: number[], rotateAngle: number) => {
+  const bbox = operationsList[operatorIndex] ? operationsList[operatorIndex][glyphIndex] : null;
+  if (!bbox) {
+    return [];
+  }
+  const coordsArray = rotateCoordinates(bbox, rotateAngle, viewport);
+  const rotatedViewport = rotateViewport(rotateAngle, viewport);
+  return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 }
 
 export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => {

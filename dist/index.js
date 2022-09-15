@@ -123,11 +123,11 @@ ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n
 
 var bboxBg = 'rgba(255, 255, 255, 0)';
 var bboxBorder = 'grey';
-var bboxBorderHover = 'orangered';
+var bboxBorderHover$1 = 'orangered';
 var bboxRelatedBorder = 'rgba(255,176,0,0.5)';
 var bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
 var bboxRelatedBackground = 'rgba(255,176,0,0.3)';
-var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-1ssntrp" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
+var BboxDiv = styled__default['default'].div.withConfig({ displayName: "BboxDiv", componentId: "sc-1h1iji3" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -170,7 +170,17 @@ var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
     bboxes.forEach(function (bbox, index) {
         try {
-            if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
+            if (bbox.location.includes('contentStream')) {
+                var bboxPosition = calculateLocationInStream(bbox.location);
+                bboxMap[bboxPosition.pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[bboxPosition.pageIndex + 1] || [])), [
+                    {
+                        index: index,
+                        operatorIndex: bboxPosition.operatorIndex,
+                        glyphIndex: bboxPosition.glyphIndex,
+                    }
+                ]);
+            }
+            else if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
                 var mcidData = getTagsFromErrorPlace(bbox.location, structure);
                 mcidData.forEach(function (_a) {
                     var mcidList = _a[0], pageIndex = _a[1];
@@ -202,10 +212,33 @@ var buildBboxMap = function (bboxes, structure) {
     });
     return bboxMap;
 };
+var calculateLocationInStream = function (location) {
+    var path = location.split("/");
+    var pageIndex = -1;
+    var operatorIndex = -1;
+    var glyphIndex = -1;
+    path.forEach(function (step) {
+        if (step.startsWith('pages')) {
+            pageIndex = parseInt(step.split(/[\[\]]/)[1]);
+        }
+        if (step.startsWith('operators')) {
+            operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
+        }
+        if (step.startsWith("usedGlyphs")) {
+            glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
+        }
+    });
+    return {
+        pageIndex: pageIndex,
+        operatorIndex: operatorIndex,
+        glyphIndex: glyphIndex
+    };
+};
 var getSelectedPageByLocation = function (bboxLocation) {
     var location = bboxLocation;
+    var path = location.split('/');
     var pageNumber = -1;
-    if ((location === null || location === void 0 ? void 0 : location.includes('pages')) && !(location === null || location === void 0 ? void 0 : location.includes('annots'))) {
+    if ((location === null || location === void 0 ? void 0 : location.includes('pages')) && path[path.length - 1].startsWith('pages')) {
         location.split('/').forEach(function (nodeString) {
             if (nodeString.includes('pages')) {
                 pageNumber = parseInt(nodeString.split(/[[\]]/)[1], 10) + 1;
@@ -413,6 +446,15 @@ function findAllMcid(tagObject) {
     func(tagObject);
     return ___default['default'].map(mcidMap, function (value, key) { return [value, ___default['default'].toNumber(key)]; });
 }
+var getBboxForGlyph = function (operatorIndex, glyphIndex, operationsList, viewport, rotateAngle) {
+    var bbox = operationsList[operatorIndex] ? operationsList[operatorIndex][glyphIndex] : null;
+    if (!bbox) {
+        return [];
+    }
+    var coordsArray = rotateCoordinates(bbox, rotateAngle, viewport);
+    var rotatedViewport = rotateViewport(rotateAngle, viewport);
+    return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
+};
 var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rotateAngle) {
     var _a;
     var coords = {};
@@ -538,9 +580,10 @@ function concatBoundingBoxes(newBoundingBox, oldBoundingBox) {
     };
 }
 
-___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: 2px solid orangered;\n}");
+___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
-var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-w8ik81" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; });
+var bboxBorderHover = 'orangered';
+var StyledPdfPage = styled__default['default'].div.withConfig({ displayName: "StyledPdfPage", componentId: "sc-vdtjfh" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
 var PdfPage = function (props) {
     var scrollIntoPage = React.useContext(ViewerContext).scrollIntoPage;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
@@ -582,10 +625,14 @@ var PdfPage = function (props) {
         setPageViewport(page.view);
         Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
             var operatorList = _a[0], annotations = _a[1];
+            var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
             var positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
             var bboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
                     bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+                }
+                if (___default['default'].isNumber(bbox.operatorIndex) && ___default['default'].isNumber(bbox.glyphIndex)) {
+                    bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, operationData, page.view, page.rotate);
                 }
                 return bbox;
             });
@@ -619,7 +666,7 @@ var PdfPage = function (props) {
     }, [pageViewport, scale, props.width, props.height]);
     var isBboxSelected = function (bbox) { return props.activeBboxIndex === bbox.index; };
     var isRelated = function (bbox) { return props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false; };
-    return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered " + (props.isPageSelected && 'pdf-page_selected'), "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
+    return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered " + (props.isPageSelected && 'pdf-page_selected'), "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
         React__default['default'].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadProgress: props.onPageLoadProgress, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
         isRendered ? bboxes.map(function (bbox, index) { return (React__default['default'].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index), selected: isBboxSelected(bbox), related: isRelated(bbox), scale: pageScale, colorScheme: props.colorScheme })); }) : null) : null));
 };
@@ -1604,7 +1651,9 @@ const OPS = {
   paintImageXObjectRepeat: 88,
   paintImageMaskXObjectRepeat: 89,
   paintSolidColorImageMask: 90,
-  constructPath: 91
+  constructPath: 91,
+  boundingBoxes: 100,
+  operationPosition: 101
 };
 exports.OPS = OPS;
 const UNSUPPORTED_FEATURES = {
@@ -3456,7 +3505,7 @@ const DEFAULT_USER_UNIT = 1.0;
 const LETTER_SIZE_MEDIABOX = [0, 0, 612, 792];
 
 function isAnnotationRenderable(annotation, intent) {
-  return intent === "display" && annotation.viewable || intent === "print" && annotation.printable;
+  return intent === "display" && annotation.viewable || intent === "print" && annotation.printable || intent === "oplist";
 }
 
 class Page {
@@ -3646,7 +3695,7 @@ class Page {
       pdfFunctionFactory: this.pdfFunctionFactory
     });
     const dataPromises = Promise.all([contentStreamPromise, resourcesPromise]);
-    let boundingBoxes;
+    let boundingBoxes, positionByOperationIndex;
     const pageListPromise = dataPromises.then(([contentStream]) => {
       const opList = new _operator_list.OperatorList(intent, sink, this.pageIndex);
       handler.send("StartRenderPage", {
@@ -3660,15 +3709,17 @@ class Page {
         resources: this.resources,
         operatorList: opList,
         intent
-      }).then(function (boundingBoxesByMCID) {
+      }).then(function ([boundingBoxesByMCID, operationArray]) {
         boundingBoxes = boundingBoxesByMCID;
+        positionByOperationIndex = operationArray;
         return opList;
       });
     });
     return Promise.all([pageListPromise, this._parsedAnnotations]).then(function ([pageOpList, annotations]) {
       if (annotations.length === 0) {
         if (intent === 'oplist') {
-          pageOpList.addOp(_util.OPS.save, boundingBoxes);
+          pageOpList.addOp(_util.OPS.operationPosition, positionByOperationIndex);
+          pageOpList.addOp(_util.OPS.boundingBoxes, boundingBoxes);
         }
 
         pageOpList.flush(true);
@@ -21969,6 +22020,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
 
           var args = operation.args;
           var fn = operation.fn;
+          boundingBoxCalculator.incrementOperation(fn);
 
           switch (fn | 0) {
             case _util.OPS.paintXObject:
@@ -22351,7 +22403,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
 
         closePendingRestoreOPS();
-        resolve(boundingBoxCalculator.boundingBoxes);
+        resolve([boundingBoxCalculator.boundingBoxes, boundingBoxCalculator.operationArray]);
       }).catch(reason => {
         if (reason instanceof _util.AbortException) {
           return;
@@ -46042,6 +46094,8 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     this.boundingBoxesStack = new BoundingBoxStack();
     this.boundingBoxes = {};
     this.ignoreCalculations = ignoreCalculations;
+    this.operationArray = [];
+    this.operationIndex = -1;
   }
 
   BoundingBoxesCalculator.prototype = {
@@ -46076,6 +46130,7 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       height[1] -= this.textStateManager.state.textMatrix[5] + shift[1];
       height = Math.sqrt(height[0] * height[0] + height[1] * height[1]);
       let [tx0, ty0] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
+      let glyphsSize = [];
 
       for (let i = 0; i < glyphs.length; i++) {
         let glyph = glyphs[i];
@@ -46104,17 +46159,24 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
           }
         }
 
+        let [x, y] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
         this.textStateManager.state.translateTextMatrix(tx, ty);
+
+        if (!(0, _util.isNum)(glyph)) {
+          glyphsSize.push([x, y, this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]]);
+        }
       }
 
       let [tx1, ty1] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
       let [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, tx1, ty1, height);
+      glyphsSize = glyphsSize.map(glyphSize => [...glyphSize, ...this.getTopPoints(...glyphSize, height)]);
 
       if (this.textStateManager.state.textMatrix[3] < 0) {
         ty0 += height * this.textStateManager.state.textMatrix[3];
         ty1 += height * this.textStateManager.state.textMatrix[3];
         ty2 += height * this.textStateManager.state.textMatrix[3];
         ty3 += height * this.textStateManager.state.textMatrix[3];
+        glyphsSize = glyphsSize.map(glyphSize => [...glyphSize.map((point, index) => index % 2 === 0 ? point : point + height * this.textStateManager.state.textMatrix[3])]);
       }
 
       let [x0, y0] = _util.Util.applyTransform([tx0, ty0], ctm);
@@ -46125,10 +46187,23 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
 
       let [x3, y3] = _util.Util.applyTransform([tx3, ty3], ctm);
 
-      let minX = Math.min(x0, x1, x2, x3);
-      let maxX = Math.max(x0, x1, x2, x3);
-      let minY = Math.min(y0, y1, y2, y3);
-      let maxY = Math.max(y0, y1, y2, y3);
+      glyphsSize = glyphsSize.map(glyphSize => [..._util.Util.applyTransform([glyphSize[0], glyphSize[1]], ctm), ..._util.Util.applyTransform([glyphSize[2], glyphSize[3]], ctm), ..._util.Util.applyTransform([glyphSize[4], glyphSize[5]], ctm), ..._util.Util.applyTransform([glyphSize[6], glyphSize[7]], ctm)]);
+      let minX, maxX, minY, maxY;
+      let glyphsPos = [];
+      glyphsSize.forEach(glyphSize => {
+        let xPoints = [...glyphSize].filter((point, index) => index % 2 === 0);
+        let yPoints = [...glyphSize].filter((point, index) => index % 2 !== 0);
+        minX = Math.min(...xPoints);
+        maxX = Math.max(...xPoints);
+        minY = Math.min(...yPoints);
+        maxY = Math.max(...yPoints);
+        glyphsPos.push([minX, minY, maxX - minX, maxY - minY]);
+      });
+      this.operationArray[this.operationIndex] = glyphsPos;
+      minX = Math.min(x0, x1, x2, x3);
+      maxX = Math.max(x0, x1, x2, x3);
+      minY = Math.min(y0, y1, y2, y3);
+      maxY = Math.max(y0, y1, y2, y3);
       this.boundingBoxesStack.save(minX, minY, maxX - minX, maxY - minY);
     },
     getClippingGraphicsBoundingBox: function BoundingBoxesCalculator_getClippingGraphicsBoundingBox() {
@@ -46525,6 +46600,13 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     setFont: function BoundingBoxesCalculator_setFont(translated) {
       this.textStateManager.state.fontMatrix = translated.font.fontMatrix;
       this.textStateManager.state.font = translated.font;
+    },
+    incrementOperation: function BoundingBoxesCalculator_incrementOperation(fn) {
+      if (this.ignoreCalculations) {
+        return;
+      }
+
+      this.operationIndex++;
     }
   };
   return BoundingBoxesCalculator;
