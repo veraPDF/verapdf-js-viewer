@@ -2,12 +2,13 @@ import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext,} 
 import { Page } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 import Bbox, {IBbox, IColorScheme} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
-import { parseMcidToBbox } from '../../services/bboxService';
+import { getBboxForGlyph, parseMcidToBbox } from '../../services/bboxService';
 
 import './pdfPage.scss';
 
@@ -22,9 +23,21 @@ interface IPdfPageProps extends IPageProps {
   isPageSelected?: boolean;
 }
 
+interface IStyledPdfPageProps {
+  height?: number;
+  width?: number;
+  scale: number;
+  colorScheme?: IColorScheme;
+}
+
+const bboxBorderHover = 'orangered';
+
 const StyledPdfPage = styled.div`
-  min-height: ${(props: { height?: number, width?: number, scale: number }) => props.height ? props.height*props.scale + 'px' : 'auto'};
-  min-width: ${(props: { height?: number, width?: number, scale: number }) => props.width ? props.width*props.scale + 'px' : 'auto'};
+  min-height: ${(props: IStyledPdfPageProps) => props.height ? props.height*props.scale + 'px' : 'auto'};
+  min-width: ${(props: IStyledPdfPageProps) => props.width ? props.width*props.scale + 'px' : 'auto'};
+  &.pdf-page_selected {
+    outline-color: ${(props: IStyledPdfPageProps) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
+  }
 `;
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
@@ -64,10 +77,14 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setIsRendered(true);
     setPageViewport(page.view);
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
+      const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
       const positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
       const bboxes = bboxList.map((bbox) => {
         if (bbox.mcidList) {
           bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+        }
+        if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
+          bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, operationData, page.view, page.rotate);
         }
 
         return bbox;
@@ -111,6 +128,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       width={!isRendered ? props.width || props.defaultWidth : undefined}
       scale={pageScale}
       ref={intersectionRef}
+      colorScheme={props.colorScheme || {}}
     >
       {loaded ? <>
         <Page

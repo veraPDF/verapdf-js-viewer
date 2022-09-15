@@ -1838,9 +1838,9 @@ path-type@^4.0.0:
   resolved "https://registry.npmjs.org/path-type/-/path-type-4.0.0.tgz"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-pdfjs-dist@2.5.207, "pdfjs-dist@github:veraPDF/pdfjs-dist#v2.5.207-taggedPdf-0.1.6":
+pdfjs-dist@2.5.207, "pdfjs-dist@github:veraPDF/pdfjs-dist#v2.5.207-taggedPdf-0.1.7":
   version "2.5.207"
-  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/c80844e5bcd382838b104371aa0d941c3001ea17"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/91514379f217c0f2a85b535216269dc9b4e3321d"
 
 picomatch@^2.2.1, picomatch@^2.2.2, picomatch@^2.2.3, picomatch@^2.3.0:
   version "2.3.0"
