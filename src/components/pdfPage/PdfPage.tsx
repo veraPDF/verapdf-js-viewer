@@ -22,7 +22,7 @@ interface IPdfPageProps extends IPageProps {
   groupId?: string;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
   isPageSelected?: boolean;
-  onWarning?(warningCode: string | null): void;
+  onWarning?(warningCode: string): void;
 }
 
 interface IStyledPdfPageProps {
@@ -123,8 +123,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const isRelated = (bbox: IBbox) => props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false;
 
   useEffect(() => {
-    props.onWarning?.(
-        activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale) ? WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT : null);
+    const message = activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
+    message && props.onWarning?.(message);
   }, [activeBbox, scale, props.activeBboxIndex]);
 
   return (

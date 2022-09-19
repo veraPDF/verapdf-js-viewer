@@ -690,7 +690,8 @@ var PdfPage = function (props) {
     var isRelated = function (bbox) { return props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false; };
     React.useEffect(function () {
         var _a;
-        (_a = props.onWarning) === null || _a === void 0 ? void 0 : _a.call(props, activeBbox && props.activeBboxIndex === (activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.index) && checkIsBboxOutOfThePage(activeBbox, scale) ? WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT : null);
+        var message = activeBbox && props.activeBboxIndex === (activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.index) && checkIsBboxOutOfThePage(activeBbox, scale) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
+        message && ((_a = props.onWarning) === null || _a === void 0 ? void 0 : _a.call(props, message));
     }, [activeBbox, scale, props.activeBboxIndex]);
     return (React__default['default'].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered " + (props.isPageSelected && 'pdf-page_selected'), "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default['default'].createElement(React__default['default'].Fragment, null,
         React__default['default'].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadProgress: props.onPageLoadProgress, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
@@ -1677,7 +1678,9 @@ const OPS = {
   paintImageXObjectRepeat: 88,
   paintImageMaskXObjectRepeat: 89,
   paintSolidColorImageMask: 90,
-  constructPath: 91
+  constructPath: 91,
+  boundingBoxes: 100,
+  operationPosition: 101
 };
 exports.OPS = OPS;
 const UNSUPPORTED_FEATURES = {
@@ -3529,7 +3532,7 @@ const DEFAULT_USER_UNIT = 1.0;
 const LETTER_SIZE_MEDIABOX = [0, 0, 612, 792];
 
 function isAnnotationRenderable(annotation, intent) {
-  return intent === "display" && annotation.viewable || intent === "print" && annotation.printable;
+  return intent === "display" && annotation.viewable || intent === "print" && annotation.printable || intent === "oplist";
 }
 
 class Page {
@@ -3719,7 +3722,7 @@ class Page {
       pdfFunctionFactory: this.pdfFunctionFactory
     });
     const dataPromises = Promise.all([contentStreamPromise, resourcesPromise]);
-    let boundingBoxes;
+    let boundingBoxes, positionByOperationIndex;
     const pageListPromise = dataPromises.then(([contentStream]) => {
       const opList = new _operator_list.OperatorList(intent, sink, this.pageIndex);
       handler.send("StartRenderPage", {
@@ -3733,15 +3736,17 @@ class Page {
         resources: this.resources,
         operatorList: opList,
         intent
-      }).then(function (boundingBoxesByMCID) {
+      }).then(function ([boundingBoxesByMCID, operationArray]) {
         boundingBoxes = boundingBoxesByMCID;
+        positionByOperationIndex = operationArray;
         return opList;
       });
     });
     return Promise.all([pageListPromise, this._parsedAnnotations]).then(function ([pageOpList, annotations]) {
       if (annotations.length === 0) {
         if (intent === 'oplist') {
-          pageOpList.addOp(_util.OPS.save, boundingBoxes);
+          pageOpList.addOp(_util.OPS.operationPosition, positionByOperationIndex);
+          pageOpList.addOp(_util.OPS.boundingBoxes, boundingBoxes);
         }
 
         pageOpList.flush(true);
@@ -22042,6 +22047,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
 
           var args = operation.args;
           var fn = operation.fn;
+          boundingBoxCalculator.incrementOperation(fn);
 
           switch (fn | 0) {
             case _util.OPS.paintXObject:
@@ -22424,7 +22430,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
 
         closePendingRestoreOPS();
-        resolve(boundingBoxCalculator.boundingBoxes);
+        resolve([boundingBoxCalculator.boundingBoxes, boundingBoxCalculator.operationArray]);
       }).catch(reason => {
         if (reason instanceof _util.AbortException) {
           return;
@@ -46115,6 +46121,8 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     this.boundingBoxesStack = new BoundingBoxStack();
     this.boundingBoxes = {};
     this.ignoreCalculations = ignoreCalculations;
+    this.operationArray = [];
+    this.operationIndex = -1;
   }
 
   BoundingBoxesCalculator.prototype = {
@@ -46149,6 +46157,7 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       height[1] -= this.textStateManager.state.textMatrix[5] + shift[1];
       height = Math.sqrt(height[0] * height[0] + height[1] * height[1]);
       let [tx0, ty0] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
+      let glyphsSize = [];
 
       for (let i = 0; i < glyphs.length; i++) {
         let glyph = glyphs[i];
@@ -46177,17 +46186,24 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
           }
         }
 
+        let [x, y] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
         this.textStateManager.state.translateTextMatrix(tx, ty);
+
+        if (!(0, _util.isNum)(glyph)) {
+          glyphsSize.push([x, y, this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]]);
+        }
       }
 
       let [tx1, ty1] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
       let [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, tx1, ty1, height);
+      glyphsSize = glyphsSize.map(glyphSize => [...glyphSize, ...this.getTopPoints(...glyphSize, height)]);
 
       if (this.textStateManager.state.textMatrix[3] < 0) {
         ty0 += height * this.textStateManager.state.textMatrix[3];
         ty1 += height * this.textStateManager.state.textMatrix[3];
         ty2 += height * this.textStateManager.state.textMatrix[3];
         ty3 += height * this.textStateManager.state.textMatrix[3];
+        glyphsSize = glyphsSize.map(glyphSize => [...glyphSize.map((point, index) => index % 2 === 0 ? point : point + height * this.textStateManager.state.textMatrix[3])]);
       }
 
       let [x0, y0] = _util.Util.applyTransform([tx0, ty0], ctm);
@@ -46198,10 +46214,23 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
 
       let [x3, y3] = _util.Util.applyTransform([tx3, ty3], ctm);
 
-      let minX = Math.min(x0, x1, x2, x3);
-      let maxX = Math.max(x0, x1, x2, x3);
-      let minY = Math.min(y0, y1, y2, y3);
-      let maxY = Math.max(y0, y1, y2, y3);
+      glyphsSize = glyphsSize.map(glyphSize => [..._util.Util.applyTransform([glyphSize[0], glyphSize[1]], ctm), ..._util.Util.applyTransform([glyphSize[2], glyphSize[3]], ctm), ..._util.Util.applyTransform([glyphSize[4], glyphSize[5]], ctm), ..._util.Util.applyTransform([glyphSize[6], glyphSize[7]], ctm)]);
+      let minX, maxX, minY, maxY;
+      let glyphsPos = [];
+      glyphsSize.forEach(glyphSize => {
+        let xPoints = [...glyphSize].filter((point, index) => index % 2 === 0);
+        let yPoints = [...glyphSize].filter((point, index) => index % 2 !== 0);
+        minX = Math.min(...xPoints);
+        maxX = Math.max(...xPoints);
+        minY = Math.min(...yPoints);
+        maxY = Math.max(...yPoints);
+        glyphsPos.push([minX, minY, maxX - minX, maxY - minY]);
+      });
+      this.operationArray[this.operationIndex] = glyphsPos;
+      minX = Math.min(x0, x1, x2, x3);
+      maxX = Math.max(x0, x1, x2, x3);
+      minY = Math.min(y0, y1, y2, y3);
+      maxY = Math.max(y0, y1, y2, y3);
       this.boundingBoxesStack.save(minX, minY, maxX - minX, maxY - minY);
     },
     getClippingGraphicsBoundingBox: function BoundingBoxesCalculator_getClippingGraphicsBoundingBox() {
@@ -46598,6 +46627,13 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     setFont: function BoundingBoxesCalculator_setFont(translated) {
       this.textStateManager.state.fontMatrix = translated.font.fontMatrix;
       this.textStateManager.state.font = translated.font;
+    },
+    incrementOperation: function BoundingBoxesCalculator_incrementOperation(fn) {
+      if (this.ignoreCalculations) {
+        return;
+      }
+
+      this.operationIndex++;
     }
   };
   return BoundingBoxesCalculator;

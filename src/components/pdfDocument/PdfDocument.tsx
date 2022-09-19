@@ -38,7 +38,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   colorScheme?: IColorScheme;
   onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;
-  onWarning?(warningCode: string | null): void;
+  onWarning?(warningCode: string): void;
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
