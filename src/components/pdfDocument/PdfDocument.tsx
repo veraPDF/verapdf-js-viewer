@@ -19,7 +19,7 @@ import {
   getBboxPages,
   scrollToActiveBbox
 } from '../../services/bboxService';
-import {IColorScheme} from '../bbox/Bbox';
+import { IColorScheme } from '../bbox/Bbox';
 // @ts-ignore
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
@@ -38,6 +38,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   colorScheme?: IColorScheme;
   onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;
+  onWarning?(warningCode: string): void;
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
@@ -234,6 +235,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onBboxClick={onBboxClick}
           colorScheme={props.colorScheme}
           isPageSelected={selectedPage === page}
+          onWarning={props.onWarning}
         />
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props, selectedPage])}
     </Document>
