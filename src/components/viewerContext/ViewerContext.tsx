@@ -1,4 +1,4 @@
-import React, {FC, createContext, useState } from 'react';
+import React, {FC, createContext, useState, ReactNode } from 'react';
 
 export const ViewerContext = createContext({} as {
   page: number,
@@ -9,7 +9,7 @@ export const ViewerContext = createContext({} as {
   setScrollIntoPage(page: number): void,
 });
 
-const ViewerProvider: FC = (props) => {
+const ViewerProvider: FC<{children: ReactNode}> = (props) => {
   const [page, setPage] = useState(1);
   const [scrollIntoPage, setScrollIntoPage] = useState<number>(0);
   const [maxPage, setMaxPage] = useState(0);

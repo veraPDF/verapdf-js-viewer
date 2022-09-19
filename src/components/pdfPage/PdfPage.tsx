@@ -1,5 +1,5 @@
 import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext,} from 'react';
-import { Page } from 'react-pdf';
+import { Page, PDFPageProxy } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 import _ from 'lodash';
@@ -49,7 +49,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [bboxes, setBboxes] = useState<IBbox[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [pageScale, setPageScale] = useState(scale);
-  const [pageViewport, setPageViewport] = useState([]);
+  const [pageViewport, setPageViewport] = useState<number[]>([]);
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
@@ -68,15 +68,22 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const onPageClick = useCallback(() => {
     props.onBboxClick?.(null);
   }, []);
-  const onBboxClick = useCallback((index) => (e: Event) => {
+  const onBboxClick = useCallback((index: any) => (e: Event) => {
     e.stopPropagation();
     props.onBboxClick?.({ index });
   }, [props.onBboxClick]);
   const onPageRenderSuccess = useCallback(() => {
     setIsRendered(true);
     props.onPageRenderSuccess?.();
+    document.querySelectorAll('.pdf-page_rendered img')?.forEach((img: any) => {
+      if (img.alt.includes('Annotation')) {
+        const index = img.src.lastIndexOf('/') + 1;
+        const name = img.src.substr(index);
+        img.src = require(`pdfjs-dist/web/images/${name}`) || img.src;
+      }
+    });
   }, []);
-  const onPageLoadSuccess = useCallback((page) => {
+  const onPageLoadSuccess = useCallback((page: PDFPageProxy) => {
     setIsRendered(true);
     setPageViewport(page.view);
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
@@ -151,7 +158,6 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           renderTextLayer={props.renderTextLayer}
           scale={props.scale}
           onLoadError={props.onPageLoadError}
-          onLoadProgress={props.onPageLoadProgress}
           onLoadSuccess={onPageLoadSuccess}
           onRenderError={props.onPageRenderError}
           onRenderSuccess={onPageRenderSuccess}

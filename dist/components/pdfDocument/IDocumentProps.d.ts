@@ -1,6 +1,6 @@
 import React from 'react';
 import { RenderFunction } from 'react-pdf/dist/Document';
-import { PDFDocumentProxy } from 'pdfjs-dist';
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 export interface IDocumentProps {
     file: File | string;
     error?: string | React.ReactElement | RenderFunction;
