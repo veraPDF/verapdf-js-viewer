@@ -60,6 +60,7 @@ function MyApp() {
 |onItemClick|Function called when an outline item has been clicked. Usually, you would like to use this callback to move the user wherever they requested to.|n/a|`({ pageNumber }) => alert('Clicked an item from page ' + pageNumber + '!')`|
 |onBboxClick|Function called when an bbox item has been clicked.|n/a|`(bboxData) => alert('Selected bbox from ' + bboxData.page + ' page!')`|
 |onPageChange|Function called when page changed during scrolling|n/a|`(page: number) => alert('New page ' + page);`|
+|onWarning|Function called in case of a warning for the selected bounding box. The warning is described by the code from the list: <br /> <ul><li>`BBOX_OUT_OF_THE_PAGE_VIEWPORT` (selected bounding box is out of the page viewport)</li></ul>|n/a|`(warningCode: string) => alert('Warning: ' + warningCode);`|
 |<b>Page props</b>|
 |page|Which page from PDF file should be displayed, by page number. In case `showAllPages={true}` autoscroll to provided page|`1`|`2`|
 |inputRef|A prop that behaves like [ref](https://reactjs.org/docs/refs-and-the-dom.html), but it's passed to main `<div>` rendered by `<Page>` component.|n/a|<ul><li>Function:<br />`(ref) => { this.myPage = ref; }`</li><li>Ref created using `React.createRef`:<br />`this.ref = React.createRef();`<br />…<br />`inputRef={this.ref}`</li><li>Ref created using `React.useRef`:<br />`const ref = React.useRef();`<br />…<br />`inputRef={ref}`</li></ul>|
