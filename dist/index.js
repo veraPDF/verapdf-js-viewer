@@ -264,8 +264,8 @@ var getBboxPages = function (bboxes, structure) {
         }
     });
 };
-var checkIsBboxOutOfThePage = function (bbox, scale) {
-    var parent = document.querySelector('.pdf-viewer');
+var checkIsBboxOutOfThePage = function (bbox, scale, page) {
+    var parent = document.querySelector('.react-pdf__Page[data-page-number="' + page + '"]');
     var parentHeight = parent.offsetHeight * scale;
     var parentWidth = parent.offsetWidth * scale;
     var left = parseFloat(bbox.location[0]) * scale;
@@ -692,9 +692,9 @@ var PdfPage = function (props) {
     var isRelated = function (bbox) { return props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false; };
     React.useEffect(function () {
         var _a;
-        var message = activeBbox && props.activeBboxIndex === (activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.index) && checkIsBboxOutOfThePage(activeBbox, scale) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
+        var message = activeBbox && props.activeBboxIndex === (activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.index) && checkIsBboxOutOfThePage(activeBbox, scale, props.page) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
         message && ((_a = props.onWarning) === null || _a === void 0 ? void 0 : _a.call(props, message));
-    }, [activeBbox, scale, props.activeBboxIndex]);
+    }, [activeBbox, scale, props.activeBboxIndex, props.page]);
     return (React__default["default"].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered ".concat(props.isPageSelected && 'pdf-page_selected'), "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default["default"].createElement(React__default["default"].Fragment, null,
         React__default["default"].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
         isRendered ? bboxes.map(function (bbox, index) { return (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index), selected: isBboxSelected(bbox), related: isRelated(bbox), scale: pageScale, colorScheme: props.colorScheme, setActiveBbox: setActiveBbox })); }) : null) : null));

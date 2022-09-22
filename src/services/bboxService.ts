@@ -104,8 +104,8 @@ export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
   });
 }
 
-export const checkIsBboxOutOfThePage = (bbox: IBbox, scale: number) => {
-  const parent = (document.querySelector('.pdf-viewer') as any);
+export const checkIsBboxOutOfThePage = (bbox: IBbox, scale: number, page: number) => {
+  const parent = (document.querySelector('.react-pdf__Page[data-page-number="' + page + '"]') as any);
   const parentHeight = parent.offsetHeight * scale;
   const parentWidth = parent.offsetWidth * scale;
 
