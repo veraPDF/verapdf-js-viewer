@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, ReactNode } from 'react';
 export declare const ViewerContext: React.Context<{
     page: number;
     setPage(page: number): void;
@@ -7,5 +7,7 @@ export declare const ViewerContext: React.Context<{
     scrollIntoPage: number;
     setScrollIntoPage(page: number): void;
 }>;
-declare const ViewerProvider: FC;
+declare const ViewerProvider: FC<{
+    children: ReactNode;
+}>;
 export default ViewerProvider;

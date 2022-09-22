@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingProcessData, PDFPageProxy, RenderFunction, TextItem } from 'react-pdf/dist/Page';
+import { PDFPageProxy, RenderFunction, TextItem } from 'react-pdf/dist/Page';
 import { TSelectedBboxData } from '../../types/selectedBboxData';
 import { OrNull } from '../../types/generics';
 export interface IPageProps {
@@ -15,7 +15,6 @@ export interface IPageProps {
     scale?: number;
     activeBboxIndex?: number;
     onPageLoadError?(error: Error): void;
-    onPageLoadProgress?(data: LoadingProcessData): void;
     onPageLoadSuccess?(page: PDFPageProxy): void;
     onPageRenderError?(error: Error): void;
     onPageRenderSuccess?(): void;

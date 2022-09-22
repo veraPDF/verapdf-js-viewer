@@ -1,7 +1,7 @@
 import React, {FC, memo, useCallback, useMemo, useState, useContext, useEffect} from 'react';
 import { Document } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import { PDFDocumentProxy } from 'pdfjs-dist';
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { useDebounce } from 'react-use';
 import _ from 'lodash';
 
@@ -10,7 +10,8 @@ import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
-import {AnyObject} from '../../types/generics';
+import {AnyObject, OrNull} from '../../types/generics';
+import { TSelectedBboxData } from '../../types/selectedBboxData';
 import { IBboxLocation } from '../../index';
 import {
   activeBboxInViewport,
@@ -121,7 +122,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       setPage(page);
     }
   }, [maxPage, props.showAllPages]);
-  const onBboxClick = useCallback((data) => {
+  const onBboxClick = useCallback((data: OrNull<TSelectedBboxData>) => {
       props.onBboxClick?.(data);
     }, []);
 
@@ -220,7 +221,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           renderTextLayer={props.renderTextLayer}
           scale={props.scale}
           onPageLoadError={props.onPageLoadError}
-          onPageLoadProgress={props.onPageLoadProgress}
           onPageLoadSuccess={onPageLoadSuccess}
           onPageRenderError={props.onPageRenderError}
           onPageRenderSuccess={props.onPageRenderSuccess}
