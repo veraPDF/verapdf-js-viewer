@@ -171,6 +171,9 @@ var buildBboxMap = function (bboxes, structure) {
         try {
             if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
                 var bboxPosition = calculateLocationInStreamOperator(bbox.location);
+                if (!bboxPosition) {
+                    return;
+                }
                 bboxMap[bboxPosition.pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[bboxPosition.pageIndex + 1] || []), true), [
                     {
                         index: index,
@@ -227,6 +230,9 @@ var calculateLocationInStreamOperator = function (location) {
             glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
         }
     });
+    if (pageIndex === -1 || operatorIndex === -1 || glyphIndex === -1) {
+        return null;
+    }
     return {
         pageIndex: pageIndex,
         operatorIndex: operatorIndex,
