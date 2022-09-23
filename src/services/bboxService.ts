@@ -8,8 +8,8 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
   bboxes.forEach((bbox, index) => {
     try {
-      if (bbox.location.includes('contentStream')) {
-        const bboxPosition = calculateLocationInStream(bbox.location);
+      if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
+        const bboxPosition = calculateLocationInStreamOperator(bbox.location);
         bboxMap[bboxPosition.pageIndex + 1] = [
           ...(bboxMap[bboxPosition.pageIndex + 1] || []),
           {
@@ -50,7 +50,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   return bboxMap;
 }
 
-export const calculateLocationInStream = (location: string) => {
+export const calculateLocationInStreamOperator = (location: string) => {
   const path = location.split("/");
   let pageIndex = -1;
   let operatorIndex = -1;
@@ -62,7 +62,7 @@ export const calculateLocationInStream = (location: string) => {
     if (step.startsWith('operators')) {
       operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
     }
-    if (step.startsWith("usedGlyphs")) {
+    if (step.startsWith('usedGlyphs')) {
       glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
     }
   });

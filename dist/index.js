@@ -122,7 +122,7 @@ var bboxBorderHover$1 = 'orangered';
 var bboxRelatedBorder = 'rgba(255,176,0,0.5)';
 var bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
 var bboxRelatedBackground = 'rgba(255,176,0,0.3)';
-var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-f7ebg2" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
+var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1h1iji3" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -169,8 +169,8 @@ var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
     bboxes.forEach(function (bbox, index) {
         try {
-            if (bbox.location.includes('contentStream')) {
-                var bboxPosition = calculateLocationInStream(bbox.location);
+            if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
+                var bboxPosition = calculateLocationInStreamOperator(bbox.location);
                 bboxMap[bboxPosition.pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[bboxPosition.pageIndex + 1] || []), true), [
                     {
                         index: index,
@@ -211,7 +211,7 @@ var buildBboxMap = function (bboxes, structure) {
     });
     return bboxMap;
 };
-var calculateLocationInStream = function (location) {
+var calculateLocationInStreamOperator = function (location) {
     var path = location.split("/");
     var pageIndex = -1;
     var operatorIndex = -1;
@@ -223,7 +223,7 @@ var calculateLocationInStream = function (location) {
         if (step.startsWith('operators')) {
             operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
         }
-        if (step.startsWith("usedGlyphs")) {
+        if (step.startsWith('usedGlyphs')) {
             glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
         }
     });
@@ -599,7 +599,7 @@ var WARNING_CODES = {
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 var bboxBorderHover = 'orangered';
-var StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-yddah5" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
+var StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-vdtjfh" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
 var PdfPage = function (props) {
     var scrollIntoPage = React.useContext(ViewerContext).scrollIntoPage;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
