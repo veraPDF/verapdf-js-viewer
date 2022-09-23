@@ -2,7 +2,7 @@ import { IBboxLocation } from '../index';
 import { AnyObject } from '../types/generics';
 import { IBbox } from "../components/bbox/Bbox";
 export declare const buildBboxMap: (bboxes: IBboxLocation[], structure: AnyObject) => {};
-export declare const calculateLocationInStream: (location: string) => {
+export declare const calculateLocationInStreamOperator: (location: string) => {
     pageIndex: number;
     operatorIndex: number;
     glyphIndex: number;
