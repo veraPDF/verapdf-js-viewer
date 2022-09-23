@@ -6,7 +6,7 @@ export declare const calculateLocationInStreamOperator: (location: string) => {
     pageIndex: number;
     operatorIndex: number;
     glyphIndex: number;
-};
+} | null;
 export declare const getSelectedPageByLocation: (bboxLocation: string) => number;
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
 export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean;

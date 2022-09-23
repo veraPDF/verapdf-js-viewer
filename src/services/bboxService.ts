@@ -10,6 +10,9 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
     try {
       if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
         const bboxPosition = calculateLocationInStreamOperator(bbox.location);
+        if (!bboxPosition) {
+            return;
+        }
         bboxMap[bboxPosition.pageIndex + 1] = [
           ...(bboxMap[bboxPosition.pageIndex + 1] || []),
           {
@@ -66,6 +69,9 @@ export const calculateLocationInStreamOperator = (location: string) => {
       glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
     }
   });
+  if (pageIndex === -1 || operatorIndex === -1 || glyphIndex === -1) {
+      return null;
+  }
   return {
     pageIndex,
     operatorIndex,
