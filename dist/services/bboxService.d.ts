@@ -9,7 +9,7 @@ export declare const calculateLocationInStreamOperator: (location: string) => {
 };
 export declare const getSelectedPageByLocation: (bboxLocation: string) => number;
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
-export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number) => boolean;
+export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean;
 export declare const getBboxForGlyph: (operatorIndex: number, glyphIndex: number, operationsList: number[][][], viewport: number[], rotateAngle: number) => number[];
 export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => number[];
 export declare const rotateViewport: (rotateAngle: number, viewport: number[]) => number[];

@@ -130,9 +130,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const isRelated = (bbox: IBbox) => props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false;
 
   useEffect(() => {
-    const message = activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
+    const message = activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale, props.page) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
     message && props.onWarning?.(message);
-  }, [activeBbox, scale, props.activeBboxIndex]);
+  }, [activeBbox, scale, props.activeBboxIndex, props.page]);
 
   return (
     <StyledPdfPage
