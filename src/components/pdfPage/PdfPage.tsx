@@ -127,7 +127,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setPageScale(scale);
   }, [pageViewport, scale, props.width, props.height]);
   const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
-  const isRelated = (bbox: IBbox) => props.groupId ? bbox.groupId === props.groupId && !isBboxSelected(bbox) : false;
+  const isRelated = (bbox: IBbox) => {
+    const [, activeTest, activeId] = props?.groupId?.split('-') || [];
+    const [, bboxTest, bboxId] = bbox?.groupId?.split('-') || [];
+    return props.groupId ? (activeTest !== bboxTest && activeId === bboxId || bbox.groupId === props.groupId) && !isBboxSelected(bbox) : false;
+  }
 
   useEffect(() => {
     const message = activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale, props.page) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
