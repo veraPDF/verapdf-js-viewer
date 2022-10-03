@@ -128,9 +128,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, [pageViewport, scale, props.width, props.height]);
   const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
   const isRelated = (bbox: IBbox) => {
-    const [, activeTest, activeId] = props?.groupId?.split('-') || [];
-    const [, bboxTest, bboxId] = bbox?.groupId?.split('-') || [];
-    return props.groupId ? (activeTest !== bboxTest && activeId === bboxId || bbox.groupId === props.groupId) && !isBboxSelected(bbox) : false;
+    const [, , activeId] = props?.groupId?.split('-') || [];
+    const [, , bboxId] = bbox?.groupId?.split('-') || [];
+    return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
   }
 
   useEffect(() => {

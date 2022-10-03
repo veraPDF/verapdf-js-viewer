@@ -697,9 +697,9 @@ var PdfPage = function (props) {
     var isBboxSelected = function (bbox) { return props.activeBboxIndex === bbox.index; };
     var isRelated = function (bbox) {
         var _a, _b;
-        var _c = ((_a = props === null || props === void 0 ? void 0 : props.groupId) === null || _a === void 0 ? void 0 : _a.split('-')) || [], activeTest = _c[1], activeId = _c[2];
-        var _d = ((_b = bbox === null || bbox === void 0 ? void 0 : bbox.groupId) === null || _b === void 0 ? void 0 : _b.split('-')) || [], bboxTest = _d[1], bboxId = _d[2];
-        return props.groupId ? (activeTest !== bboxTest && activeId === bboxId || bbox.groupId === props.groupId) && !isBboxSelected(bbox) : false;
+        var _c = ((_a = props === null || props === void 0 ? void 0 : props.groupId) === null || _a === void 0 ? void 0 : _a.split('-')) || [], activeId = _c[2];
+        var _d = ((_b = bbox === null || bbox === void 0 ? void 0 : bbox.groupId) === null || _b === void 0 ? void 0 : _b.split('-')) || [], bboxId = _d[2];
+        return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
     };
     React.useEffect(function () {
         var _a;
