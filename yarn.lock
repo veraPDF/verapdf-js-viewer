@@ -1332,9 +1332,9 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-pdfjs-dist@2.14.305, pdfjs-dist@^2.10.377, "pdfjs-dist@github:veraPDF/pdfjs-dist#v2.14.305-taggedPdf-0.1.7":
+pdfjs-dist@2.14.305, pdfjs-dist@^2.10.377, "pdfjs-dist@github:veraPDF/pdfjs-dist#v2.14.305-taggedPdf-0.1.8":
   version "2.14.305"
-  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/9f0c64a69aa321bb95d3a17c2b2a9c1a7f924cff"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/6d4186149b55944fd1b6399cedbf8cc2bf9847b7"
   dependencies:
     dommatrix "^1.0.1"
     web-streams-polyfill "^3.2.1"
