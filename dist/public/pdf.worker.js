@@ -53793,18 +53793,22 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       let descent = (this.textStateManager.state.font.descent || 0) * this.textStateManager.state.fontSize;
       let ascent = (this.textStateManager.state.font.ascent || 1) * this.textStateManager.state.fontSize;
       let rise = this.textStateManager.state.textRise * this.textStateManager.state.fontSize;
+      let tx0, ty0, shift, height;
 
-      let shift = _util.Util.applyTransform([0, descent + rise], this.textStateManager.state.textMatrix);
+      if (!this.textStateManager.state.font.vertical) {
+        [tx0, ty0] = _util.Util.applyTransform([0, descent + rise], this.textStateManager.state.textMatrix);
+        shift = [tx0 - this.textStateManager.state.textMatrix[4], ty0 - this.textStateManager.state.textMatrix[5]];
+        height = _util.Util.applyTransform([0, ascent - descent], this.textStateManager.state.textMatrix);
+      } else {
+        [tx0, ty0] = _util.Util.applyTransform([-this.textStateManager.state.fontSize / 2, rise], this.textStateManager.state.textMatrix);
+        shift = [tx0 - this.textStateManager.state.textMatrix[4], ty0 - this.textStateManager.state.textMatrix[5]];
+        height = _util.Util.applyTransform([ascent - descent, 0], this.textStateManager.state.textMatrix);
+      }
 
-      shift[0] -= this.textStateManager.state.textMatrix[4];
-      shift[1] -= this.textStateManager.state.textMatrix[5];
-
-      let height = _util.Util.applyTransform([0, ascent + rise], this.textStateManager.state.textMatrix);
-
-      height[0] -= this.textStateManager.state.textMatrix[4] + shift[0];
-      height[1] -= this.textStateManager.state.textMatrix[5] + shift[1];
+      height[0] -= this.textStateManager.state.textMatrix[4];
+      height[1] -= this.textStateManager.state.textMatrix[5];
       height = Math.sqrt(height[0] * height[0] + height[1] * height[1]);
-      let [tx0, ty0] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
+      height *= this.textStateManager.state.textMatrix[0] * this.textStateManager.state.textMatrix[3] < 0 ? -1 : 1;
       let glyphsSize = [];
 
       for (let i = 0; i < glyphs.length; i++) {
@@ -53830,12 +53834,12 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
             tx = (w0 * this.textStateManager.state.fontSize + this.textStateManager.state.charSpacing + (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0)) * this.textStateManager.state.textHScale;
           } else {
             let w1 = glyphWidth * (this.textStateManager.state.fontMatrix ? this.textStateManager.state.fontMatrix[0] : 1 / 1000);
-            ty = w1 * this.textStateManager.state.fontSize + this.textStateManager.state.charSpacing + (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0);
+            ty = w1 * this.textStateManager.state.fontSize - this.textStateManager.state.charSpacing - (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0);
           }
         }
 
         let [x, y] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
-        this.textStateManager.state.translateTextMatrix(tx, ty);
+        this.textStateManager.state.translateTextMatrix(tx, -ty);
 
         if (typeof glyph !== "number") {
           glyphsSize.push([x, y, this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]]);
@@ -53845,14 +53849,6 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       let [tx1, ty1] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
       let [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, tx1, ty1, height);
       glyphsSize = glyphsSize.map(glyphSize => [...glyphSize, ...this.getTopPoints(...glyphSize, height)]);
-
-      if (this.textStateManager.state.textMatrix[3] < 0) {
-        ty0 += height * this.textStateManager.state.textMatrix[3];
-        ty1 += height * this.textStateManager.state.textMatrix[3];
-        ty2 += height * this.textStateManager.state.textMatrix[3];
-        ty3 += height * this.textStateManager.state.textMatrix[3];
-        glyphsSize = glyphsSize.map(glyphSize => [...glyphSize.map((point, index) => index % 2 === 0 ? point : point + height * this.textStateManager.state.textMatrix[3])]);
-      }
 
       let [x0, y0] = _util.Util.applyTransform([tx0, ty0], ctm);
 
