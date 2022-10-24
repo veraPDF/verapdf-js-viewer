@@ -23,12 +23,13 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
         ];
       } else if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
         const mcidData = getTagsFromErrorPlace(bbox.location, structure);
-        mcidData.forEach(([mcidList, pageIndex]) => {
+        mcidData.forEach(([mcidList, pageIndex, contentItemPath]) => {
           bboxMap[pageIndex + 1] = [
             ...(bboxMap[pageIndex + 1] || []),
             {
               index,
               mcidList,
+              contentItemPath,
               groupId: bbox.groupId || undefined,
             },
           ];
@@ -186,7 +187,7 @@ const calculateLocationJSON = (location: string) => {
 }
 
 const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
-  const defaultValue = [[[], -1]];
+  const defaultValue = [[[], -1, undefined]];
   let selectedTag = convertContextToPath(context);
 
   if (_.isEmpty(selectedTag)) {
@@ -197,6 +198,12 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
     return [[[selectedTag.mcid], selectedTag.pageIndex]];
   } else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
     return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
+  } else if (selectedTag.hasOwnProperty('contentItems')) {
+    return [[undefined, selectedTag.pageIndex, [
+      selectedTag.contentStream,
+      selectedTag.content,
+      ...selectedTag.contentItems
+    ]]];
   } else if (selectedTag instanceof Array) {
     let objectOfErrors = { ...structure };
     selectedTag.forEach((node, index) => {
@@ -241,6 +248,27 @@ const convertContextToPath = (errorContext = '') => {
   let contextString: string | string[] = errorContext;
 
   try {
+    if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
+      const result: any = contextString.match(
+        /pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>(\(.+\))?\/contentItem\[(\d+)\])+/d
+      );
+      if (result) {
+        try {
+          let path: AnyObject = {};
+          path.pageIndex = parseInt(result.groups.pages, 10);
+          path.contentStream = parseInt(result.groups.contentStream, 10);
+          path.content = parseInt(result.groups.content, 10);
+          path.contentItems = result.groups.contentItems.split('/').filter((ci: any) => ci.includes('contentItem')).map((ci: any) => {
+            const contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/d);
+            return parseInt(contentItemIndex?.groups?.contentItem || '-1', 10);
+          });
+          return path;
+        } catch (err) {
+          console.log('NoMCIDContentItemPathParseError:', err.message || err);
+        }
+      }
+    }
+
     if (contextString.includes('contentItem')) {
       let path: AnyObject = {};
       contextString.split('/').forEach(nodeString => {

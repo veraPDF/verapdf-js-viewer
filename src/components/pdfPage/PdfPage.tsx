@@ -88,10 +88,31 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setPageViewport(page.view);
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
-      const positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
+      const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
       const bboxes = bboxList.map((bbox) => {
         if (bbox.mcidList) {
           bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+        } else if (bbox.contentItemPath) {
+          const contentItemsPath = bbox.contentItemPath.slice(2);
+          let contentItemsBBoxes = noMCIDData[bbox.contentItemPath[1]];
+          try {
+            contentItemsPath.forEach((ci, i) => {
+              if (contentItemsPath.length > i + 1 || !contentItemsBBoxes.final) {
+                contentItemsBBoxes = contentItemsBBoxes.contentItems[0];
+              }
+              contentItemsBBoxes = contentItemsBBoxes.contentItems[ci];
+            });
+            
+            bbox.location = [
+              contentItemsBBoxes.contentItem.x,
+              contentItemsBBoxes.contentItem.y,
+              contentItemsBBoxes.contentItem.w,
+              contentItemsBBoxes.contentItem.h
+            ];
+          } catch (err) {
+            console.log('NoMCIDDataParseError:', err.message || err);
+            bbox.location = [0, 0, 0, 0];
+          }
         }
         if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
           bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, operationData, page.view, page.rotate);
