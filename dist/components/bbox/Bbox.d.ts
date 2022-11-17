@@ -7,6 +7,7 @@ export interface IBbox {
     mcidList?: number[];
     glyphIndex?: number;
     operatorIndex?: number;
+    contentItemPath?: number[];
 }
 export interface IColorScheme {
     border?: string;

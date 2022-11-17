@@ -1,4 +1,4 @@
-export declare type OrNull<T> = T | null;
-export declare type AnyObject = {
+export type OrNull<T> = T | null;
+export type AnyObject = {
     [key: string]: any;
 };

@@ -185,11 +185,12 @@ var buildBboxMap = function (bboxes, structure) {
             else if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
                 var mcidData = getTagsFromErrorPlace(bbox.location, structure);
                 mcidData.forEach(function (_a) {
-                    var mcidList = _a[0], pageIndex = _a[1];
+                    var mcidList = _a[0], pageIndex = _a[1], contentItemPath = _a[2];
                     bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || []), true), [
                         {
                             index: index,
                             mcidList: mcidList,
+                            contentItemPath: contentItemPath,
                             groupId: bbox.groupId || undefined,
                         },
                     ], false);
@@ -338,7 +339,7 @@ var calculateLocationJSON = function (location) {
     return bboxes;
 };
 var getTagsFromErrorPlace = function (context, structure) {
-    var defaultValue = [[[], -1]];
+    var defaultValue = [[[], -1, undefined]];
     var selectedTag = convertContextToPath(context);
     if (___default["default"].isEmpty(selectedTag)) {
         return defaultValue;
@@ -348,6 +349,12 @@ var getTagsFromErrorPlace = function (context, structure) {
     }
     else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
         return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
+    }
+    else if (selectedTag.hasOwnProperty('contentItems')) {
+        return [[undefined, selectedTag.pageIndex, __spreadArray([
+                    selectedTag.contentStream,
+                    selectedTag.content
+                ], selectedTag.contentItems)]];
     }
     else if (selectedTag instanceof Array) {
         var objectOfErrors_1 = __assign({}, structure);
@@ -394,6 +401,26 @@ var convertContextToPath = function (errorContext) {
     }
     var contextString = errorContext;
     try {
+        if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
+            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/d);
+            if (result) {
+                try {
+                    var path = {};
+                    path.pageIndex = parseInt(result.groups.pages, 10);
+                    path.contentStream = parseInt(result.groups.contentStream, 10);
+                    path.content = parseInt(result.groups.content, 10);
+                    path.contentItems = result.groups.contentItems.split('/').filter(function (ci) { return ci.includes('contentItem'); }).map(function (ci) {
+                        var _a;
+                        var contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/d);
+                        return parseInt(((_a = contentItemIndex === null || contentItemIndex === void 0 ? void 0 : contentItemIndex.groups) === null || _a === void 0 ? void 0 : _a.contentItem) || '-1', 10);
+                    });
+                    return path;
+                }
+                catch (err) {
+                    console.log('NoMCIDContentItemPathParseError:', err.message || err);
+                }
+            }
+        }
         if (contextString.includes('contentItem')) {
             var path_1 = {};
             contextString.split('/').forEach(function (nodeString) {
@@ -656,10 +683,32 @@ var PdfPage = function (props) {
         Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
             var operatorList = _a[0], annotations = _a[1];
             var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
-            var positionData = operatorList.argsArray[operatorList.argsArray.length - 1];
+            var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1];
             var bboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
                     bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+                }
+                else if (bbox.contentItemPath) {
+                    var contentItemsPath_1 = bbox.contentItemPath.slice(2);
+                    var contentItemsBBoxes_1 = noMCIDData[bbox.contentItemPath[1]];
+                    try {
+                        contentItemsPath_1.forEach(function (ci, i) {
+                            if (contentItemsPath_1.length > i + 1 || !contentItemsBBoxes_1.final) {
+                                contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[0];
+                            }
+                            contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[ci];
+                        });
+                        bbox.location = [
+                            contentItemsBBoxes_1.contentItem.x,
+                            contentItemsBBoxes_1.contentItem.y,
+                            contentItemsBBoxes_1.contentItem.w,
+                            contentItemsBBoxes_1.contentItem.h
+                        ];
+                    }
+                    catch (err) {
+                        console.log('NoMCIDDataParseError:', err.message || err);
+                        bbox.location = [0, 0, 0, 0];
+                    }
                 }
                 if (___default["default"].isNumber(bbox.operatorIndex) && ___default["default"].isNumber(bbox.glyphIndex)) {
                     bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, operationData, page.view, page.rotate);
@@ -4636,7 +4685,7 @@ class Page {
       options: this.evaluatorOptions
     });
     const dataPromises = Promise.all([contentStreamPromise, resourcesPromise]);
-    let boundingBoxes, positionByOperationIndex;
+    let MCIDBoundingBoxes, positionByOperationIndex, noMCIDBoundingBoxes;
     const pageListPromise = dataPromises.then(([contentStream]) => {
       const opList = new _operator_list.OperatorList(intent, sink);
       handler.send("StartRenderPage", {
@@ -4650,9 +4699,10 @@ class Page {
         resources: this.resources,
         operatorList: opList,
         intent
-      }).then(function ([boundingBoxesByMCID, operationArray]) {
-        boundingBoxes = boundingBoxesByMCID;
+      }).then(function ([boundingBoxesByMCID, operationArray, boundingBoxesWithoutMCID]) {
+        MCIDBoundingBoxes = boundingBoxesByMCID;
         positionByOperationIndex = operationArray;
+        noMCIDBoundingBoxes = boundingBoxesWithoutMCID;
         return opList;
       });
     });
@@ -4660,7 +4710,7 @@ class Page {
       if (annotations.length === 0 || intent & _util.RenderingIntentFlag.ANNOTATIONS_DISABLE) {
         if (intent & _util.RenderingIntentFlag.OPLIST) {
           pageOpList.addOp(_util.OPS.operationPosition, positionByOperationIndex);
-          pageOpList.addOp(_util.OPS.boundingBoxes, boundingBoxes);
+          pageOpList.addOp(_util.OPS.boundingBoxes, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
         }
 
         pageOpList.flush(true);
@@ -4694,7 +4744,7 @@ class Page {
         pageOpList.addOp(_util.OPS.endAnnotations, []);
 
         if (intent & _util.RenderingIntentFlag.OPLIST) {
-          pageOpList.addOp(_util.OPS.save, boundingBoxes);
+          pageOpList.addOp(_util.OPS.save, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
         }
 
         pageOpList.flush(true);
@@ -24416,6 +24466,7 @@ class PartialEvaluator {
               localImageCache,
               localColorSpaceCache
             }));
+            boundingBoxCalculator.parseOperator(fn, args);
             return;
 
           case _util.OPS.showText:
@@ -24498,6 +24549,8 @@ class PartialEvaluator {
                 resources,
                 localColorSpaceCache
               }).then(function (colorSpace) {
+                boundingBoxCalculator.parseOperator(fn, args);
+
                 if (colorSpace) {
                   stateManager.state.fillColorSpace = colorSpace;
                 }
@@ -24519,6 +24572,8 @@ class PartialEvaluator {
                 resources,
                 localColorSpaceCache
               }).then(function (colorSpace) {
+                boundingBoxCalculator.parseOperator(fn, args);
+
                 if (colorSpace) {
                   stateManager.state.strokeColorSpace = colorSpace;
                 }
@@ -24678,6 +24733,7 @@ class PartialEvaluator {
 
               throw reason;
             }));
+            boundingBoxCalculator.parseOperator(fn, args);
             return;
 
           case _util.OPS.moveTo:
@@ -24759,7 +24815,7 @@ class PartialEvaluator {
       }
 
       closePendingRestoreOPS();
-      resolve([boundingBoxCalculator.boundingBoxes, boundingBoxCalculator.operationArray]);
+      resolve([boundingBoxCalculator.boundingBoxes, boundingBoxCalculator.operationArray, boundingBoxCalculator.getNoMCIDBoundingBoxes()]);
     }).catch(reason => {
       if (reason instanceof _util.AbortException) {
         return;
@@ -54462,7 +54518,7 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     this.textStateManager = new _evaluator.StateManager(new _evaluator.TextState());
     this.graphicsStateManager = new _evaluator.StateManager(new GraphicsState());
     this.clipping = false;
-    this.boundingBoxesStack = new BoundingBoxStack();
+    this.boundingBoxesStack = new NoMCIDBoundingBoxStack();
     this.boundingBoxes = {};
     this.ignoreCalculations = ignoreCalculations;
     this.operationArray = [];
@@ -54607,6 +54663,10 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
       let y = clippingBBox.y;
       let w = clippingBBox.w;
       let h = clippingBBox.h;
+      this.graphicsStateManager.state.x = null;
+      this.graphicsStateManager.state.y = null;
+      this.graphicsStateManager.state.w = null;
+      this.graphicsStateManager.state.h = null;
       this.boundingBoxesStack.save(x, y, w, h);
     },
     getRectBoundingBox: function getRectBoundingBox(x, y, w, h) {
@@ -54784,6 +54844,9 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
         this.clipping = false;
       }
     },
+    getNoMCIDBoundingBoxes: function getNoMCIDBoundingBoxes() {
+      return this.boundingBoxesStack.get();
+    },
     getImageBoundingBox: function getImageBoundingBox() {
       let state = this.graphicsStateManager.state;
 
@@ -54803,6 +54866,10 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     parseOperator: function BoundingBoxesCalculator_parseOperator(fn, args) {
       if (this.ignoreCalculations) {
         return;
+      }
+
+      if (fn !== _util.OPS.markPoint && fn !== _util.OPS.markPointProps && fn !== _util.OPS.beginMarkedContent && fn !== _util.OPS.beginMarkedContentProps) {
+        this.boundingBoxesStack.inc();
       }
 
       switch (fn | 0) {
@@ -55069,6 +55136,101 @@ var BoundingBoxStack = function BoundingBoxStack() {
     }
   };
   return BoundingBoxStack;
+}();
+
+var NoMCIDBoundingBoxStack = function NoMCIDBoundingBoxStack() {
+  function NoMCIDBoundingBoxStack() {
+    this.boundingBoxesStack = new BoundingBoxStack();
+    this.contentCounter = null;
+    this.content = {};
+    this.pointer = {};
+  }
+
+  NoMCIDBoundingBoxStack.prototype = {
+    begin: function NoMCIDBoundingBoxStack_begin(mcid) {
+      if (!this.contentCounter || this.contentCounter.inMarkedContent !== false) {
+        this.inc(true);
+      } else {
+        const newContentItem = {
+          parent: this.pointer,
+          contentItems: []
+        };
+        this.pointer.contentItems.push(newContentItem);
+        this.pointer = newContentItem;
+      }
+
+      this.boundingBoxesStack.begin(mcid);
+    },
+    save: function NoMCIDBoundingBoxStack_save(x, y, w, h) {
+      if (this.pointer.contentItems) {
+        this.pointer.contentItems.push({
+          contentItem: {
+            x,
+            y,
+            w,
+            h
+          }
+        });
+        this.pointer.final = true;
+      } else {
+        console.log('NoMCIDBoundingBoxStackError:', 'The pointer was in an invalid state, saved data will be lost');
+      }
+
+      this.boundingBoxesStack.save(x, y, w, h);
+    },
+    end: function NoMCIDBoundingBoxStack_end() {
+      const tempPointer = this.pointer;
+      this.pointer = tempPointer.parent || this.content;
+      delete tempPointer.parent;
+
+      if (this.pointer === this.content) {
+        this.contentCounter.inMarkedContent = null;
+        this.pointer = {};
+      }
+
+      return this.boundingBoxesStack.end();
+    },
+    inc: function NoMCIDBoundingBoxStack_inc(isMC = false) {
+      if (!this.contentCounter) {
+        this.contentCounter = {
+          index: 0,
+          inMarkedContent: !isMC
+        };
+        this.content[this.contentCounter.index] = {
+          parent: this.content,
+          contentItems: []
+        };
+        this.pointer = this.content[this.contentCounter.index];
+      } else if (this.contentCounter.inMarkedContent !== false && isMC || !!this.contentCounter.inMarkedContent === isMC && !Object.keys(this.pointer).length) {
+        delete this.content[this.contentCounter.index].parent;
+        this.contentCounter = {
+          index: this.contentCounter.index + 1,
+          inMarkedContent: !isMC
+        };
+        this.content[this.contentCounter.index] = {
+          parent: this.content,
+          contentItems: []
+        };
+        this.pointer = this.content[this.contentCounter.index];
+      }
+    },
+    get: function NoMCIDBoundingBoxStack_get() {
+      try {
+        if (Object.keys(this.content).length && this.contentCounter) {
+          this.content[this.contentCounter.index].parent && delete this.content[this.contentCounter.index].parent;
+          const result = JSON.parse(JSON.stringify(this.content));
+          this.content[this.contentCounter.index].parent = this.content;
+          return result;
+        }
+
+        return {};
+      } catch (err) {
+        console.log('NoMCIDBoundingBoxStackError:', err.message || err);
+        return {};
+      }
+    }
+  };
+  return NoMCIDBoundingBoxStack;
 }();
 
 /***/ }),
