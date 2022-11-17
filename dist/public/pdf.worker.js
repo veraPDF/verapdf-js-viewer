@@ -54123,7 +54123,7 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
         return;
       }
 
-      if (fn !== _util.OPS.markPoint && fn !== _util.OPS.markPointProps && fn != _util.OPS.beginMarkedContent && fn != _util.OPS.beginMarkedContentProps) {
+      if (fn !== _util.OPS.markPoint && fn !== _util.OPS.markPointProps && fn !== _util.OPS.beginMarkedContent && fn !== _util.OPS.beginMarkedContentProps) {
         this.boundingBoxesStack.inc();
       }
 

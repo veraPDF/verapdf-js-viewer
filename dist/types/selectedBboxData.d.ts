@@ -1,3 +1,3 @@
-export declare type TSelectedBboxData = {
+export type TSelectedBboxData = {
     index: number;
 };

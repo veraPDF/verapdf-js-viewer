@@ -402,7 +402,7 @@ var convertContextToPath = function (errorContext) {
     var contextString = errorContext;
     try {
         if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
-            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>(\(.+\))?\/contentItem\[(\d+)\])+/d);
+            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/d);
             if (result) {
                 try {
                     var path = {};
@@ -54868,7 +54868,7 @@ var BoundingBoxesCalculator = function PartialEvaluatorClosure() {
         return;
       }
 
-      if (fn !== _util.OPS.markPoint && fn !== _util.OPS.markPointProps && fn != _util.OPS.beginMarkedContent && fn != _util.OPS.beginMarkedContentProps) {
+      if (fn !== _util.OPS.markPoint && fn !== _util.OPS.markPointProps && fn !== _util.OPS.beginMarkedContent && fn !== _util.OPS.beginMarkedContentProps) {
         this.boundingBoxesStack.inc();
       }
 
