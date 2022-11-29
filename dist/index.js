@@ -402,7 +402,7 @@ var convertContextToPath = function (errorContext) {
     var contextString = errorContext;
     try {
         if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
-            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/d);
+            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/);
             if (result) {
                 try {
                     var path = {};
@@ -411,7 +411,7 @@ var convertContextToPath = function (errorContext) {
                     path.content = parseInt(result.groups.content, 10);
                     path.contentItems = result.groups.contentItems.split('/').filter(function (ci) { return ci.includes('contentItem'); }).map(function (ci) {
                         var _a;
-                        var contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/d);
+                        var contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/);
                         return parseInt(((_a = contentItemIndex === null || contentItemIndex === void 0 ? void 0 : contentItemIndex.groups) === null || _a === void 0 ? void 0 : _a.contentItem) || '-1', 10);
                     });
                     return path;
