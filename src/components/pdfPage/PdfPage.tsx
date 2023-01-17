@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext,} from 'react';
+import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo} from 'react';
 import { Page, PDFPageProxy } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
@@ -53,7 +53,6 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
-  const [activeBbox, setActiveBbox] = useState<IBbox | null>(null);
   useIntersection(intersectionRef, {
     threshold: [.2, .4, .5, .6, .8, 1],
   }, (entry) => {
@@ -102,7 +101,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
               }
               contentItemsBBoxes = contentItemsBBoxes.contentItems[ci];
             });
-            
+
             bbox.location = [
               contentItemsBBoxes.contentItem.x,
               contentItemsBBoxes.contentItem.y,
@@ -147,17 +146,22 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
 
     setPageScale(scale);
   }, [pageViewport, scale, props.width, props.height]);
-  const isBboxSelected = (bbox: IBbox) => props.activeBboxIndex === bbox.index;
-  const isRelated = (bbox: IBbox) => {
+  const isBboxSelected = useCallback((bbox: IBbox) => props.activeBboxIndex === bbox.index, [props.activeBboxIndex]);
+  const isRelated = useCallback((bbox: IBbox) => {
     const [, , activeId] = props?.groupId?.split('-') || [];
     const [, , bboxId] = bbox?.groupId?.split('-') || [];
     return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
-  }
+  }, [props.groupId, isBboxSelected]);
 
-  useEffect(() => {
-    const message = activeBbox && props.activeBboxIndex === activeBbox?.index && checkIsBboxOutOfThePage(activeBbox, scale, props.page) && WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT;
-    message && props.onWarning?.(message);
-  }, [activeBbox, scale, props.activeBboxIndex, props.page]);
+  const activeBboxes = useMemo(() => bboxes.filter((bbox) => bbox.index === props.activeBboxIndex), [bboxes, props.activeBboxIndex]);
+
+  useEffect(
+    useCallback(() => {
+      if (activeBboxes && activeBboxes.length && activeBboxes.every((activeBbox) => checkIsBboxOutOfThePage(activeBbox, scale, props.page))) {
+        props.onWarning?.(WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT);
+      }
+    }, [activeBboxes, scale, props.page]),
+  [activeBboxes]);
 
   return (
     <StyledPdfPage
@@ -192,7 +196,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextError={props.onGetTextError}
         />
         {isRendered ? bboxes.map((bbox: IBbox, index) => (
-          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} related={isRelated(bbox)} scale={pageScale} colorScheme={props.colorScheme} setActiveBbox={setActiveBbox} />
+          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} related={isRelated(bbox)} scale={pageScale} colorScheme={props.colorScheme} />
         )) : null}
       </> : null}
     </StyledPdfPage>

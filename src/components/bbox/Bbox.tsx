@@ -1,4 +1,4 @@
-import React, {FC, memo, useEffect, useMemo} from 'react';
+import React, {FC, memo, useMemo} from 'react';
 import styled from 'styled-components';
 
 import './bbox.scss';
@@ -38,7 +38,6 @@ interface IBboxProps {
   selected?: boolean;
   colorScheme?: IColorScheme;
   onClick?(e: any): void;
-  setActiveBbox?(bbox: IBbox | null): void;
 }
 
 interface IBboxDivProps {
@@ -89,10 +88,6 @@ const Bbox: FC<IBboxProps> = (props) => {
         : 'auto',
     ]
   } ,[props.bbox.location, props.scale]);
-
-  useEffect(() => {
-    (props.selected || props.related) && props.setActiveBbox?.(props.bbox);
-  }, [props.selected, props.bbox, props.related]);
 
   return <BboxDiv className={`pdf-bbox ${props.selected && 'pdf-bbox_selected'} ${props.related && 'pdf-bbox_related'}`}
                   left={left}

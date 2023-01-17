@@ -113,8 +113,8 @@ export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
 
 export const checkIsBboxOutOfThePage = (bbox: IBbox, scale: number, page: number) => {
   const parent = (document.querySelector('.react-pdf__Page[data-page-number="' + page + '"]') as any);
-  const parentHeight = parent.offsetHeight * scale;
-  const parentWidth = parent.offsetWidth * scale;
+  const parentHeight = parent.offsetHeight;
+  const parentWidth = parent.offsetWidth;
 
   const left = parseFloat(bbox.location[0] as string) * scale;
   const top = parseFloat(bbox.location[1] as string) * scale;
