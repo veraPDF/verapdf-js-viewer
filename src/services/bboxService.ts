@@ -19,6 +19,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             index,
             operatorIndex: bboxPosition.operatorIndex,
             glyphIndex: bboxPosition.glyphIndex,
+            bboxTitle: bbox.bboxTitle,
           }
         ];
       } else if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
@@ -31,6 +32,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
               mcidList,
               contentItemPath,
               groupId: bbox.groupId || undefined,
+              bboxTitle: bbox.bboxTitle,
             },
           ];
         });
@@ -43,6 +45,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
               index,
               location: bboxWithLocation.location,
               groupId: bbox.groupId || undefined,
+              bboxTitle: bbox.bboxTitle,
             },
           ];
         })
