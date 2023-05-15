@@ -39,5 +39,6 @@ export default {
       },
     }),
   ],
-  external: ['react', 'react-dom']
+  external: ['react', 'react-dom', 'react-pdf', 'react-use', 'styled-components', 'lodash', 'use-intersection',
+    'react-pdf/dist/esm/Page/AnnotationLayer.css', 'pdfjs-dist/build/pdf.worker.entry']
 }
