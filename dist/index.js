@@ -76281,10 +76281,10 @@ var PdfDocument = function (props) {
     React.useEffect(function () {
         function handlekeydownEvent(event) {
             if ((event.ctrlKey || event.metaKey) && event.which === 38) {
-                props.onSelectBbox((___default["default"].isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 1) ? 1 : props.activeBboxIndex - 1);
+                props.onSelectBbox((___default["default"].isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 0) ? 0 : props.activeBboxIndex - 1);
             }
             else if ((event.ctrlKey || event.metaKey) && event.which === 40) {
-                props.onSelectBbox((props.activeBboxIndex === -1 || ___default["default"].isNil(props.activeBboxIndex)) ? 1 :
+                props.onSelectBbox((props.activeBboxIndex === -1 || ___default["default"].isNil(props.activeBboxIndex)) ? 0 :
                     (props.activeBboxIndex + 1 === bboxes.length) ? props.activeBboxIndex : props.activeBboxIndex + 1);
             }
         }
