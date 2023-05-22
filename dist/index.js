@@ -76299,7 +76299,7 @@ var PdfDocument = function (props) {
         return function () {
             document.removeEventListener('keydown', handlekeydownEvent);
         };
-    }, [props.activeBboxIndex /*, props.page, maxPage*/]);
+    }, [props.activeBboxIndex, props.page, maxPage]);
     return (React__default["default"].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate, options: {
             workerSrc: pdf_worker_entry,
         } }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
@@ -76314,7 +76314,7 @@ ___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex
 var App = function (props) {
     var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, pdfProps = __rest(props, ["className", "bboxes"]);
     return (React__default["default"].createElement(ViewerProvider, null,
-        React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className) },
+        React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className), role: "button", tabIndex: 0 },
             React__default["default"].createElement(PdfDocument$1, __assign({}, pdfProps, { bboxes: bboxes })))));
 };
 
