@@ -192,11 +192,15 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   useEffect(() => {
     function handlekeydownEvent(event: any) {
-      if ((event.ctrlKey || event.metaKey) && event.key === 38) {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
         props.onSelectBbox((_.isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 0) ? 0 : props.activeBboxIndex - 1);
-      } else if ((event.ctrlKey || event.metaKey) && event.key === 40) {
+      } else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
         props.onSelectBbox((props.activeBboxIndex === -1 || _.isNil(props.activeBboxIndex)) ? 0 :
             (props.activeBboxIndex + 1 === bboxes.length) ? props.activeBboxIndex : props.activeBboxIndex + 1);
+      } else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
+        props.onPageChange?.(props.page - 1);
+      } else if (event.key === 'ArrowRight' && props.page !== maxPage) {
+        props.onPageChange?.(props.page + 1);
       }
     }
 
@@ -204,7 +208,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return () => {
       document.removeEventListener('keydown', handlekeydownEvent)
     }
-  }, [props.activeBboxIndex])
+  }, [props.activeBboxIndex/*, props.page, maxPage*/])
 
   return (
     <Document

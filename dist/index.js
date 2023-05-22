@@ -76280,19 +76280,26 @@ var PdfDocument = function (props) {
     }, [props.file]);
     React.useEffect(function () {
         function handlekeydownEvent(event) {
-            if ((event.ctrlKey || event.metaKey) && event.which === 38) {
+            var _a, _b;
+            if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
                 props.onSelectBbox((___default["default"].isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 0) ? 0 : props.activeBboxIndex - 1);
             }
-            else if ((event.ctrlKey || event.metaKey) && event.which === 40) {
+            else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
                 props.onSelectBbox((props.activeBboxIndex === -1 || ___default["default"].isNil(props.activeBboxIndex)) ? 0 :
                     (props.activeBboxIndex + 1 === bboxes.length) ? props.activeBboxIndex : props.activeBboxIndex + 1);
+            }
+            else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
+                (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, props.page - 1);
+            }
+            else if (event.key === 'ArrowRight' && props.page !== maxPage) {
+                (_b = props.onPageChange) === null || _b === void 0 ? void 0 : _b.call(props, props.page + 1);
             }
         }
         document.addEventListener('keydown', handlekeydownEvent);
         return function () {
             document.removeEventListener('keydown', handlekeydownEvent);
         };
-    }, [props.activeBboxIndex]);
+    }, [props.activeBboxIndex /*, props.page, maxPage*/]);
     return (React__default["default"].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate, options: {
             workerSrc: pdf_worker_entry,
         } }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
