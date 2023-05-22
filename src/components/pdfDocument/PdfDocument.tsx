@@ -192,9 +192,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   useEffect(() => {
     function handlekeydownEvent(event: any) {
-      if ((event.ctrlKey || event.metaKey) && event.which === 38) {
+      if ((event.ctrlKey || event.metaKey) && event.key === 38) {
         props.onSelectBbox((_.isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 0) ? 0 : props.activeBboxIndex - 1);
-      }else if ((event.ctrlKey || event.metaKey) && event.which === 40) {
+      } else if ((event.ctrlKey || event.metaKey) && event.key === 40) {
         props.onSelectBbox((props.activeBboxIndex === -1 || _.isNil(props.activeBboxIndex)) ? 0 :
             (props.activeBboxIndex + 1 === bboxes.length) ? props.activeBboxIndex : props.activeBboxIndex + 1);
       }
