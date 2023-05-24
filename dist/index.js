@@ -114,7 +114,7 @@ function __makeTemplateObject(cooked, raw) {
     return cooked;
 }
 
-___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  pointer-events: none;\n  z-index: 100;\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_related {\n  z-index: 99;\n}");
+___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 100;\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_related {\n  z-index: 99;\n}");
 
 var bboxBg = 'rgba(255, 255, 255, 0)';
 var bboxBorder = 'grey';
@@ -140,7 +140,7 @@ var Bbox = function (props) {
                 : 'auto',
         ];
     }, [props.bbox.location, props.scale]), left = _a[0], bottom = _a[1], width = _a[2], height = _a[3], top = _a[4];
-    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox ".concat(props.selected && 'pdf-bbox_selected', " ").concat(props.related && 'pdf-bbox_related'), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, onClick: props.onClick });
+    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox ".concat(props.selected && 'pdf-bbox_selected', " ").concat(props.related && 'pdf-bbox_related'), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
 };
 var Bbox$1 = React.memo(Bbox);
 var templateObject_1$1;
@@ -175,6 +175,7 @@ var buildBboxMap = function (bboxes, structure) {
                         index: index,
                         operatorIndex: bboxPosition.operatorIndex,
                         glyphIndex: bboxPosition.glyphIndex,
+                        bboxTitle: bbox.bboxTitle,
                     }
                 ], false);
             }
@@ -188,6 +189,7 @@ var buildBboxMap = function (bboxes, structure) {
                             mcidList: mcidList,
                             contentItemPath: contentItemPath,
                             groupId: bbox.groupId || undefined,
+                            bboxTitle: bbox.bboxTitle,
                         },
                     ], false);
                 });
@@ -200,6 +202,7 @@ var buildBboxMap = function (bboxes, structure) {
                             index: index,
                             location: bboxWithLocation.location,
                             groupId: bbox.groupId || undefined,
+                            bboxTitle: bbox.bboxTitle,
                         },
                     ], false);
                 });
@@ -76275,6 +76278,28 @@ var PdfDocument = function (props) {
         setMaxPage(0);
         setPage(1);
     }, [props.file]);
+    React.useEffect(function () {
+        function handlekeydownEvent(event) {
+            var _a, _b;
+            if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
+                props.onSelectBbox((___default["default"].isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 0) ? 0 : props.activeBboxIndex - 1);
+            }
+            else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
+                props.onSelectBbox((props.activeBboxIndex === -1 || ___default["default"].isNil(props.activeBboxIndex)) ? 0 :
+                    (props.activeBboxIndex + 1 === bboxes.length) ? props.activeBboxIndex : props.activeBboxIndex + 1);
+            }
+            else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
+                (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, props.page - 1);
+            }
+            else if (event.key === 'ArrowRight' && props.page !== maxPage) {
+                (_b = props.onPageChange) === null || _b === void 0 ? void 0 : _b.call(props, props.page + 1);
+            }
+        }
+        document.addEventListener('keydown', handlekeydownEvent);
+        return function () {
+            document.removeEventListener('keydown', handlekeydownEvent);
+        };
+    }, [props.activeBboxIndex, props.page, maxPage]);
     return (React__default["default"].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate, options: {
             workerSrc: pdf_worker_entry,
         } }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
@@ -76284,12 +76309,12 @@ var PdfDocument = function (props) {
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
-___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  justify-content: flex-start;\n  overflow: auto;\n}");
+___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  justify-content: flex-start;\n  overflow: auto;\n  outline: none;\n}");
 
 var App = function (props) {
     var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, pdfProps = __rest(props, ["className", "bboxes"]);
     return (React__default["default"].createElement(ViewerProvider, null,
-        React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className) },
+        React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className), role: "button", tabIndex: 0 },
             React__default["default"].createElement(PdfDocument$1, __assign({}, pdfProps, { bboxes: bboxes })))));
 };
 

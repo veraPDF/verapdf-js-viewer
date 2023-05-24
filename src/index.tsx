@@ -9,6 +9,7 @@ export interface IBboxLocation {
   page: number;
   location: string;
   groupId?: string;
+  bboxTitle: string;
 }
 
 interface IPdfViewerProps extends IPdfDocumentProps {
@@ -20,7 +21,7 @@ const App: FC<IPdfViewerProps> = (props) => {
   const { className = '', bboxes = [], ...pdfProps } = props;
   return (
     <ViewerProvider>
-      <div className={`pdf-viewer ${className}`}>
+      <div className={`pdf-viewer ${className}`} role="button" tabIndex={0}>
         <PdfDocument {...pdfProps} bboxes={bboxes}/>
       </div>
     </ViewerProvider>

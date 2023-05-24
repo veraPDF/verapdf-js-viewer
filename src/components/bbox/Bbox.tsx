@@ -14,6 +14,7 @@ export interface IBbox {
   location: (number | string)[];
   index: number;
   groupId?: string;
+  bboxTitle: string;
   mcidList?: number[];
   glyphIndex?: number;
   operatorIndex?: number;
@@ -96,6 +97,8 @@ const Bbox: FC<IBboxProps> = (props) => {
                   height={height}
                   top={top}
                   colorScheme={props.colorScheme || {}}
+                  title={props.bbox.bboxTitle}
+                  aria-describedby={props.bbox.bboxTitle}
                   onClick={props.onClick}
   />;
 };
