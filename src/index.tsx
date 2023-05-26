@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import ViewerProvider from './components/viewerContext/ViewerContext';
+import { scrollToActiveBbox } from './services/bboxService';
 
 import './styles.scss'
 
@@ -26,6 +27,10 @@ const App: FC<IPdfViewerProps> = (props) => {
       </div>
     </ViewerProvider>
   );
+}
+
+export {
+  scrollToActiveBbox,
 }
 
 export default App
