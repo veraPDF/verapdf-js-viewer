@@ -76319,4 +76319,5 @@ var App = function (props) {
 };
 
 exports["default"] = App;
+exports.scrollToActiveBbox = scrollToActiveBbox;
 //# sourceMappingURL=index.js.map
