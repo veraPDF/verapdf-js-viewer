@@ -40,7 +40,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;
   onWarning?(warningCode: string): void;
-  onSelectBbox(date: number | undefined): void;
+  onSelectBbox(index: number | undefined): void;
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {

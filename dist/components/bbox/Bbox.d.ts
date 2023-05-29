@@ -4,7 +4,7 @@ export interface IBbox {
     location: (number | string)[];
     index: number;
     groupId?: string;
-    bboxTitle: string;
+    bboxTitle?: string;
     mcidList?: number[];
     glyphIndex?: number;
     operatorIndex?: number;

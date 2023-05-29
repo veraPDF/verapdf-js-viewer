@@ -10,7 +10,7 @@ export interface IBboxLocation {
   page: number;
   location: string;
   groupId?: string;
-  bboxTitle: string;
+  bboxTitle?: string;
 }
 
 interface IPdfViewerProps extends IPdfDocumentProps {
