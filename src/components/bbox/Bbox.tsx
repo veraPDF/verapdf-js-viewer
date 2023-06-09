@@ -6,9 +6,7 @@ import './bbox.scss';
 const bboxBg = 'rgba(255, 255, 255, 0)';
 const bboxBorder = 'grey';
 const bboxBorderHover = 'orangered';
-const bboxRelatedBorder = 'rgba(255,176,0,0.5)';
 const bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
-const bboxRelatedBackground = 'rgba(255,176,0,0.3)';
 
 export interface IBbox {
   location: (number | string)[];
@@ -25,11 +23,9 @@ export interface IColorScheme {
   border?: string;
   borderHovered?: string;
   borderSelected?: string;
-  borderRelated?: string;
   background?: string;
   backgroundSelected?: string;
   backgroundHovered?: string;
-  backgroundRelated?: string;
 }
 
 interface IBboxProps {
@@ -66,10 +62,6 @@ const BboxDiv = styled.div`
     border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
     background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected};
   }
-  &.pdf-bbox_related {
-    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground};
-  }
 `;
 
 const Bbox: FC<IBboxProps> = (props) => {
@@ -90,7 +82,7 @@ const Bbox: FC<IBboxProps> = (props) => {
     ]
   } ,[props.bbox.location, props.scale]);
 
-  return <BboxDiv className={`pdf-bbox ${props.selected && 'pdf-bbox_selected'} ${props.related && 'pdf-bbox_related'}`}
+  return <BboxDiv className={`pdf-bbox ${props.selected && 'pdf-bbox_selected'}`}
                   left={left}
                   bottom={bottom}
                   width={width}
