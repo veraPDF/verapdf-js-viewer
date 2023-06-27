@@ -55127,6 +55127,10 @@ var BoundingBoxStack = function BoundingBoxStack() {
     end: function BoundingBoxStack_end() {
       let last = this.stack.pop();
 
+      if (!last) {
+        return null;
+      }
+
       if (last.mcid !== null) {
         return last;
       } else {
