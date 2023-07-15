@@ -90,7 +90,7 @@ const Bbox: FC<IBboxProps> = (props) => {
     ]
   } ,[props.bbox.location, props.scale]);
 
-  return <BboxDiv className={`pdf-bbox ${props.selected && 'pdf-bbox_selected'} ${props.related && 'pdf-bbox_related'}`}
+  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}`}
                   left={left}
                   bottom={bottom}
                   width={width}
