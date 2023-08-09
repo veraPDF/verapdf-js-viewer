@@ -475,7 +475,7 @@ function concatBoundingBoxes(newBoundingBox: AnyObject, oldBoundingBox?: AnyObje
     return {};
   }
 
-  if (_.isNil(newBoundingBox)) {
+  if (_.isNil(newBoundingBox) || Object.values(newBoundingBox).some((el) => _.isNil(el))) {
     return oldBoundingBox || {};
   }
   if (_.isNil(oldBoundingBox)) {
