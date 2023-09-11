@@ -23992,6 +23992,11 @@ class PartialEvaluator {
             continue;
 
           case _util.OPS.beginMarkedContentProps:
+            if (args[1] instanceof _primitives.Name) {
+              const reference = resources.get("Properties").get(args[1].name);
+              args = [args[0], reference];
+            }
+
             boundingBoxCalculator.parseOperator(fn, args);
 
             if (!(args[0] instanceof _primitives.Name)) {

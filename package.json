@@ -31,7 +31,7 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-sass": "^1.12.0",
-    "rollup-plugin-typescript2": "^0.30.0",
+    "rollup-plugin-typescript2": "^0.31.0",
     "typescript": "^4.8.3",
     "typescript-plugin-styled-components": "^2.0.0"
   },
@@ -43,13 +43,13 @@
     "dist"
   ],
   "dependencies": {
-    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.14.305-taggedPdf-0.1.11",
+    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.14.305-taggedPdf-0.1.12",
     "react-pdf": "6.0.0-beta.3",
     "react-use": "^17.1.0",
     "styled-components": "^5.2.1",
     "use-intersection": "^0.2.1"
   },
   "resolutions": {
-    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.14.305-taggedPdf-0.1.11"
+    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.14.305-taggedPdf-0.1.12"
   }
 }
