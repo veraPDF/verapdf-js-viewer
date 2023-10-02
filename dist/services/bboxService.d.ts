@@ -1,7 +1,13 @@
 import { IBboxLocation } from '../index';
-import { AnyObject } from '../types/generics';
+import { AnyObject, OrNull } from '../types/generics';
 import { IBbox } from "../components/bbox/Bbox";
 export declare const buildBboxMap: (bboxes: IBboxLocation[], structure: AnyObject) => {};
+export declare const parseTree: (tree: AnyObject | AnyObject[]) => AnyObject;
+export declare const structurizeMcidTree: (node: AnyObject) => OrNull<AnyObject>;
+export declare const setTreeIds: (node: AnyObject, id?: string) => OrNull<AnyObject>;
+export declare const getMcidList: (node: AnyObject, mcidList?: AnyObject[][][]) => AnyObject[][][];
+export declare const createBboxMap: (mcidList: AnyObject[][][]) => AnyObject;
+export declare const createAllBboxes: (bboxesAll: AnyObject[][], pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => IBbox[];
 export declare const calculateLocationInStreamOperator: (location: string) => {
     pageIndex: number;
     operatorIndex: number;

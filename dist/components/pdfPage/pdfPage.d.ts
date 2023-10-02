@@ -5,6 +5,7 @@ import { AnyObject } from '../../types/generics';
 import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
     bboxList?: IBbox[];
+    bboxesAll?: AnyObject[][];
     defaultHeight?: number;
     defaultWidth?: number;
     structure?: AnyObject;

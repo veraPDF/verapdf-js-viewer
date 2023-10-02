@@ -1,13 +1,63 @@
 import _ from 'lodash';
 
 import {IBboxLocation} from '../index';
-import {AnyObject} from '../types/generics';
+import {AnyObject, OrNull} from '../types/generics';
 import {IBbox} from "../components/bbox/Bbox";
+
+const cleanArray = (arr: AnyObject[]): AnyObject[] => {
+  if (_.isNil(arr)) return [];
+  if (arr.some(el => _.isNil(el))) {
+      arr = arr.filter(el => !_.isNil(el));
+      return arr.length ? arr : [];
+  }
+  return arr;
+};
+
+const spliteChilds = (childs: AnyObject[]): [AnyObject, AnyObject[]] => {
+  if (_.isNil(childs)) childs = [];
+  const [arrNodes, arrMcid] = _.reduce(
+      cleanArray(childs),
+      (arr, child) => {
+        if (!_.isNil(child)) arr[+child.hasOwnProperty('mcid')].push(child);
+          return arr;
+      },
+      [[] as AnyObject, []]
+  );
+  return [arrNodes, arrMcid];
+};
+
+const getMultiBboxPagesObj = (mcidList: AnyObject[]): AnyObject => {
+  const mcidListPages = [] as number[];
+  const multiBbox = {};
+  mcidList.forEach(obj => {
+    if (!_.isNil(obj)) mcidListPages.push(obj.pageIndex)
+  });
+  const mcidListPagesDict = Array.from(new Set(mcidListPages));
+  for (const value of mcidListPagesDict) {
+    multiBbox[value + 1] = [];
+  }
+  mcidListPages.forEach((page, index) => multiBbox[page + 1].push(mcidList[index]));
+  return multiBbox;
+};
+
+const updateMcidList = (oldMcidList: AnyObject[], childs: AnyObject[]): AnyObject[] => {
+  if (_.isNil(oldMcidList)) oldMcidList = [];
+  if (_.isNil(childs)) childs = [];
+  return [
+      ...oldMcidList,
+      ..._.flatMap(cleanArray(childs), child => {
+          if (child.hasOwnProperty('mcidList') && !_.isNil(child.mcidList)) {
+              return child.mcidList;
+          }
+      }),
+  ];
+};
 
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
   bboxes.forEach((bbox, index) => {
     try {
+      if (_.isNil(bbox.location)) return;
       if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
         const bboxPosition = calculateLocationInStreamOperator(bbox.location);
         if (!bboxPosition) {
@@ -56,6 +106,99 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   });
   return bboxMap;
 }
+
+export const parseTree = (tree: AnyObject | AnyObject[]): AnyObject => {
+  if (tree instanceof Array) {
+      if (tree.length === 1) return tree[0];
+      return { name: 'Document', children: tree };
+  }
+  return tree;
+};
+
+export const structurizeMcidTree = (node: AnyObject): OrNull<AnyObject> => {
+  if (_.isNil(node)) return null;
+  if (_.isNil(node.children)) {
+      if (node.hasOwnProperty('name')) return node;
+      return null;
+  }
+  if (!(node.children instanceof Array)) {
+      if (node.children.hasOwnProperty('mcid')) {
+          node.mcidList = [node.children];
+          node.children = [];
+      } else {
+          node.children = [structurizeMcidTree(node.children)];
+          node.mcidList = updateMcidList(node.mcidList, node.children);
+      }
+  } else {
+      const [arrNodes, arrMcid] = spliteChilds(node.children);
+      node.children = _.map(arrNodes, child => structurizeMcidTree(child));
+      node.mcidList = updateMcidList(arrMcid, node.children);
+  }
+  node.children = cleanArray(node.children);
+  return node;
+};
+
+export const setTreeIds = (node: AnyObject, id: string = '0'): OrNull<AnyObject> => {
+  if (_.isNil(node)) return null;
+  node.id = id;
+  if (_.isNil(node?.children)) node.children = [];
+  if (!node?.children.length) {
+      node.final = true;
+      return node;
+  }
+  if (!(node.children instanceof Array)) node.children = [setTreeIds(node.children, `${id}:${0}`)];
+  else node.children = _.map(node.children, (child, index) => setTreeIds(child, `${id}:${index}`));
+  return node;
+};
+
+export const getMcidList = (node: AnyObject, mcidList: AnyObject[][][] = []): AnyObject[][][] => {
+  if (_.isNil(node)) return mcidList;
+  if (!_.isNil(node.mcidList) && !_.isNil(node.id) && node.mcidList.length) mcidList.push([node.mcidList, node.id]);
+  if (_.isNil(node.children)) return mcidList;
+  if (!(node.children instanceof Array)) mcidList.push([node.children.mcidList, node.children.id]);
+  else _.map(node.children, child => (mcidList = getMcidList(child, mcidList)));
+  return mcidList;
+};
+
+export const createBboxMap = (mcidList:  AnyObject[][][]): AnyObject => {
+  const mcidListPages = [] as Array<number | number[]>;
+  const bboxMap = {};
+  const getPages = (list: AnyObject[]): number[]  => Array.from(new Set(list.filter(obj => !_.isNil(obj?.pageIndex)).map(obj => obj?.pageIndex)));
+  mcidList.forEach(arr => {
+    const list = arr[0];
+    const pages = getPages(list);
+    mcidListPages.push(pages.length === 1 ? pages[0] : pages);
+  });
+  const mcidListPagesDict = Array.from(new Set(mcidListPages.flat()));
+  for (const value of mcidListPagesDict) {
+      bboxMap[value + 1] = [];
+  }
+  mcidListPages.forEach((page, index) => {
+    if (!(page instanceof Array)) bboxMap[page + 1].push(mcidList[index]);
+    else {
+      const [mcid, id] = mcidList[index];
+      const multiBboxPagesObj = getMultiBboxPagesObj(mcid);
+      page.forEach(pageIndex => bboxMap[pageIndex + 1].push([multiBboxPagesObj[pageIndex + 1], id]))
+    };
+  });
+  return bboxMap;
+};
+
+export const createAllBboxes = (bboxesAll: AnyObject[][], pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number): IBbox[] => {
+  return bboxesAll?.map((bbox) => {
+    const [mcid, id] = bbox as [AnyObject[], string];
+      const listOfMcid = cleanArray(mcid).map((obj: AnyObject) => obj?.mcid);
+      const location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
+      const [,, width, height] = location;
+      return {
+        id,
+        location: location,
+        area: width * height,
+      };
+    }
+  ).sort(
+    ({area: area1}, {area: area2}) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0);
+};
 
 export const calculateLocationInStreamOperator = (location: string) => {
   const path = location.split("/");
@@ -357,7 +500,6 @@ export const getBboxForGlyph = (operatorIndex: number, glyphIndex: number, opera
 
 export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => {
   let coords: AnyObject = {};
-
   if (listOfMcid instanceof Array) {
     listOfMcid.forEach(mcid => {
       const currentBbox = pageMap[mcid];
@@ -368,7 +510,7 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
         !_.isNaN(currentBbox.width) &&
         !_.isNaN(currentBbox.height)
       ) {
-        coords = concatBoundingBoxes(currentBbox, coords.x ? coords : undefined);
+        coords = concatBoundingBoxes(currentBbox, coords.hasOwnProperty('x') ? coords : undefined);
       }
     });
   } else if (listOfMcid.hasOwnProperty('annot')) {

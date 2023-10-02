@@ -8,6 +8,7 @@ import './pdfDocument.scss';
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     showAllPages?: boolean;
     activeBboxIndex?: number;
+    activeBboxId?: string;
     bboxes: IBboxLocation[];
     colorScheme?: IColorScheme;
     onBboxesParsed?(pages: number[]): void;

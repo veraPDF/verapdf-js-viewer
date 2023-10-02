@@ -124,13 +124,17 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
 
 ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 100;\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_related {\n  z-index: 99;\n}");
 
-var bboxBg = 'rgba(255, 255, 255, 0)';
 var bboxBorder = 'grey';
 var bboxBorderHover$1 = 'orangered';
 var bboxRelatedBorder = 'rgba(255,176,0,0.5)';
-var bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
-var bboxRelatedBackground = 'rgba(255,176,0,0.3)';
-var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1jfsiwo" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground; });
+var bboxSrtucturedBorder = 'rgba(255,255,255,0)';
+var bboxSelectedSrtucturedBorder = 'rgba(255,122,0,1)';
+var bboxBg = 'rgba(255,255,255,0)';
+var bboxBgSelected = 'rgba(255,69,0,0.5)';
+var bboxBgRelated = 'rgba(255,176,0,0.3)';
+var bboxBgSrtuctured = 'rgba(255,255,255,0)';
+var bboxBgSelectedSrtuctured = 'rgba(255,100,0,0.4)';
+var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1jfsiwo" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated; }, bboxBorderHover$1, function (props) { return props.colorScheme && props.colorScheme.borderStructured || bboxSrtucturedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundStructured || bboxBgSrtuctured; }, function (props) { return props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedSrtucturedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedSrtuctured; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -148,7 +152,7 @@ var Bbox = function (props) {
                 : 'auto',
         ];
     }, [props.bbox.location, props.scale]), left = _a[0], bottom = _a[1], width = _a[2], height = _a[3], top = _a[4];
-    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox".concat(props.selected ? ' pdf-bbox_selected' : '').concat(props.related ? ' pdf-bbox_related' : ''), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
+    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox".concat(props.selected ? ' pdf-bbox_selected' : '').concat(props.related ? ' pdf-bbox_related' : '').concat(props.structured ? ' pdf-bbox_structured' : '').concat(props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
 };
 var Bbox$1 = React.memo(Bbox);
 var templateObject_1$1;
@@ -169,10 +173,57 @@ var ViewerProvider = function (props) {
     return React__default["default"].createElement(ViewerContext.Provider, { value: context }, props.children);
 };
 
+var cleanArray = function (arr) {
+    if (___default["default"].isNil(arr))
+        return [];
+    if (arr.some(function (el) { return ___default["default"].isNil(el); })) {
+        arr = arr.filter(function (el) { return !___default["default"].isNil(el); });
+        return arr.length ? arr : [];
+    }
+    return arr;
+};
+var spliteChilds = function (childs) {
+    if (___default["default"].isNil(childs))
+        childs = [];
+    var _a = ___default["default"].reduce(cleanArray(childs), function (arr, child) {
+        if (!___default["default"].isNil(child))
+            arr[+child.hasOwnProperty('mcid')].push(child);
+        return arr;
+    }, [[], []]), arrNodes = _a[0], arrMcid = _a[1];
+    return [arrNodes, arrMcid];
+};
+var getMultiBboxPagesObj = function (mcidList) {
+    var mcidListPages = [];
+    var multiBbox = {};
+    mcidList.forEach(function (obj) {
+        if (!___default["default"].isNil(obj))
+            mcidListPages.push(obj.pageIndex);
+    });
+    var mcidListPagesDict = Array.from(new Set(mcidListPages));
+    for (var _i = 0, mcidListPagesDict_1 = mcidListPagesDict; _i < mcidListPagesDict_1.length; _i++) {
+        var value = mcidListPagesDict_1[_i];
+        multiBbox[value + 1] = [];
+    }
+    mcidListPages.forEach(function (page, index) { return multiBbox[page + 1].push(mcidList[index]); });
+    return multiBbox;
+};
+var updateMcidList = function (oldMcidList, childs) {
+    if (___default["default"].isNil(oldMcidList))
+        oldMcidList = [];
+    if (___default["default"].isNil(childs))
+        childs = [];
+    return __spreadArray(__spreadArray([], oldMcidList, true), ___default["default"].flatMap(cleanArray(childs), function (child) {
+        if (child.hasOwnProperty('mcidList') && !___default["default"].isNil(child.mcidList)) {
+            return child.mcidList;
+        }
+    }), true);
+};
 var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
     bboxes.forEach(function (bbox, index) {
         try {
+            if (___default["default"].isNil(bbox.location))
+                return;
             if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
                 var bboxPosition = calculateLocationInStreamOperator(bbox.location);
                 if (!bboxPosition) {
@@ -221,6 +272,113 @@ var buildBboxMap = function (bboxes, structure) {
         }
     });
     return bboxMap;
+};
+var parseTree = function (tree) {
+    if (tree instanceof Array) {
+        if (tree.length === 1)
+            return tree[0];
+        return { name: 'Document', children: tree };
+    }
+    return tree;
+};
+var structurizeMcidTree = function (node) {
+    if (___default["default"].isNil(node))
+        return null;
+    if (___default["default"].isNil(node.children)) {
+        if (node.hasOwnProperty('name'))
+            return node;
+        return null;
+    }
+    if (!(node.children instanceof Array)) {
+        if (node.children.hasOwnProperty('mcid')) {
+            node.mcidList = [node.children];
+            node.children = [];
+        }
+        else {
+            node.children = [structurizeMcidTree(node.children)];
+            node.mcidList = updateMcidList(node.mcidList, node.children);
+        }
+    }
+    else {
+        var _a = spliteChilds(node.children), arrNodes = _a[0], arrMcid = _a[1];
+        node.children = ___default["default"].map(arrNodes, function (child) { return structurizeMcidTree(child); });
+        node.mcidList = updateMcidList(arrMcid, node.children);
+    }
+    node.children = cleanArray(node.children);
+    return node;
+};
+var setTreeIds = function (node, id) {
+    if (id === void 0) { id = '0'; }
+    if (___default["default"].isNil(node))
+        return null;
+    node.id = id;
+    if (___default["default"].isNil(node === null || node === void 0 ? void 0 : node.children))
+        node.children = [];
+    if (!(node === null || node === void 0 ? void 0 : node.children.length)) {
+        node.final = true;
+        return node;
+    }
+    if (!(node.children instanceof Array))
+        node.children = [setTreeIds(node.children, "".concat(id, ":").concat(0))];
+    else
+        node.children = ___default["default"].map(node.children, function (child, index) { return setTreeIds(child, "".concat(id, ":").concat(index)); });
+    return node;
+};
+var getMcidList = function (node, mcidList) {
+    if (mcidList === void 0) { mcidList = []; }
+    if (___default["default"].isNil(node))
+        return mcidList;
+    if (!___default["default"].isNil(node.mcidList) && !___default["default"].isNil(node.id) && node.mcidList.length)
+        mcidList.push([node.mcidList, node.id]);
+    if (___default["default"].isNil(node.children))
+        return mcidList;
+    if (!(node.children instanceof Array))
+        mcidList.push([node.children.mcidList, node.children.id]);
+    else
+        ___default["default"].map(node.children, function (child) { return (mcidList = getMcidList(child, mcidList)); });
+    return mcidList;
+};
+var createBboxMap = function (mcidList) {
+    var mcidListPages = [];
+    var bboxMap = {};
+    var getPages = function (list) { return Array.from(new Set(list.filter(function (obj) { return !___default["default"].isNil(obj === null || obj === void 0 ? void 0 : obj.pageIndex); }).map(function (obj) { return obj === null || obj === void 0 ? void 0 : obj.pageIndex; }))); };
+    mcidList.forEach(function (arr) {
+        var list = arr[0];
+        var pages = getPages(list);
+        mcidListPages.push(pages.length === 1 ? pages[0] : pages);
+    });
+    var mcidListPagesDict = Array.from(new Set(mcidListPages.flat()));
+    for (var _i = 0, mcidListPagesDict_2 = mcidListPagesDict; _i < mcidListPagesDict_2.length; _i++) {
+        var value = mcidListPagesDict_2[_i];
+        bboxMap[value + 1] = [];
+    }
+    mcidListPages.forEach(function (page, index) {
+        if (!(page instanceof Array))
+            bboxMap[page + 1].push(mcidList[index]);
+        else {
+            var _a = mcidList[index], mcid = _a[0], id_1 = _a[1];
+            var multiBboxPagesObj_1 = getMultiBboxPagesObj(mcid);
+            page.forEach(function (pageIndex) { return bboxMap[pageIndex + 1].push([multiBboxPagesObj_1[pageIndex + 1], id_1]); });
+        }
+    });
+    return bboxMap;
+};
+var createAllBboxes = function (bboxesAll, pageMap, annotations, viewport, rotateAngle) {
+    return bboxesAll === null || bboxesAll === void 0 ? void 0 : bboxesAll.map(function (bbox) {
+        var _a = bbox, mcid = _a[0], id = _a[1];
+        var listOfMcid = cleanArray(mcid).map(function (obj) { return obj === null || obj === void 0 ? void 0 : obj.mcid; });
+        var location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
+        var width = location[2], height = location[3];
+        return {
+            id: id,
+            location: location,
+            area: width * height,
+        };
+    }).sort(function (_a, _b) {
+        var area1 = _a.area;
+        var area2 = _b.area;
+        return (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0;
+    });
 };
 var calculateLocationInStreamOperator = function (location) {
     var path = location.split("/");
@@ -518,7 +676,7 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rota
                 !___default["default"].isNaN(currentBbox.y) &&
                 !___default["default"].isNaN(currentBbox.width) &&
                 !___default["default"].isNaN(currentBbox.height)) {
-                coords = concatBoundingBoxes(currentBbox, coords.x ? coords : undefined);
+                coords = concatBoundingBoxes(currentBbox, coords.hasOwnProperty('x') ? coords : undefined);
             }
         });
     }
@@ -644,13 +802,14 @@ var PdfPage = function (props) {
     var scrollIntoPage = React.useContext(ViewerContext).scrollIntoPage;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
     var intersectionRef = React.useRef(null);
-    var _c = React.useState([]), bboxes = _c[0], setBboxes = _c[1];
-    var _d = React.useState(false), loaded = _d[0], setLoaded = _d[1];
-    var _e = React.useState(scale), pageScale = _e[0], setPageScale = _e[1];
-    var _f = React.useState([]), pageViewport = _f[0], setPageViewport = _f[1];
-    var _g = React.useState(false), isRendered = _g[0], setIsRendered = _g[1];
-    var _h = React.useState(false), isIntersecting = _h[0], setIsIntersecting = _h[1];
-    var _j = React.useState(0), intersectionRatio = _j[0], setIntersectionRatio = _j[1];
+    var _c = React.useState([]), bboxesAll = _c[0], setBboxesAll = _c[1];
+    var _d = React.useState([]), bboxesErrors = _d[0], setBboxesErrors = _d[1];
+    var _e = React.useState(false), loaded = _e[0], setLoaded = _e[1];
+    var _f = React.useState(scale), pageScale = _f[0], setPageScale = _f[1];
+    var _g = React.useState([]), pageViewport = _g[0], setPageViewport = _g[1];
+    var _h = React.useState(false), isRendered = _h[0], setIsRendered = _h[1];
+    var _j = React.useState(false), isIntersecting = _j[0], setIsIntersecting = _j[1];
+    var _k = React.useState(0), intersectionRatio = _k[0], setIntersectionRatio = _k[1];
     useIntersection.useIntersection(intersectionRef, {
         threshold: [.2, .4, .5, .6, .8, 1],
     }, function (entry) {
@@ -665,10 +824,10 @@ var PdfPage = function (props) {
         var _a;
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, null);
     }, []);
-    var onBboxClick = React.useCallback(function (index) { return function (e) {
+    var onBboxClick = React.useCallback(function (index, id) { return function (e) {
         var _a;
         e.stopPropagation();
-        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { index: index });
+        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { index: index, id: id });
     }; }, [props.onBboxClick]);
     var onPageRenderSuccess = React.useCallback(function () {
         var _a, _b;
@@ -687,10 +846,12 @@ var PdfPage = function (props) {
         setIsRendered(true);
         setPageViewport(page.view);
         Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
+            var _b;
             var operatorList = _a[0], annotations = _a[1];
             var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
-            var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1];
-            var bboxes = bboxList.map(function (bbox) {
+            var _c = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _c[0], noMCIDData = _c[1];
+            var allBboxes = createAllBboxes((_b = props.bboxesAll) !== null && _b !== void 0 ? _b : [[]], positionData, annotations, page.view, page.rotate);
+            var errorBboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
                     bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
                 }
@@ -721,10 +882,11 @@ var PdfPage = function (props) {
                 }
                 return bbox;
             });
-            setBboxes(bboxes);
+            setBboxesAll(allBboxes);
+            setBboxesErrors(errorBboxes);
         });
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
-    }, [bboxList, props.width, props.height, scale]);
+    }, [bboxList, props.bboxesAll, props.width, props.height, scale]);
     React.useEffect(function () {
         var _a;
         if (!loaded && isIntersecting) {
@@ -749,14 +911,22 @@ var PdfPage = function (props) {
         }
         setPageScale(scale);
     }, [pageViewport, scale, props.width, props.height]);
-    var isBboxSelected = React.useCallback(function (bbox) { return props.activeBboxIndex === bbox.index; }, [props.activeBboxIndex]);
+    var isBboxSelected = React.useCallback(function (bbox) {
+        var isBboxMode = !___default["default"].isNil(props.activeBboxIndex);
+        return isBboxMode ? bbox.index === props.activeBboxIndex : (bbox === null || bbox === void 0 ? void 0 : bbox.id) === (props === null || props === void 0 ? void 0 : props.activeBboxId);
+    }, [props.activeBboxIndex, props.activeBboxId]);
     var isRelated = React.useCallback(function (bbox) {
         var _a, _b;
         var _c = ((_a = props === null || props === void 0 ? void 0 : props.groupId) === null || _a === void 0 ? void 0 : _a.split('-')) || [], activeId = _c[2];
         var _d = ((_b = bbox === null || bbox === void 0 ? void 0 : bbox.groupId) === null || _b === void 0 ? void 0 : _b.split('-')) || [], bboxId = _d[2];
         return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
     }, [props.groupId, isBboxSelected]);
-    var activeBboxes = React.useMemo(function () { return bboxes.filter(function (bbox) { return bbox.index === props.activeBboxIndex; }); }, [bboxes, props.activeBboxIndex]);
+    var isBboxStructured = React.useCallback(function (bbox) { return ___default["default"].isNil(bbox.index); }, []);
+    var bboxes = React.useMemo(function () { return __spreadArray(__spreadArray([], bboxesAll, true), bboxesErrors, true); }, [bboxesErrors, bboxesAll]);
+    var activeBboxes = React.useMemo(function () { return bboxes.filter(function (bbox) {
+        var isBboxMode = !___default["default"].isNil(props.activeBboxIndex);
+        return isBboxMode ? bbox.index === props.activeBboxIndex : (bbox === null || bbox === void 0 ? void 0 : bbox.id) === (props === null || props === void 0 ? void 0 : props.activeBboxId);
+    }); }, [props.activeBboxIndex, props.activeBboxId]);
     React.useEffect(React.useCallback(function () {
         var _a;
         if (activeBboxes && activeBboxes.length && activeBboxes.every(function (activeBbox) { return checkIsBboxOutOfThePage(activeBbox, scale, props.page); })) {
@@ -765,7 +935,7 @@ var PdfPage = function (props) {
     }, [activeBboxes, scale, props.page]), [activeBboxes]);
     return (React__default["default"].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered".concat(props.isPageSelected ? ' pdf-page_selected' : ''), "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default["default"].createElement(React__default["default"].Fragment, null,
         React__default["default"].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
-        isRendered ? bboxes.map(function (bbox, index) { return (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index), selected: isBboxSelected(bbox), related: isRelated(bbox), scale: pageScale, colorScheme: props.colorScheme })); }) : null) : null));
+        isRendered ? bboxes.map(function (bbox, index) { return (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index, bbox.id), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isRelated(bbox), scale: pageScale, colorScheme: props.colorScheme })); }) : null) : null));
 };
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1;
@@ -76148,12 +76318,14 @@ var PdfDocument = function (props) {
     var _b = props.bboxes, bboxes = _b === void 0 ? [] : _b;
     var _c = React.useState(false), loaded = _c[0], setLoaded = _c[1];
     var _d = React.useState({}), structureTree = _d[0], setStructureTree = _d[1];
-    var _e = React.useState({}), bboxMap = _e[0], setBboxMap = _e[1];
-    var _f = React.useState([]), pagesByViewport = _f[0], setPagesByViewport = _f[1];
-    var _g = React.useState([]), ratioArray = _g[0], setRatioArray = _g[1];
-    var _h = React.useState(0), defaultHeight = _h[0], setDefaultHeight = _h[1];
-    var _j = React.useState(0), defaultWidth = _j[0], setDefaultWidth = _j[1];
-    var _k = React.useState(undefined), selectedPage = _k[0], setSelectedPage = _k[1];
+    var _e = React.useState({}), parsedTree = _e[0], setParsedTree = _e[1];
+    var _f = React.useState({}), bboxMap = _f[0], setBboxMap = _f[1];
+    var _g = React.useState({}), bboxesAll = _g[0], setBboxesAll = _g[1];
+    var _h = React.useState([]), pagesByViewport = _h[0], setPagesByViewport = _h[1];
+    var _j = React.useState([]), ratioArray = _j[0], setRatioArray = _j[1];
+    var _k = React.useState(0), defaultHeight = _k[0], setDefaultHeight = _k[1];
+    var _l = React.useState(0), defaultWidth = _l[0], setDefaultWidth = _l[1];
+    var _m = React.useState(undefined), selectedPage = _m[0], setSelectedPage = _m[1];
     var activeBbox = React.useMemo(function () {
         return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null;
     }, [props.activeBboxIndex, bboxes]);
@@ -76169,14 +76341,23 @@ var PdfDocument = function (props) {
         (_a = props.onBboxesParsed) === null || _a === void 0 ? void 0 : _a.call(props, getBboxPages(bboxes, structureTree));
     }, [bboxes, structureTree]);
     React.useEffect(function () {
-        var _a;
-        if (((_a = props.activeBboxIndex) !== null && _a !== void 0 ? _a : false) === false) {
+        var mcidList = getMcidList(parsedTree !== null && parsedTree !== void 0 ? parsedTree : {});
+        setBboxesAll(createBboxMap(mcidList));
+    }, [parsedTree]);
+    React.useEffect(function () {
+        var isBboxMode = !___default["default"].isNil(props.activeBboxIndex);
+        var id = isBboxMode ? props.activeBboxIndex : props.activeBboxId;
+        if ((id !== null && id !== void 0 ? id : false) === false) {
             return;
         }
+        var entries = Object.entries(isBboxMode ? bboxMap : bboxesAll);
+        var finder = isBboxMode
+            ? function (value) { return ___default["default"].find(value, { index: props.activeBboxIndex }); }
+            : function (value) { return ___default["default"].find(value, function (arr) { return arr[1] === props.activeBboxId; }); };
         var bboxPage = 0;
-        for (var _i = 0, _b = Object.entries(bboxMap); _i < _b.length; _i++) {
-            var _c = _b[_i], key = _c[0], value = _c[1];
-            if (___default["default"].find(value, { index: props.activeBboxIndex })) {
+        for (var _i = 0, entries_1 = entries; _i < entries_1.length; _i++) {
+            var _a = entries_1[_i], key = _a[0], value = _a[1];
+            if (finder(value)) {
                 bboxPage = parseInt(key);
                 break;
             }
@@ -76186,7 +76367,7 @@ var PdfDocument = function (props) {
             // To be sure that page is loaded before scrolling to the active bbox
             setTimeout(function () { return scrollToActiveBbox(); }, 100);
         }
-    }, [props.activeBboxIndex, bboxMap]);
+    }, [props.activeBboxIndex, props.activeBboxId, bboxMap, bboxesAll]);
     React.useEffect(function () {
         if (activeBbox) {
             var selectedPage_1 = getSelectedPageByLocation(activeBbox.location);
@@ -76200,12 +76381,17 @@ var PdfDocument = function (props) {
         }
     }, [activeBbox]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {
-        var pageData;
+        var parsedTree, treeWithMcidList, treeWithIds, pageData;
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     setStructureTree(data._pdfInfo.structureTree);
+                    parsedTree = parseTree(data._pdfInfo.structureTree);
+                    treeWithMcidList = structurizeMcidTree(parsedTree);
+                    treeWithIds = setTreeIds(treeWithMcidList !== null && treeWithMcidList !== void 0 ? treeWithMcidList : {});
+                    setParsedTree(treeWithIds !== null && treeWithIds !== void 0 ? treeWithIds : {});
+                    data.parsedTree = treeWithIds !== null && treeWithIds !== void 0 ? treeWithIds : {};
                     return [4 /*yield*/, data.getPage(1)];
                 case 1:
                     pageData = _b.sent();
@@ -76321,8 +76507,8 @@ var PdfDocument = function (props) {
             workerSrc: pdf_worker_entry,
         } }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
         var _a;
-        return React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], groupId: (_a = bboxes[props.activeBboxIndex]) === null || _a === void 0 ? void 0 : _a.groupId, activeBboxIndex: props.activeBboxIndex, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning });
-    }) : null; }, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props, selectedPage])));
+        return React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], bboxesAll: bboxesAll[page], groupId: (_a = bboxes[props.activeBboxIndex]) === null || _a === void 0 ? void 0 : _a.groupId, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning });
+    }) : null; }, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, bboxesAll, props, selectedPage])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
