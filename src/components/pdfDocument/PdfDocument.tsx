@@ -78,7 +78,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [maxPage, props.showAllPages, props.page]);
 
   useEffect(() => {
-    setBboxMap(buildBboxMap(bboxes, structureTree));    
+    setBboxMap(buildBboxMap(bboxes, structureTree));
     props.onBboxesParsed?.(getBboxPages(bboxes, structureTree));
   }, [bboxes, structureTree]);
 
@@ -251,8 +251,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
         workerSrc: pdfjsWorker,
       }}
     >
-      {useMemo(() => loaded ? shownPages.map((page) => {
-        return <PdfPage
+      {useMemo(() => loaded ? shownPages.map((page) => <PdfPage
           defaultHeight={defaultHeight}
           defaultWidth={defaultWidth}
           key={page}
@@ -285,7 +284,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           isPageSelected={selectedPage === page}
           onWarning={props.onWarning}
         />
-      }
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, bboxesAll, props, selectedPage])}
     </Document>
   );

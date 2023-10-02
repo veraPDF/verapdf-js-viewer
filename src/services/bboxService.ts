@@ -500,6 +500,7 @@ export const getBboxForGlyph = (operatorIndex: number, glyphIndex: number, opera
 
 export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => {
   let coords: AnyObject = {};
+
   if (listOfMcid instanceof Array) {
     listOfMcid.forEach(mcid => {
       const currentBbox = pageMap[mcid];
