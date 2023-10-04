@@ -4141,7 +4141,8 @@ class Page {
         }
 
         if (intent & _util.RenderingIntentFlag.OPLIST) {
-          pageOpList.addOp(_util.OPS.save, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
+          pageOpList.addOp(_util.OPS.operationPosition, positionByOperationIndex);
+          pageOpList.addOp(_util.OPS.boundingBoxes, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
         }
 
         pageOpList.flush(true, {
