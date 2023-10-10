@@ -16,6 +16,11 @@ import { IBboxLocation } from '../../index';
 import {
   activeBboxInViewport,
   buildBboxMap,
+  parseTree,
+  setTreeIds,
+  structurizeMcidTree,
+  getMcidList,
+  createBboxMap,
   getSelectedPageByLocation,
   getBboxPages,
   scrollToActiveBbox
@@ -30,11 +35,13 @@ interface IDocumentData extends PDFDocumentProxy {
   _pdfInfo: {
     structureTree: AnyObject;
   }
+  parsedTree: AnyObject;
 }
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
   activeBboxIndex?: number;
+  activeBboxId?: string;
   bboxes: IBboxLocation[];
   colorScheme?: IColorScheme;
   onBboxesParsed?(pages: number[]): void;
@@ -48,7 +55,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const { bboxes = [] } = props;
   const [loaded, setLoaded] = useState(false);
   const [structureTree, setStructureTree] = useState({});
+  const [parsedTree, setParsedTree] = useState({});
   const [bboxMap, setBboxMap] = useState({});
+  const [bboxesAll, setBboxesAll] = useState({});
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
   const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(0);
@@ -69,17 +78,28 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [maxPage, props.showAllPages, props.page]);
 
   useEffect(() => {
-    setBboxMap(buildBboxMap(bboxes, structureTree));
+    setBboxMap(buildBboxMap(bboxes, structureTree));    
     props.onBboxesParsed?.(getBboxPages(bboxes, structureTree));
   }, [bboxes, structureTree]);
 
   useEffect(() => {
-    if ((props.activeBboxIndex ?? false) === false) {
+    const mcidList = getMcidList(parsedTree ?? {});
+    setBboxesAll(createBboxMap(mcidList));
+  }, [parsedTree]);
+
+  useEffect(() => {
+    const isBboxMode = !_.isNil(props.activeBboxIndex);
+    const id = isBboxMode ? props.activeBboxIndex : props.activeBboxId;
+    if ((id ?? false) === false) {
       return;
     }
+    const entries = Object.entries(isBboxMode ? bboxMap : bboxesAll);
+    const finder = isBboxMode 
+        ? (value: AnyObject[]) => _.find(value, { index: props.activeBboxIndex })
+        : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === props.activeBboxId);
     let bboxPage = 0;
-    for (const [key, value] of Object.entries(bboxMap)) {
-      if (_.find(value as AnyObject[], { index: props.activeBboxIndex })) {
+    for (const [key, value] of entries) {
+      if (finder(value as AnyObject[] & [AnyObject[], string])) {
         bboxPage = parseInt(key);
         break;
       }
@@ -89,7 +109,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       // To be sure that page is loaded before scrolling to the active bbox
       setTimeout(() => scrollToActiveBbox(), 100);
     }
-  }, [props.activeBboxIndex, bboxMap])
+  }, [props.activeBboxIndex, props.activeBboxId, bboxMap, bboxesAll])
 
   useEffect(() => {
     if (activeBbox) {
@@ -105,6 +125,11 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
     setStructureTree(data._pdfInfo.structureTree);
+    const parsedTree = parseTree(data._pdfInfo.structureTree);
+    const treeWithMcidList = structurizeMcidTree(parsedTree);
+    const treeWithIds = setTreeIds(treeWithMcidList ?? {});
+    setParsedTree(treeWithIds ?? {});
+    data.parsedTree = treeWithIds ?? {};
     const pageData = await data.getPage(1);
     setDefaultHeight(pageData.view[3]);
     setDefaultWidth(pageData.view[2]);
@@ -125,7 +150,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [maxPage, props.showAllPages]);
   const onBboxClick = useCallback((data: OrNull<TSelectedBboxData>) => {
       props.onBboxClick?.(data);
-    }, []);
+  }, []);
 
   const setPageByViewport = useMemo(() => (newPage: number, intersection: { isIntersecting: boolean, intersectionRatio: number }) => {
     const { isIntersecting, intersectionRatio } = intersection;
@@ -226,8 +251,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
         workerSrc: pdfjsWorker,
       }}
     >
-      {useMemo(() => loaded ? shownPages.map((page) =>
-        <PdfPage
+      {useMemo(() => loaded ? shownPages.map((page) => {
+        return <PdfPage
           defaultHeight={defaultHeight}
           defaultWidth={defaultWidth}
           key={page}
@@ -251,14 +276,17 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onGetTextError={props.onGetTextError}
           onPageInViewport={onPageInViewport}
           bboxList={bboxMap[page]}
+          bboxesAll={bboxesAll[page]}
           groupId={bboxes[props.activeBboxIndex as number]?.groupId}
           activeBboxIndex={props.activeBboxIndex}
+          activeBboxId={props.activeBboxId}
           onBboxClick={onBboxClick}
           colorScheme={props.colorScheme}
           isPageSelected={selectedPage === page}
           onWarning={props.onWarning}
         />
-      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, props, selectedPage])}
+      }
+      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, bboxesAll, props, selectedPage])}
     </Document>
   );
 }
