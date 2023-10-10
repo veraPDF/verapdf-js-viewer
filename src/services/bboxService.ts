@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import {IBboxLocation} from '../index';
 import {AnyObject, OrNull} from '../types/generics';
-import {IBbox} from "../components/bbox/Bbox";
+import {IBbox, IMcidItem, TreeElementBbox} from "../components/bbox/Bbox";
 
 const cleanArray = (arr: AnyObject[]): AnyObject[] => {
   if (_.isNil(arr)) return [];
@@ -13,10 +13,10 @@ const cleanArray = (arr: AnyObject[]): AnyObject[] => {
   return arr;
 };
 
-const spliteChilds = (childs: AnyObject[]): [AnyObject, AnyObject[]] => {
-  if (_.isNil(childs)) childs = [];
+const splitChildren = (children: AnyObject[]): [AnyObject, AnyObject[]] => {
+  if (_.isNil(children)) children = [];
   const [arrNodes, arrMcid] = _.reduce(
-      cleanArray(childs),
+      cleanArray(children),
       (arr, child) => {
         if (!_.isNil(child)) arr[+child.hasOwnProperty('mcid')].push(child);
           return arr;
@@ -26,7 +26,7 @@ const spliteChilds = (childs: AnyObject[]): [AnyObject, AnyObject[]] => {
   return [arrNodes, arrMcid];
 };
 
-const getMultiBboxPagesObj = (mcidList: AnyObject[]): AnyObject => {
+const getMultiBboxPagesObj = (mcidList: Array<IMcidItem | undefined>): AnyObject => {
   const mcidListPages = [] as number[];
   const multiBbox = {};
   mcidList.forEach(obj => {
@@ -40,12 +40,12 @@ const getMultiBboxPagesObj = (mcidList: AnyObject[]): AnyObject => {
   return multiBbox;
 };
 
-const updateMcidList = (oldMcidList: AnyObject[], childs: AnyObject[]): AnyObject[] => {
+const updateMcidList = (oldMcidList: AnyObject[], children: AnyObject[]): AnyObject[] => {
   if (_.isNil(oldMcidList)) oldMcidList = [];
-  if (_.isNil(childs)) childs = [];
+  if (_.isNil(children)) children = [];
   return [
       ...oldMcidList,
-      ..._.flatMap(cleanArray(childs), child => {
+      ..._.flatMap(cleanArray(children), child => {
           if (child.hasOwnProperty('mcidList') && !_.isNil(child.mcidList)) {
               return child.mcidList;
           }
@@ -108,8 +108,10 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
 }
 
 export const parseTree = (tree: AnyObject | AnyObject[]): AnyObject => {
+  if (tree instanceof Array && tree.length === 1) {
+      return tree[0];
+  }
   if (tree instanceof Array) {
-      if (tree.length === 1) return tree[0];
       return { name: 'Document', children: tree };
   }
   return tree;
@@ -130,7 +132,7 @@ export const structurizeMcidTree = (node: AnyObject): OrNull<AnyObject> => {
           node.mcidList = updateMcidList(node.mcidList, node.children);
       }
   } else {
-      const [arrNodes, arrMcid] = spliteChilds(node.children);
+      const [arrNodes, arrMcid] = splitChildren(node.children);
       node.children = _.map(arrNodes, child => structurizeMcidTree(child));
       node.mcidList = updateMcidList(arrMcid, node.children);
   }
@@ -151,7 +153,7 @@ export const setTreeIds = (node: AnyObject, id: string = '0'): OrNull<AnyObject>
   return node;
 };
 
-export const getMcidList = (node: AnyObject, mcidList: AnyObject[][][] = []): AnyObject[][][] => {
+export const getMcidList = (node: AnyObject, mcidList: TreeElementBbox[] = []): TreeElementBbox[] => {
   if (_.isNil(node)) return mcidList;
   if (!_.isNil(node.mcidList) && !_.isNil(node.id) && node.mcidList.length) mcidList.push([node.mcidList, node.id]);
   if (_.isNil(node.children)) return mcidList;
@@ -160,10 +162,13 @@ export const getMcidList = (node: AnyObject, mcidList: AnyObject[][][] = []): An
   return mcidList;
 };
 
-export const createBboxMap = (mcidList:  AnyObject[][][]): AnyObject => {
+export const createBboxMap = (mcidList: TreeElementBbox[]): AnyObject => {
   const mcidListPages = [] as Array<number | number[]>;
   const bboxMap = {};
-  const getPages = (list: AnyObject[]): number[]  => Array.from(new Set(list.filter(obj => !_.isNil(obj?.pageIndex)).map(obj => obj?.pageIndex)));
+  const getPages = (list: Array<IMcidItem | undefined>): number[]  => {
+    const cleanedList = list.filter((obj): obj is IMcidItem => !_.isNil(obj) && !_.isNil(obj.pageIndex));
+    return Array.from(new Set(cleanedList.map(obj => obj?.pageIndex)));
+  };
   mcidList.forEach(arr => {
     const list = arr[0];
     const pages = getPages(list);
@@ -184,7 +189,8 @@ export const createBboxMap = (mcidList:  AnyObject[][][]): AnyObject => {
   return bboxMap;
 };
 
-export const createAllBboxes = (bboxesAll: AnyObject[][], pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number): IBbox[] => {
+export const createAllBboxes = (bboxesAll: TreeElementBbox[] | undefined, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number): IBbox[] => {
+  if (_.isNil(bboxesAll)) return [];
   return bboxesAll?.map((bbox) => {
     const [mcid, id] = bbox as [AnyObject[], string];
       const listOfMcid = cleanArray(mcid).map((obj: AnyObject) => obj?.mcid);

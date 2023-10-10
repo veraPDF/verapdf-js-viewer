@@ -4,7 +4,7 @@ import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-import Bbox, {IBbox, IColorScheme} from '../bbox/Bbox';
+import Bbox, {IBbox, IColorScheme, TreeElementBbox} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
@@ -15,7 +15,7 @@ import './pdfPage.scss';
 
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
-  bboxesAll?: AnyObject[][];
+  treeElementsBboxes?: TreeElementBbox[];
   defaultHeight?: number;
   defaultWidth?: number;
   structure?: AnyObject;
@@ -90,7 +90,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
       const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
-      const allBboxes = createAllBboxes(props.bboxesAll ?? [[]], positionData, annotations, page.view, page.rotate);
+      const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
       const errorBboxes = bboxList.map((bbox) => {
         if (bbox.mcidList) {
           bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
@@ -126,7 +126,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxesErrors(errorBboxes);
     });
     props.onPageLoadSuccess?.(page);
-  }, [bboxList, props.bboxesAll, props.width, props.height, scale]);
+  }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
 
   useEffect(() => {
     if (!loaded && isIntersecting) {

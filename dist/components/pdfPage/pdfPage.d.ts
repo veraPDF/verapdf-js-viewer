@@ -1,11 +1,11 @@
 import React from 'react';
-import { IBbox, IColorScheme } from '../bbox/Bbox';
+import { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { AnyObject } from '../../types/generics';
 import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
     bboxList?: IBbox[];
-    bboxesAll?: AnyObject[][];
+    treeElementsBboxes?: TreeElementBbox[];
     defaultHeight?: number;
     defaultWidth?: number;
     structure?: AnyObject;

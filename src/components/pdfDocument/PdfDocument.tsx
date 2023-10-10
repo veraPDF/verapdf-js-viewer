@@ -57,7 +57,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [structureTree, setStructureTree] = useState({});
   const [parsedTree, setParsedTree] = useState({});
   const [bboxMap, setBboxMap] = useState({});
-  const [bboxesAll, setBboxesAll] = useState({});
+  const [treeElementsBboxes, setTreeElementsBboxes] = useState({});
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
   const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(0);
@@ -84,7 +84,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   useEffect(() => {
     const mcidList = getMcidList(parsedTree ?? {});
-    setBboxesAll(createBboxMap(mcidList));
+    setTreeElementsBboxes(createBboxMap(mcidList));
   }, [parsedTree]);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     if ((id ?? false) === false) {
       return;
     }
-    const entries = Object.entries(isBboxMode ? bboxMap : bboxesAll);
+    const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
     const finder = isBboxMode 
         ? (value: AnyObject[]) => _.find(value, { index: props.activeBboxIndex })
         : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === props.activeBboxId);
@@ -109,7 +109,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       // To be sure that page is loaded before scrolling to the active bbox
       setTimeout(() => scrollToActiveBbox(), 100);
     }
-  }, [props.activeBboxIndex, props.activeBboxId, bboxMap, bboxesAll])
+  }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes])
 
   useEffect(() => {
     if (activeBbox) {
@@ -275,7 +275,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onGetTextError={props.onGetTextError}
           onPageInViewport={onPageInViewport}
           bboxList={bboxMap[page]}
-          bboxesAll={bboxesAll[page]}
+          treeElementsBboxes={treeElementsBboxes[page]}
           groupId={bboxes[props.activeBboxIndex as number]?.groupId}
           activeBboxIndex={props.activeBboxIndex}
           activeBboxId={props.activeBboxId}
@@ -284,7 +284,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           isPageSelected={selectedPage === page}
           onWarning={props.onWarning}
         />
-      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, bboxesAll, props, selectedPage])}
+      ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])}
     </Document>
   );
 }

@@ -12,6 +12,10 @@ export interface IBbox {
     contentItemPath?: number[];
     area?: number;
 }
+export interface IMcidItem {
+    mcid: number;
+    pageIndex: number;
+}
 export interface IColorScheme {
     border?: string;
     borderHovered?: string;
@@ -35,5 +39,6 @@ interface IBboxProps {
     colorScheme?: IColorScheme;
     onClick?(e: any): void;
 }
+export type TreeElementBbox = [Array<IMcidItem | undefined>, string];
 declare const _default: React.NamedExoticComponent<IBboxProps>;
 export default _default;
