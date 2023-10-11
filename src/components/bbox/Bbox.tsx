@@ -3,22 +3,36 @@ import styled from 'styled-components';
 
 import './bbox.scss';
 
-const bboxBg = 'rgba(255, 255, 255, 0)';
 const bboxBorder = 'grey';
-const bboxBorderHover = 'orangered';
 const bboxRelatedBorder = 'rgba(255,176,0,0.5)';
-const bboxBgSelected = 'rgba(255, 69, 0, 0.5)';
-const bboxRelatedBackground = 'rgba(255,176,0,0.3)';
+const bboxStructuredBorder = 'rgba(255,255,255,0)';
+const bboxSelectedStructuredBorder = 'rgba(255,122,0,1)';
+
+const bboxBorderHover = 'orangered';
+const bboxStructuredBorderHover = 'rgba(255,122,0,1)';
+
+const bboxBg = 'rgba(255,255,255,0)';
+const bboxBgSelected = 'rgba(255,69,0,0.5)';
+const bboxBgRelated = 'rgba(255,176,0,0.3)';
+const bboxBgStructured = 'rgba(255,255,255,0)';
+const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
 
 export interface IBbox {
   location: (number | string)[];
-  index: number;
+  id: string,
+  index?: number;
   groupId?: string;
   bboxTitle?: string;
   mcidList?: number[];
   glyphIndex?: number;
   operatorIndex?: number;
   contentItemPath?: number[];
+  area?: number,
+}
+
+export interface IMcidItem {
+  mcid: number;
+  pageIndex: number;
 }
 
 export interface IColorScheme {
@@ -26,17 +40,22 @@ export interface IColorScheme {
   borderHovered?: string;
   borderSelected?: string;
   borderRelated?: string;
+  borderStructured?: string;
+  borderSelectedStructured?: string;
   background?: string;
-  backgroundSelected?: string;
   backgroundHovered?: string;
+  backgroundSelected?: string;
   backgroundRelated?: string;
+  backgroundStructured?: string;
+  backgroundSelectedStructured?: string;
 }
 
 interface IBboxProps {
   bbox: IBbox;
-  related?: boolean;
-  scale: number;
   selected?: boolean;
+  related?: boolean;
+  structured?: boolean;
+  scale: number;
   colorScheme?: IColorScheme;
   onClick?(e: any): void;
 }
@@ -49,6 +68,8 @@ interface IBboxDivProps {
   top?: string;
   colorScheme?: IColorScheme;
 }
+
+export type TreeElementBbox = [Array<IMcidItem | undefined>, string];
 
 const BboxDiv = styled.div`
   left: ${(props: IBboxDivProps) => props.left};
@@ -68,7 +89,18 @@ const BboxDiv = styled.div`
   }
   &.pdf-bbox_related {
     border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundRelated || bboxRelatedBackground};
+    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated};
+  }
+  &.pdf-bbox_structured {
+    &:hover {
+      border-color: ${bboxStructuredBorderHover};
+    }
+    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderStructured || bboxStructuredBorder};
+    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundStructured || bboxBgStructured};
+  }
+  &.pdf-bbox_structured_selected {
+    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder};
+    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured};
   }
 `;
 
@@ -90,7 +122,7 @@ const Bbox: FC<IBboxProps> = (props) => {
     ]
   } ,[props.bbox.location, props.scale]);
 
-  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}`}
+  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}${props.structured ? ' pdf-bbox_structured' : ''}${props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''}`}
                   left={left}
                   bottom={bottom}
                   width={width}

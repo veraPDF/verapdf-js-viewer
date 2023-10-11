@@ -14,15 +14,14 @@ export interface IPageProps {
     renderTextLayer?: boolean;
     scale?: number;
     activeBboxIndex?: number;
+    activeBboxId?: string;
     onPageLoadError?(error: Error): void;
     onPageLoadSuccess?(page: PDFPageProxy): void;
     onPageRenderError?(error: Error): void;
     onPageRenderSuccess?(): void;
     onGetAnnotationsSuccess?(annotations: any): void;
     onGetAnnotationsError?(error: Error): void;
-    onGetTextSuccess?({ items }: {
-        items: TextItem[];
-    }): void;
+    onGetTextSuccess?(items: TextItem[]): void;
     onGetTextError?(error: Error): void;
     onBboxClick?(data: OrNull<TSelectedBboxData>): void;
 }
