@@ -22,7 +22,7 @@ export interface IPageProps {
   onPageRenderSuccess?(): void;
   onGetAnnotationsSuccess?(annotations: any): void;
   onGetAnnotationsError?(error: Error): void;
-  onGetTextSuccess?(items: TextItem[]): void;
+  onGetTextSuccess?({ items }: { items: TextItem[] }): void;
   onGetTextError?(error: Error): void;
   onBboxClick?(data: OrNull<TSelectedBboxData>): void;
 }
