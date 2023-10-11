@@ -4,17 +4,18 @@ import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-import Bbox, {IBbox, IColorScheme} from '../bbox/Bbox';
+import Bbox, {IBbox, IColorScheme, TreeElementBbox} from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
-import { getBboxForGlyph, parseMcidToBbox, checkIsBboxOutOfThePage } from '../../services/bboxService';
+import { getBboxForGlyph, parseMcidToBbox, createAllBboxes, checkIsBboxOutOfThePage } from '../../services/bboxService';
 import { WARNING_CODES } from "../../services/constants";
 
 import './pdfPage.scss';
 
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
+  treeElementsBboxes?: TreeElementBbox[];
   defaultHeight?: number;
   defaultWidth?: number;
   structure?: AnyObject;
@@ -46,7 +47,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const { scrollIntoPage } = useContext(ViewerContext);
   const { bboxList = [], scale = 1 } = props;
   const intersectionRef = useRef(null);
-  const [bboxes, setBboxes] = useState<IBbox[]>([]);
+  const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
+  const [bboxesErrors, setBboxesErrors] = useState<IBbox[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [pageScale, setPageScale] = useState(scale);
   const [pageViewport, setPageViewport] = useState<number[]>([]);
@@ -67,9 +69,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const onPageClick = useCallback(() => {
     props.onBboxClick?.(null);
   }, []);
-  const onBboxClick = useCallback((index: any) => (e: Event) => {
+  const onBboxClick = useCallback((index: any, id: any) => (e: Event) => {
     e.stopPropagation();
-    props.onBboxClick?.({ index });
+    props.onBboxClick?.({ index, id });
   }, [props.onBboxClick]);
   const onPageRenderSuccess = useCallback(() => {
     setIsRendered(true);
@@ -88,7 +90,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
       const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
-      const bboxes = bboxList.map((bbox) => {
+      const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
+      const errorBboxes = bboxList.map((bbox) => {
         if (bbox.mcidList) {
           bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
         } else if (bbox.contentItemPath) {
@@ -119,10 +122,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
 
         return bbox;
       });
-      setBboxes(bboxes);
+      setBboxesAll(allBboxes);
+      setBboxesErrors(errorBboxes);
     });
     props.onPageLoadSuccess?.(page);
-  }, [bboxList, props.width, props.height, scale]);
+  }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
 
   useEffect(() => {
     if (!loaded && isIntersecting) {
@@ -146,14 +150,22 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
 
     setPageScale(scale);
   }, [pageViewport, scale, props.width, props.height]);
-  const isBboxSelected = useCallback((bbox: IBbox) => props.activeBboxIndex === bbox.index, [props.activeBboxIndex]);
+
+  const isBboxSelected = useCallback((bbox: IBbox) => {
+    const isBboxMode = !_.isNil(props.activeBboxIndex);
+    return isBboxMode ? bbox.index === props.activeBboxIndex : bbox?.id === props?.activeBboxId;
+  }, [props.activeBboxIndex, props.activeBboxId]);
   const isRelated = useCallback((bbox: IBbox) => {
     const [, , activeId] = props?.groupId?.split('-') || [];
     const [, , bboxId] = bbox?.groupId?.split('-') || [];
     return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
   }, [props.groupId, isBboxSelected]);
-
-  const activeBboxes = useMemo(() => bboxes.filter((bbox) => bbox.index === props.activeBboxIndex), [bboxes, props.activeBboxIndex]);
+  const isBboxStructured = useCallback((bbox: IBbox) => _.isNil(bbox.index), []);
+  const bboxes = useMemo(() => [...bboxesAll, ...bboxesErrors], [bboxesErrors, bboxesAll]);
+  const activeBboxes = useMemo(() => bboxes.filter((bbox) => {
+    const isBboxMode = !_.isNil(props.activeBboxIndex);
+    return isBboxMode ? bbox.index === props.activeBboxIndex : bbox?.id === props?.activeBboxId
+  }), [props.activeBboxIndex, props.activeBboxId]);
 
   useEffect(
     useCallback(() => {
@@ -196,7 +208,15 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextError={props.onGetTextError}
         />
         {isRendered ? bboxes.map((bbox: IBbox, index) => (
-          <Bbox key={index} bbox={bbox} onClick={onBboxClick(bbox.index)} selected={isBboxSelected(bbox)} related={isRelated(bbox)} scale={pageScale} colorScheme={props.colorScheme} />
+          <Bbox
+            key={index}
+            bbox={bbox}
+            onClick={onBboxClick(bbox.index, bbox.id)}
+            structured={isBboxStructured(bbox)}
+            selected={isBboxSelected(bbox)}
+            related={isRelated(bbox)}
+            scale={pageScale}
+            colorScheme={props.colorScheme} />
         )) : null}
       </> : null}
     </StyledPdfPage>
