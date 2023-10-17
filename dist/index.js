@@ -77346,7 +77346,7 @@ var PdfDocument = function (props) {
             switch (_b.label) {
                 case 0:
                     setStructureTree(data._pdfInfo.structureTree);
-                    parsedTree = parseTree(data._pdfInfo.structureTree);
+                    parsedTree = parseTree(___default["default"].cloneDeep(data._pdfInfo.structureTree));
                     treeWithMcidList = structurizeMcidTree(parsedTree);
                     treeWithIds = setTreeIds(treeWithMcidList !== null && treeWithMcidList !== void 0 ? treeWithMcidList : {});
                     setParsedTree(treeWithIds !== null && treeWithIds !== void 0 ? treeWithIds : {});

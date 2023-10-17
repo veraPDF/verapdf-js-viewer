@@ -125,7 +125,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
     setStructureTree(data._pdfInfo.structureTree);
-    const parsedTree = parseTree(data._pdfInfo.structureTree);
+    const parsedTree = parseTree(_.cloneDeep(data._pdfInfo.structureTree));
     const treeWithMcidList = structurizeMcidTree(parsedTree);
     const treeWithIds = setTreeIds(treeWithMcidList ?? {});
     setParsedTree(treeWithIds ?? {});
