@@ -35,6 +35,7 @@ interface IBboxProps {
     selected?: boolean;
     related?: boolean;
     structured?: boolean;
+    enabled: boolean;
     scale: number;
     colorScheme?: IColorScheme;
     onClick?(e: any): void;

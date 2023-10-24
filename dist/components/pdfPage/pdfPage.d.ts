@@ -6,6 +6,7 @@ import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
     bboxList?: IBbox[];
     treeElementsBboxes?: TreeElementBbox[];
+    isTreeBboxesVisible: boolean;
     defaultHeight?: number;
     defaultWidth?: number;
     structure?: AnyObject;
