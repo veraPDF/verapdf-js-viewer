@@ -19,4 +19,8 @@
   &_related {
     z-index: 99;
   }
+
+  &_disabled {
+    display: none;
+  }
 }

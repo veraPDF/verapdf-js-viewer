@@ -55,6 +55,7 @@ interface IBboxProps {
   selected?: boolean;
   related?: boolean;
   structured?: boolean;
+  enabled: boolean;
   scale: number;
   colorScheme?: IColorScheme;
   onClick?(e: any): void;
@@ -122,7 +123,7 @@ const Bbox: FC<IBboxProps> = (props) => {
     ]
   } ,[props.bbox.location, props.scale]);
 
-  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}${props.structured ? ' pdf-bbox_structured' : ''}${props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''}`}
+  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}${props.structured ? ' pdf-bbox_structured' : ''}${props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''}${props.structured && !props.enabled ? ' pdf-bbox_disabled' : ''}`}
                   left={left}
                   bottom={bottom}
                   width={width}

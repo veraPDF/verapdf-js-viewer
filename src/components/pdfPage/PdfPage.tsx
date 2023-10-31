@@ -16,6 +16,7 @@ import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
   treeElementsBboxes?: TreeElementBbox[];
+  isTreeBboxesVisible: boolean;
   defaultHeight?: number;
   defaultWidth?: number;
   structure?: AnyObject;
@@ -215,6 +216,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
             structured={isBboxStructured(bbox)}
             selected={isBboxSelected(bbox)}
             related={isRelated(bbox)}
+            enabled={props.isTreeBboxesVisible}
             scale={pageScale}
             colorScheme={props.colorScheme} />
         )) : null}
