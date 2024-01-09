@@ -12,12 +12,7 @@
   }
 
   &_selected {
-    z-index: 100;
     background: $bbox-bg-color--selected;
-  }
-
-  &_related {
-    z-index: 99;
   }
 
   &_disabled {

@@ -122,7 +122,7 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 100;\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_related {\n  z-index: 99;\n}\n.pdf-bbox_disabled {\n  display: none;\n}");
+___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_disabled {\n  display: none;\n}");
 
 var bboxBorder = 'grey';
 var bboxRelatedBorder = 'rgba(255,176,0,0.5)';
@@ -928,7 +928,16 @@ var PdfPage = function (props) {
         return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
     }, [props.groupId, isBboxSelected]);
     var isBboxStructured = React.useCallback(function (bbox) { return ___default["default"].isNil(bbox.index); }, []);
-    var bboxes = React.useMemo(function () { return __spreadArray(__spreadArray([], bboxesAll, true), bboxesErrors, true); }, [bboxesErrors, bboxesAll]);
+    var bboxes = React.useMemo(function () {
+        return __spreadArray(__spreadArray([], bboxesAll, true), bboxesErrors, true).sort(function (_a, _b) {
+            var locationAll = _a.location;
+            var locationError = _b.location;
+            var getArea = function (arr) { return +(+(arr[2])).toFixed(4) * +(+(arr[3])).toFixed(4); };
+            var areaAll = getArea(locationAll);
+            var areaError = getArea(locationError);
+            return areaAll < areaError ? 1 : areaAll > areaError ? -1 : 0;
+        });
+    }, [bboxesErrors, bboxesAll]);
     var activeBboxes = React.useMemo(function () { return bboxes.filter(function (bbox) {
         var isBboxMode = !___default["default"].isNil(props.activeBboxIndex);
         return isBboxMode ? bbox.index === props.activeBboxIndex : (bbox === null || bbox === void 0 ? void 0 : bbox.id) === (props === null || props === void 0 ? void 0 : props.activeBboxId);
