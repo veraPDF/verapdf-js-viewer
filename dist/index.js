@@ -929,13 +929,18 @@ var PdfPage = function (props) {
     }, [props.groupId, isBboxSelected]);
     var isBboxStructured = React.useCallback(function (bbox) { return ___default["default"].isNil(bbox.index); }, []);
     var bboxes = React.useMemo(function () {
+        /*
+          Sorting bboxes in descending order of area
+          Note: if the area of error bbox equal to the area of structure bbox,
+          then we assume that the structure bbox has a larger area
+        */
         return __spreadArray(__spreadArray([], bboxesAll, true), bboxesErrors, true).sort(function (_a, _b) {
             var locationAll = _a.location;
             var locationError = _b.location;
-            var getArea = function (arr) { return +(+(arr[2])).toFixed(4) * +(+(arr[3])).toFixed(4); };
+            var getArea = function (arr) { return ___default["default"].round(+arr[2], 4) * ___default["default"].round(+arr[3], 4); };
             var areaAll = getArea(locationAll);
             var areaError = getArea(locationError);
-            return areaAll < areaError ? 1 : areaAll > areaError ? -1 : 0;
+            return areaAll < areaError ? 1 : (areaAll > areaError ? -1 : 0);
         });
     }, [bboxesErrors, bboxesAll]);
     var activeBboxes = React.useMemo(function () { return bboxes.filter(function (bbox) {

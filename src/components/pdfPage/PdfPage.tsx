@@ -163,12 +163,17 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, [props.groupId, isBboxSelected]);
   const isBboxStructured = useCallback((bbox: IBbox) => _.isNil(bbox.index), []);
   const bboxes = useMemo(() => {
+    /*
+      Sorting bboxes in descending order of area
+      Note: if the area of error bbox equal to the area of structure bbox,
+      then we assume that the structure bbox has a larger area
+    */
     return [...bboxesAll, ...bboxesErrors].sort(
       ({ location: locationAll }, { location: locationError }) => {
-        const getArea = (arr: Array<number | string>) => +(+(arr[2])).toFixed(4) * +(+(arr[3])).toFixed(4);
+        const getArea = (arr: Array<number | string>): number => _.round(+arr[2], 4) * _.round(+arr[3], 4);
         const areaAll = getArea(locationAll);
         const areaError = getArea(locationError);
-        return areaAll < areaError ? 1 : areaAll > areaError ? -1 : 0;
+        return areaAll < areaError ? 1 : (areaAll > areaError ? -1 : 0);
       })
   }, [bboxesErrors, bboxesAll]);
   const activeBboxes = useMemo(() => bboxes.filter((bbox) => {
