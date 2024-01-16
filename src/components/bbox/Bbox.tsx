@@ -1,4 +1,4 @@
-import React, {FC, memo, useMemo} from 'react';
+import React, { FC, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import './bbox.scss';
@@ -55,7 +55,8 @@ interface IBboxProps {
   selected?: boolean;
   related?: boolean;
   structured?: boolean;
-  enabled: boolean;
+  structuredEnabled: boolean;
+  erroredEnabled: boolean;
   scale: number;
   colorScheme?: IColorScheme;
   onClick?(e: any): void;
@@ -121,9 +122,19 @@ const Bbox: FC<IBboxProps> = (props) => {
         ? `calc(100% - ${parseFloat(props.bbox.location[1] as string) * props.scale}px)`
         : 'auto',
     ]
-  } ,[props.bbox.location, props.scale]);
+  }, [props.bbox.location, props.scale]);
 
-  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}${props.structured ? ' pdf-bbox_structured' : ''}${props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''}${props.structured && !props.enabled ? ' pdf-bbox_disabled' : ''}`}
+  const isSelected = useMemo(() => props.selected ? ' pdf-bbox_selected' : '', [props.selected]);
+  const isRelated = useMemo(() => props.related ? ' pdf-bbox_related' : '', [props.related]);
+  const isStructured = useMemo(() => props.structured ? ' pdf-bbox_structured' : '', [props.structured]);
+  const isStructuredSelected = useMemo(() =>
+    props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''
+  , [props.structured, props.selected]);
+  const isEnabled = useMemo(() =>
+    props.structured && !props.structuredEnabled || !props.structured && !props.erroredEnabled ? ' pdf-bbox_disabled' : ''
+  , [props.structured, props.structuredEnabled, props.erroredEnabled]);
+
+  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isEnabled}`}
                   left={left}
                   bottom={bottom}
                   width={width}

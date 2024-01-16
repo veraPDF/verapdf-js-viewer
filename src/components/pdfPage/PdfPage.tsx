@@ -1,10 +1,10 @@
-import React, {FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo} from 'react';
+import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo } from 'react';
 import { Page, PDFPageProxy } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-import Bbox, {IBbox, IColorScheme, TreeElementBbox} from '../bbox/Bbox';
+import Bbox, { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { AnyObject } from '../../types/generics';
@@ -16,6 +16,7 @@ import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
   treeElementsBboxes?: TreeElementBbox[];
+  visibleErrorBboxes?: number[];
   isTreeBboxesVisible: boolean;
   defaultHeight?: number;
   defaultWidth?: number;
@@ -162,6 +163,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
   }, [props.groupId, isBboxSelected]);
   const isBboxStructured = useCallback((bbox: IBbox) => _.isNil(bbox.index), []);
+  const isBboxErroredEnabled = useCallback((bbox: IBbox) => {
+    if (_.isNil(props.visibleErrorBboxes) || _.isNil(bbox) || _.isNil(bbox.index)) return true;
+    return props.visibleErrorBboxes.includes(bbox.index);
+  }, [props.visibleErrorBboxes]);
+
   const bboxes = useMemo(() => {
     /*
       Sorting bboxes in descending order of area
@@ -229,7 +235,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
             structured={isBboxStructured(bbox)}
             selected={isBboxSelected(bbox)}
             related={isRelated(bbox)}
-            enabled={props.isTreeBboxesVisible}
+            structuredEnabled={props.isTreeBboxesVisible}
+            erroredEnabled={isBboxErroredEnabled(bbox)}
             scale={pageScale}
             colorScheme={props.colorScheme} />
         )) : null}

@@ -153,7 +153,16 @@ var Bbox = function (props) {
                 : 'auto',
         ];
     }, [props.bbox.location, props.scale]), left = _a[0], bottom = _a[1], width = _a[2], height = _a[3], top = _a[4];
-    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox".concat(props.selected ? ' pdf-bbox_selected' : '').concat(props.related ? ' pdf-bbox_related' : '').concat(props.structured ? ' pdf-bbox_structured' : '').concat(props.structured && props.selected ? ' pdf-bbox_structured_selected' : '').concat(props.structured && !props.enabled ? ' pdf-bbox_disabled' : ''), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
+    var isSelected = React.useMemo(function () { return props.selected ? ' pdf-bbox_selected' : ''; }, [props.selected]);
+    var isRelated = React.useMemo(function () { return props.related ? ' pdf-bbox_related' : ''; }, [props.related]);
+    var isStructured = React.useMemo(function () { return props.structured ? ' pdf-bbox_structured' : ''; }, [props.structured]);
+    var isStructuredSelected = React.useMemo(function () {
+        return props.structured && props.selected ? ' pdf-bbox_structured_selected' : '';
+    }, [props.structured, props.selected]);
+    var isEnabled = React.useMemo(function () {
+        return props.structured && !props.structuredEnabled || !props.structured && !props.erroredEnabled ? ' pdf-bbox_disabled' : '';
+    }, [props.structured, props.structuredEnabled, props.erroredEnabled]);
+    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox".concat(isSelected).concat(isRelated).concat(isStructured).concat(isStructuredSelected).concat(isEnabled), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
 };
 var Bbox$1 = React.memo(Bbox);
 var templateObject_1$1;
@@ -928,6 +937,11 @@ var PdfPage = function (props) {
         return props.groupId ? activeId === bboxId && !isBboxSelected(bbox) : false;
     }, [props.groupId, isBboxSelected]);
     var isBboxStructured = React.useCallback(function (bbox) { return ___default["default"].isNil(bbox.index); }, []);
+    var isBboxErroredEnabled = React.useCallback(function (bbox) {
+        if (___default["default"].isNil(props.visibleErrorBboxes) || ___default["default"].isNil(bbox) || ___default["default"].isNil(bbox.index))
+            return true;
+        return props.visibleErrorBboxes.includes(bbox.index);
+    }, [props.visibleErrorBboxes]);
     var bboxes = React.useMemo(function () {
         /*
           Sorting bboxes in descending order of area
@@ -955,7 +969,7 @@ var PdfPage = function (props) {
     }, [activeBboxes, scale, props.page]), [activeBboxes]);
     return (React__default["default"].createElement(StyledPdfPage, { className: "pdf-page pdf-page_rendered".concat(props.isPageSelected ? ' pdf-page_selected' : ''), "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default["default"].createElement(React__default["default"].Fragment, null,
         React__default["default"].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError }),
-        isRendered ? bboxes.map(function (bbox, index) { return (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index, bbox.id), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isRelated(bbox), enabled: props.isTreeBboxesVisible, scale: pageScale, colorScheme: props.colorScheme })); }) : null) : null));
+        isRendered ? bboxes.map(function (bbox, index) { return (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, onClick: onBboxClick(bbox.index, bbox.id), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isRelated(bbox), structuredEnabled: props.isTreeBboxesVisible, erroredEnabled: isBboxErroredEnabled(bbox), scale: pageScale, colorScheme: props.colorScheme })); }) : null) : null));
 };
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1;
@@ -65765,7 +65779,7 @@ var PdfDocument = function (props) {
             workerSrc: pdf_worker_entry,
         } }, React.useMemo(function () { return loaded ? shownPages.map(function (page) {
         var _a;
-        return React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: treeElementsBboxes[page], groupId: (_a = bboxes[props.activeBboxIndex]) === null || _a === void 0 ? void 0 : _a.groupId, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning });
+        return React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: props.onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: treeElementsBboxes[page], visibleErrorBboxes: props.visibleErrorBboxes, groupId: (_a = bboxes[props.activeBboxIndex]) === null || _a === void 0 ? void 0 : _a.groupId, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning });
     }) : null; }, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
