@@ -20,6 +20,7 @@ const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
 export interface IBbox {
   location: (number | string)[];
   id: string,
+  isVisible?: boolean;
   index?: number;
   groupId?: string;
   bboxTitle?: string;
@@ -52,11 +53,10 @@ export interface IColorScheme {
 
 interface IBboxProps {
   bbox: IBbox;
+  disabled: boolean;
   selected?: boolean;
   related?: boolean;
   structured?: boolean;
-  structuredEnabled: boolean;
-  erroredEnabled: boolean;
   scale: number;
   colorScheme?: IColorScheme;
   onClick?(e: any): void;
@@ -126,15 +126,11 @@ const Bbox: FC<IBboxProps> = (props) => {
 
   const isSelected = useMemo(() => props.selected ? ' pdf-bbox_selected' : '', [props.selected]);
   const isRelated = useMemo(() => props.related ? ' pdf-bbox_related' : '', [props.related]);
+  const isDisabled = useMemo(() => props.disabled ? ' pdf-bbox_disabled' : '', [props.disabled]);
   const isStructured = useMemo(() => props.structured ? ' pdf-bbox_structured' : '', [props.structured]);
-  const isStructuredSelected = useMemo(() =>
-    props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''
-  , [props.structured, props.selected]);
-  const isEnabled = useMemo(() =>
-    props.structured && !props.structuredEnabled || !props.structured && !props.erroredEnabled ? ' pdf-bbox_disabled' : ''
-  , [props.structured, props.structuredEnabled, props.erroredEnabled]);
+  const isStructuredSelected = useMemo(() => props.structured && props.selected ? ' pdf-bbox_structured_selected' : '', [props.structured, props.selected]);
 
-  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isEnabled}`}
+  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isDisabled}`}
                   left={left}
                   bottom={bottom}
                   width={width}

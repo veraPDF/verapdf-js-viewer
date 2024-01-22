@@ -10,7 +10,6 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     activeBboxIndex?: number;
     activeBboxId?: string;
     bboxes: IBboxLocation[];
-    visibleErrorBboxes?: number[];
     isTreeBboxesVisible: boolean;
     colorScheme?: IColorScheme;
     onBboxesParsed?(pages: number[]): void;

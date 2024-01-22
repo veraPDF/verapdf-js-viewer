@@ -43,7 +43,6 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   activeBboxIndex?: number;
   activeBboxId?: string;
   bboxes: IBboxLocation[];
-  visibleErrorBboxes?: number[];
   isTreeBboxesVisible: boolean;
   colorScheme?: IColorScheme;
   onBboxesParsed?(pages: number[]): void;
@@ -278,7 +277,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onPageInViewport={onPageInViewport}
           bboxList={bboxMap[page]}
           treeElementsBboxes={treeElementsBboxes[page]}
-          visibleErrorBboxes={props.visibleErrorBboxes}
           groupId={bboxes[props.activeBboxIndex as number]?.groupId}
           activeBboxIndex={props.activeBboxIndex}
           activeBboxId={props.activeBboxId}

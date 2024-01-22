@@ -51405,8 +51405,7 @@ class ExtendedCatalog extends Catalog {
     }
     if ((0, _primitives.isDict)(el) && el.has('K')) {
       let name = el.has('S') ? el.get('S').name : null;
-      let isRoleMapped = this.roleMap.get(name) !== undefined;
-      let roleName = isRoleMapped ? this.roleMap.get(name).name : name;
+      let roleName = this.getRoleName(el, name);
       return {
         name: name ? (0, _util.stringToUTF8String)(name) : null,
         roleName: roleName ? (0, _util.stringToUTF8String)(roleName) : null,
@@ -51461,6 +51460,16 @@ class ExtendedCatalog extends Catalog {
         pageIndex: page
       };
     }
+    if ((0, _primitives.isDict)(el) && el.has('S')) {
+      let name = el.get('S').name;
+      let roleName = this.getRoleName(el, name);
+      return {
+        name: name ? (0, _util.stringToUTF8String)(name) : null,
+        roleName: roleName ? (0, _util.stringToUTF8String)(roleName) : null,
+        children: [],
+        ref: ref
+      };
+    }
   }
   getPages(pages) {
     let pagesArray = [];
@@ -51485,6 +51494,14 @@ class ExtendedCatalog extends Catalog {
   }
   getRoleMap(tree) {
     return tree !== null && (0, _primitives.isDict)(tree) && tree.has('RoleMap') ? tree.get('RoleMap') : new Map();
+  }
+  getRoleName(el, name) {
+    let namespace = (0, _primitives.isDict)(el) && el.has('NS') ? el.get('NS') : null;
+    let roleNameNS = (0, _primitives.isDict)(namespace) && namespace.has('RoleMapNS') ? namespace.get('RoleMapNS') : null;
+    let roleNameNSArray = (0, _primitives.isDict)(roleNameNS) && roleNameNS.has(name) ? roleNameNS.get(name) : null;
+    let roleName_v1 = this.roleMap.get(name) ? this.roleMap.get(name).name : null;
+    let roleName_v2 = Array.isArray(roleNameNSArray) && roleNameNSArray.length > 0 && roleNameNSArray[0].hasOwnProperty('name') ? roleNameNSArray[0].name : null;
+    return roleName_v1 || roleName_v2 || name;
   }
   get structureTree() {
     let structureTree = null;

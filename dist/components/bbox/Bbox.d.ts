@@ -3,6 +3,7 @@ import './bbox.scss';
 export interface IBbox {
     location: (number | string)[];
     id: string;
+    isVisible?: boolean;
     index?: number;
     groupId?: string;
     bboxTitle?: string;
@@ -32,11 +33,10 @@ export interface IColorScheme {
 }
 interface IBboxProps {
     bbox: IBbox;
+    disabled: boolean;
     selected?: boolean;
     related?: boolean;
     structured?: boolean;
-    structuredEnabled: boolean;
-    erroredEnabled: boolean;
     scale: number;
     colorScheme?: IColorScheme;
     onClick?(e: any): void;
