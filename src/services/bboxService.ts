@@ -67,7 +67,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
           ...(bboxMap[bboxPosition.pageIndex + 1] || []),
           {
             index,
-            isVisible: bbox.isVisible,
+            isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
             operatorIndex: bboxPosition.operatorIndex,
             glyphIndex: bboxPosition.glyphIndex,
             bboxTitle: bbox.bboxTitle,
@@ -80,7 +80,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             ...(bboxMap[pageIndex + 1] || []),
             {
               index,
-              isVisible: bbox.isVisible,
+              isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
               mcidList,
               contentItemPath,
               groupId: bbox.groupId || undefined,
@@ -95,7 +95,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             ...(bboxMap[bboxWithLocation.page] || []),
             {
               index,
-              isVisible: bbox.isVisible,
+              isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
               location: bboxWithLocation.location,
               groupId: bbox.groupId || undefined,
               bboxTitle: bbox.bboxTitle,

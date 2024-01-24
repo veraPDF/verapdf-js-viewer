@@ -7,9 +7,9 @@ import { scrollToActiveBbox } from './services/bboxService';
 import './styles.scss'
 
 export interface IBboxLocation {
-  isVisible: boolean;
   page: number;
   location: string;
+  isVisible?: boolean;
   groupId?: string;
   bboxTitle?: string;
 }

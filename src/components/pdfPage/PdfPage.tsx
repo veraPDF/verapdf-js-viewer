@@ -134,7 +134,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxesErrors((prev) => _.map(prev, (bbox, index) => {
         return {
           ...bbox,
-          isVisible: bboxList[index].isVisible
+          isVisible: bboxList[index].hasOwnProperty('isVisible') ? bboxList[index].isVisible : true,
         };
       }));
     }

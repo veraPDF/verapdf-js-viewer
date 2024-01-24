@@ -238,7 +238,7 @@ var buildBboxMap = function (bboxes, structure) {
                 bboxMap[bboxPosition.pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[bboxPosition.pageIndex + 1] || []), true), [
                     {
                         index: index,
-                        isVisible: bbox.isVisible,
+                        isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                         operatorIndex: bboxPosition.operatorIndex,
                         glyphIndex: bboxPosition.glyphIndex,
                         bboxTitle: bbox.bboxTitle,
@@ -252,7 +252,7 @@ var buildBboxMap = function (bboxes, structure) {
                     bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || []), true), [
                         {
                             index: index,
-                            isVisible: bbox.isVisible,
+                            isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                             mcidList: mcidList,
                             contentItemPath: contentItemPath,
                             groupId: bbox.groupId || undefined,
@@ -267,7 +267,7 @@ var buildBboxMap = function (bboxes, structure) {
                     bboxMap[bboxWithLocation.page] = __spreadArray(__spreadArray([], (bboxMap[bboxWithLocation.page] || []), true), [
                         {
                             index: index,
-                            isVisible: bbox.isVisible,
+                            isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                             location: bboxWithLocation.location,
                             groupId: bbox.groupId || undefined,
                             bboxTitle: bbox.bboxTitle,
@@ -904,7 +904,7 @@ var PdfPage = function (props) {
     React.useEffect(function () {
         if (bboxList.length) {
             setBboxesErrors(function (prev) { return ___default["default"].map(prev, function (bbox, index) {
-                return __assign(__assign({}, bbox), { isVisible: bboxList[index].isVisible });
+                return __assign(__assign({}, bbox), { isVisible: bboxList[index].hasOwnProperty('isVisible') ? bboxList[index].isVisible : true });
             }); });
         }
     }, [bboxList]);
