@@ -1,6 +1,6 @@
 {
   "name": "verapdf-js-viewer",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -43,13 +43,13 @@
     "dist"
   ],
   "dependencies": {
-    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.16.105-taggedPdf-0.1.14",
+    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.16.105-taggedPdf-0.1.15",
     "react-pdf": "6.2.2",
     "react-use": "^17.1.0",
     "styled-components": "^5.2.1",
     "use-intersection": "^0.2.1"
   },
   "resolutions": {
-    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.16.105-taggedPdf-0.1.14"
+    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.16.105-taggedPdf-0.1.15"
   }
 }

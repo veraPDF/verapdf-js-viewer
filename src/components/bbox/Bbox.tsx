@@ -1,4 +1,4 @@
-import React, {FC, memo, useMemo} from 'react';
+import React, { FC, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import './bbox.scss';
@@ -20,6 +20,7 @@ const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
 export interface IBbox {
   location: (number | string)[];
   id: string,
+  isVisible?: boolean;
   index?: number;
   groupId?: string;
   bboxTitle?: string;
@@ -52,10 +53,10 @@ export interface IColorScheme {
 
 interface IBboxProps {
   bbox: IBbox;
+  disabled: boolean;
   selected?: boolean;
   related?: boolean;
   structured?: boolean;
-  enabled: boolean;
   scale: number;
   colorScheme?: IColorScheme;
   onClick?(e: any): void;
@@ -121,9 +122,15 @@ const Bbox: FC<IBboxProps> = (props) => {
         ? `calc(100% - ${parseFloat(props.bbox.location[1] as string) * props.scale}px)`
         : 'auto',
     ]
-  } ,[props.bbox.location, props.scale]);
+  }, [props.bbox.location, props.scale]);
 
-  return <BboxDiv className={`pdf-bbox${props.selected ? ' pdf-bbox_selected' : ''}${props.related ? ' pdf-bbox_related' : ''}${props.structured ? ' pdf-bbox_structured' : ''}${props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''}${props.structured && !props.enabled ? ' pdf-bbox_disabled' : ''}`}
+  const isSelected = useMemo(() => props.selected ? ' pdf-bbox_selected' : '', [props.selected]);
+  const isRelated = useMemo(() => props.related ? ' pdf-bbox_related' : '', [props.related]);
+  const isDisabled = useMemo(() => props.disabled ? ' pdf-bbox_disabled' : '', [props.disabled]);
+  const isStructured = useMemo(() => props.structured ? ' pdf-bbox_structured' : '', [props.structured]);
+  const isStructuredSelected = useMemo(() => props.structured && props.selected ? ' pdf-bbox_structured_selected' : '', [props.structured, props.selected]);
+
+  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isDisabled}`}
                   left={left}
                   bottom={bottom}
                   width={width}

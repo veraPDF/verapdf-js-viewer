@@ -9,6 +9,7 @@ import './styles.scss'
 export interface IBboxLocation {
   page: number;
   location: string;
+  isVisible?: boolean;
   groupId?: string;
   bboxTitle?: string;
 }
