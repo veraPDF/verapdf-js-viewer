@@ -36,6 +36,12 @@ export interface IMcidItem {
   pageIndex: number;
 }
 
+export interface IAnnotItem {
+  pageIndex: number;
+  annotIndex: number;
+  rect: number[];
+}
+
 export interface IColorScheme {
   border?: string;
   borderHovered?: string;

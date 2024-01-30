@@ -5,7 +5,7 @@
   border: 2px solid $bbox-border-color;
   box-sizing: border-box;
   cursor: pointer;
-  z-index: 2;
+  z-index: 3;
 
   &:hover {
     border-color: $bbox-border-color--hover;
@@ -17,5 +17,13 @@
 
   &_disabled {
     display: none;
+  }
+}
+
+section[data-annotation-id] {
+  z-index: 2 !important;
+
+  * {
+    color: transparent !important;
   }
 }
