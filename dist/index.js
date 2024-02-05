@@ -122,7 +122,7 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 2;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_disabled {\n  display: none;\n}");
+___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 3;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_disabled {\n  display: none;\n}\n\nsection[data-annotation-id] {\n  z-index: 2 !important;\n}\nsection[data-annotation-id] * {\n  color: transparent !important;\n}");
 
 var bboxBorder = 'grey';
 var bboxRelatedBorder = 'rgba(255,176,0,0.5)';
@@ -188,15 +188,24 @@ var cleanArray = function (arr) {
     }
     return arr;
 };
-var splitChildren = function (children) {
+var groupChildren = function (children) {
+    var _a, _b, _c;
     if (___default["default"].isNil(children))
         children = [];
-    var _a = ___default["default"].reduce(cleanArray(children), function (arr, child) {
-        if (!___default["default"].isNil(child))
-            arr[+child.hasOwnProperty('mcid')].push(child);
-        return arr;
-    }, [[], []]), arrNodes = _a[0], arrMcid = _a[1];
-    return [arrNodes, arrMcid];
+    var group = ___default["default"].groupBy(cleanArray(children), function (child) {
+        if (child.hasOwnProperty('name'))
+            return 'nodeList';
+        if (child.hasOwnProperty('mcid'))
+            return 'mcidList';
+        if (child.hasOwnProperty('rect'))
+            return 'annotList';
+        return null;
+    });
+    return [
+        (_a = group.nodeList) !== null && _a !== void 0 ? _a : [],
+        (_b = group.mcidList) !== null && _b !== void 0 ? _b : [],
+        (_c = group.annotList) !== null && _c !== void 0 ? _c : [],
+    ];
 };
 var getMultiBboxPagesObj = function (mcidList) {
     var mcidListPages = [];
@@ -291,7 +300,7 @@ var parseTree = function (tree) {
     }
     return tree;
 };
-var structurizeMcidTree = function (node) {
+var structurizeTree = function (node) {
     if (___default["default"].isNil(node))
         return null;
     if (___default["default"].isNil(node.children)) {
@@ -304,35 +313,49 @@ var structurizeMcidTree = function (node) {
             node.mcidList = [node.children];
             node.children = [];
         }
+        else if (node.children.hasOwnProperty('rect')) {
+            node.annotList = [node.children];
+            node.children = [];
+        }
         else {
-            node.children = [structurizeMcidTree(node.children)];
+            node.children = [structurizeTree(node.children)];
             node.mcidList = updateMcidList(node.mcidList, node.children);
         }
     }
     else {
-        var _a = splitChildren(node.children), arrNodes = _a[0], arrMcid = _a[1];
-        node.children = ___default["default"].map(arrNodes, function (child) { return structurizeMcidTree(child); });
-        node.mcidList = updateMcidList(arrMcid, node.children);
+        var _a = groupChildren(node.children), nodeList = _a[0], mcidList = _a[1], annotList = _a[2];
+        node.children = ___default["default"].map(nodeList, function (child) { return structurizeTree(child); });
+        node.mcidList = updateMcidList(mcidList, node.children);
+        if (annotList.length) {
+            node.annotList = annotList;
+        }
     }
     node.children = cleanArray(node.children);
     return node;
 };
-var setTreeIds = function (node, id) {
+var setTreeIds = function (node, annotMap, id) {
+    if (annotMap === void 0) { annotMap = {}; }
     if (id === void 0) { id = '0'; }
     if (___default["default"].isNil(node))
-        return null;
+        return [null, annotMap];
     node.id = id;
+    if (node === null || node === void 0 ? void 0 : node.hasOwnProperty('annotList')) {
+        node.annotList.forEach(function (annot) {
+            var index = "".concat(annot.pageIndex, ":").concat(annot.annotIndex);
+            annotMap[index] = id;
+        });
+    }
     if (___default["default"].isNil(node === null || node === void 0 ? void 0 : node.children))
         node.children = [];
     if (!(node === null || node === void 0 ? void 0 : node.children.length)) {
         node.final = true;
-        return node;
+        return [node, annotMap];
     }
     if (!(node.children instanceof Array))
-        node.children = [setTreeIds(node.children, "".concat(id, ":").concat(0))];
+        node.children = [setTreeIds(node.children, annotMap, "".concat(id, ":0"))[0]];
     else
-        node.children = ___default["default"].map(node.children, function (child, index) { return setTreeIds(child, "".concat(id, ":").concat(index)); });
-    return node;
+        node.children = ___default["default"].map(node.children, function (child, index) { return setTreeIds(child, annotMap, "".concat(id, ":").concat(index))[0]; });
+    return [node, annotMap];
 };
 var getMcidList = function (node, mcidList) {
     if (mcidList === void 0) { mcidList = []; }
@@ -52392,9 +52415,12 @@ class ExtendedCatalog extends Catalog {
         case 'Link':
         case 'Annot':
           let rect = obj.get('Rect');
+          let pageRef = Array.isArray(this.pages) && Number.isInteger(page) && page >= 0 ? this.pages[page] : null;
+          let pageObj = pageRef ? this.xref.fetch(pageRef) : null;
           return {
-            rect: [rect[0], rect[1], rect[2], rect[3]],
-            pageIndex: page
+            annotIndex: this.getAnnotIndex(el, pageObj),
+            pageIndex: page,
+            rect: [rect[0], rect[1], rect[2], rect[3]]
           };
       }
     }
@@ -52455,7 +52481,7 @@ class ExtendedCatalog extends Catalog {
     return pagesArray;
   }
   getRoleMap(tree) {
-    return tree !== null && (0, _primitives.isDict)(tree) && tree.has('RoleMap') ? tree.get('RoleMap') : new Map();
+    return (0, _primitives.isDict)(tree) && tree.has('RoleMap') ? tree.get('RoleMap') : new Map();
   }
   getRoleName(el, name) {
     let namespace = (0, _primitives.isDict)(el) && el.has('NS') ? el.get('NS') : null;
@@ -52464,6 +52490,12 @@ class ExtendedCatalog extends Catalog {
     let roleName_v1 = this.roleMap.get(name) ? this.roleMap.get(name).name : null;
     let roleName_v2 = Array.isArray(roleNameNSArray) && roleNameNSArray.length > 0 && roleNameNSArray[0].hasOwnProperty('name') ? roleNameNSArray[0].name : null;
     return roleName_v1 || roleName_v2 || name;
+  }
+  getAnnotIndex(el, pageObj) {
+    let objRef = (0, _primitives.isDict)(el) && el.has('Obj') ? el.getRaw('Obj') : null;
+    let annotsArray = (0, _primitives.isDict)(pageObj) && pageObj.has('Annots') ? pageObj.get('Annots') : null;
+    let annotIndex = Array.isArray(annotsArray) && annotsArray.length > 0 && objRef instanceof _primitives.Ref ? annotsArray.findIndex(el => el.num === objRef.num && el.gen === objRef.gen) : null;
+    return annotIndex;
   }
   get structureTree() {
     let structureTree = null;
@@ -65678,25 +65710,27 @@ var PdfDocument = function (props) {
         }
     }, [activeBbox]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {
-        var parsedTree, treeWithMcidList, treeWithIds, pageData;
-        var _a;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var parsedTree, treeWithData, _a, treeWithIds, annotMap, pageData;
+        var _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
                     setStructureTree(data._pdfInfo.structureTree);
                     parsedTree = parseTree(___default["default"].cloneDeep(data._pdfInfo.structureTree));
-                    treeWithMcidList = structurizeMcidTree(parsedTree);
-                    treeWithIds = setTreeIds(treeWithMcidList !== null && treeWithMcidList !== void 0 ? treeWithMcidList : {});
+                    treeWithData = structurizeTree(parsedTree);
+                    _a = setTreeIds(treeWithData !== null && treeWithData !== void 0 ? treeWithData : {}), treeWithIds = _a[0], annotMap = _a[1];
+                    if (!___default["default"].isNil(treeWithIds))
+                        treeWithIds.annotMap = annotMap;
                     setParsedTree(treeWithIds !== null && treeWithIds !== void 0 ? treeWithIds : {});
                     data.parsedTree = treeWithIds !== null && treeWithIds !== void 0 ? treeWithIds : {};
                     return [4 /*yield*/, data.getPage(1)];
                 case 1:
-                    pageData = _b.sent();
+                    pageData = _c.sent();
                     setDefaultHeight(pageData.view[3]);
                     setDefaultWidth(pageData.view[2]);
                     setMaxPage(data.numPages);
                     setLoaded(true);
-                    (_a = props.onLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, data);
+                    (_b = props.onLoadSuccess) === null || _b === void 0 ? void 0 : _b.call(props, data);
                     return [2 /*return*/];
             }
         });

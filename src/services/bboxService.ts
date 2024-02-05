@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import {IBboxLocation} from '../index';
 import {AnyObject, OrNull} from '../types/generics';
-import {IBbox, IMcidItem, TreeElementBbox} from "../components/bbox/Bbox";
+import {IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from "../components/bbox/Bbox";
 
 const cleanArray = (arr: AnyObject[]): AnyObject[] => {
   if (_.isNil(arr)) return [];
@@ -13,17 +13,19 @@ const cleanArray = (arr: AnyObject[]): AnyObject[] => {
   return arr;
 };
 
-const splitChildren = (children: AnyObject[]): [AnyObject, AnyObject[]] => {
+const groupChildren = (children: AnyObject[]): AnyObject[][] => {
   if (_.isNil(children)) children = [];
-  const [arrNodes, arrMcid] = _.reduce(
-      cleanArray(children),
-      (arr, child) => {
-        if (!_.isNil(child)) arr[+child.hasOwnProperty('mcid')].push(child);
-          return arr;
-      },
-      [[] as AnyObject, []]
-  );
-  return [arrNodes, arrMcid];
+  const group = _.groupBy(cleanArray(children), (child) => {
+      if (child.hasOwnProperty('name')) return 'nodeList';
+      if (child.hasOwnProperty('mcid')) return 'mcidList';
+      if (child.hasOwnProperty('rect')) return 'annotList';
+      return null;
+  });
+  return [
+      group.nodeList ?? [],
+      group.mcidList ?? [],
+      group.annotList ?? [],
+  ];
 };
 
 const getMultiBboxPagesObj = (mcidList: Array<IMcidItem | undefined>): AnyObject => {
@@ -120,7 +122,7 @@ export const parseTree = (tree: AnyObject | AnyObject[]): AnyObject => {
   return tree;
 };
 
-export const structurizeMcidTree = (node: AnyObject): OrNull<AnyObject> => {
+export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
   if (_.isNil(node)) return null;
   if (_.isNil(node.children)) {
       if (node.hasOwnProperty('name')) return node;
@@ -130,30 +132,42 @@ export const structurizeMcidTree = (node: AnyObject): OrNull<AnyObject> => {
       if (node.children.hasOwnProperty('mcid')) {
           node.mcidList = [node.children];
           node.children = [];
+      } else if (node.children.hasOwnProperty('rect')) {
+          node.annotList = [node.children];
+          node.children = [];
       } else {
-          node.children = [structurizeMcidTree(node.children)];
+          node.children = [structurizeTree(node.children)];
           node.mcidList = updateMcidList(node.mcidList, node.children);
       }
   } else {
-      const [arrNodes, arrMcid] = splitChildren(node.children);
-      node.children = _.map(arrNodes, child => structurizeMcidTree(child));
-      node.mcidList = updateMcidList(arrMcid, node.children);
+      const [nodeList, mcidList, annotList] = groupChildren(node.children);
+      node.children = _.map(nodeList, child => structurizeTree(child));
+      node.mcidList = updateMcidList(mcidList, node.children);
+      if (annotList.length) {
+          node.annotList = annotList;
+      }
   }
   node.children = cleanArray(node.children);
   return node;
 };
 
-export const setTreeIds = (node: AnyObject, id: string = '0'): OrNull<AnyObject> => {
-  if (_.isNil(node)) return null;
+export const setTreeIds = (node: AnyObject, annotMap: AnyObject = {}, id: string = '0'): [OrNull<AnyObject>, AnyObject] => {
+  if (_.isNil(node)) return [null, annotMap];
   node.id = id;
+  if (node?.hasOwnProperty('annotList')) {
+      node.annotList.forEach((annot: IAnnotItem) => {
+        const index = `${annot.pageIndex}:${annot.annotIndex}`;
+        annotMap[index] = id;
+      });
+  }
   if (_.isNil(node?.children)) node.children = [];
   if (!node?.children.length) {
       node.final = true;
-      return node;
+      return [node, annotMap];
   }
-  if (!(node.children instanceof Array)) node.children = [setTreeIds(node.children, `${id}:${0}`)];
-  else node.children = _.map(node.children, (child, index) => setTreeIds(child, `${id}:${index}`));
-  return node;
+  if (!(node.children instanceof Array)) node.children = [setTreeIds(node.children, annotMap, `${id}:0`)[0]];
+  else node.children = _.map(node.children, (child, index) => setTreeIds(child, annotMap, `${id}:${index}`)[0]);
+  return [node, annotMap];
 };
 
 export const getMcidList = (node: AnyObject, mcidList: TreeElementBbox[] = []): TreeElementBbox[] => {

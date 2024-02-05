@@ -51426,9 +51426,12 @@ class ExtendedCatalog extends Catalog {
         case 'Link':
         case 'Annot':
           let rect = obj.get('Rect');
+          let pageRef = Array.isArray(this.pages) && Number.isInteger(page) && page >= 0 ? this.pages[page] : null;
+          let pageObj = pageRef ? this.xref.fetch(pageRef) : null;
           return {
-            rect: [rect[0], rect[1], rect[2], rect[3]],
-            pageIndex: page
+            annotIndex: this.getAnnotIndex(el, pageObj),
+            pageIndex: page,
+            rect: [rect[0], rect[1], rect[2], rect[3]]
           };
         default:
           break;
@@ -51493,7 +51496,7 @@ class ExtendedCatalog extends Catalog {
     return pagesArray;
   }
   getRoleMap(tree) {
-    return tree !== null && (0, _primitives.isDict)(tree) && tree.has('RoleMap') ? tree.get('RoleMap') : new Map();
+    return (0, _primitives.isDict)(tree) && tree.has('RoleMap') ? tree.get('RoleMap') : new Map();
   }
   getRoleName(el, name) {
     let namespace = (0, _primitives.isDict)(el) && el.has('NS') ? el.get('NS') : null;
@@ -51502,6 +51505,12 @@ class ExtendedCatalog extends Catalog {
     let roleName_v1 = this.roleMap.get(name) ? this.roleMap.get(name).name : null;
     let roleName_v2 = Array.isArray(roleNameNSArray) && roleNameNSArray.length > 0 && roleNameNSArray[0].hasOwnProperty('name') ? roleNameNSArray[0].name : null;
     return roleName_v1 || roleName_v2 || name;
+  }
+  getAnnotIndex(el, pageObj) {
+    let objRef = (0, _primitives.isDict)(el) && el.has('Obj') ? el.getRaw('Obj') : null;
+    let annotsArray = (0, _primitives.isDict)(pageObj) && pageObj.has('Annots') ? pageObj.get('Annots') : null;
+    let annotIndex = Array.isArray(annotsArray) && annotsArray.length > 0 && objRef instanceof _primitives.Ref ? annotsArray.findIndex(el => el.num === objRef.num && el.gen === objRef.gen) : null;
+    return annotIndex;
   }
   get structureTree() {
     let structureTree = null;

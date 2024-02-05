@@ -18,7 +18,7 @@ import {
   buildBboxMap,
   parseTree,
   setTreeIds,
-  structurizeMcidTree,
+  structurizeTree,
   getMcidList,
   createBboxMap,
   getSelectedPageByLocation,
@@ -127,8 +127,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const onDocumentLoadSuccess = useCallback(async (data: IDocumentData) => {
     setStructureTree(data._pdfInfo.structureTree);
     const parsedTree = parseTree(_.cloneDeep(data._pdfInfo.structureTree));
-    const treeWithMcidList = structurizeMcidTree(parsedTree);
-    const treeWithIds = setTreeIds(treeWithMcidList ?? {});
+    const treeWithData = structurizeTree(parsedTree);
+    const [treeWithIds, annotMap] = setTreeIds(treeWithData ?? {});
+    if (!_.isNil(treeWithIds)) treeWithIds.annotMap = annotMap;
     setParsedTree(treeWithIds ?? {});
     data.parsedTree = treeWithIds ?? {};
     const pageData = await data.getPage(1);
