@@ -561,6 +561,20 @@ var getTagsFromErrorPlace = function (context, structure) {
     }
     else if (selectedTag instanceof Array) {
         var objectOfErrors_1 = __assign({}, structure);
+        if (selectedTag.length === 1 && selectedTag[0][1] === 'TREE_ROOT') {
+            var nextStepObject = void 0;
+            if (!objectOfErrors_1.children) {
+                nextStepObject = objectOfErrors_1[selectedTag[0][0]];
+            }
+            else if (!(objectOfErrors_1.children instanceof Array)) {
+                nextStepObject = objectOfErrors_1.children;
+            }
+            else {
+                nextStepObject = objectOfErrors_1;
+            }
+            objectOfErrors_1 = __assign({}, nextStepObject);
+            return findAllMcid(__assign({}, nextStepObject));
+        }
         selectedTag.forEach(function (node, index) {
             var nextStepObject;
             if (!objectOfErrors_1.children) {
@@ -579,7 +593,9 @@ var getTagsFromErrorPlace = function (context, structure) {
                     nextStepObject = objectOfErrors_1;
                 }
                 else {
-                    var clearedChildrenArray = __spreadArray([], objectOfErrors_1.children, true).filter(function (tag) { return !(tag === null || tag === void 0 ? void 0 : tag.hasOwnProperty('mcid')); });
+                    var clearedChildrenArray = __spreadArray([], objectOfErrors_1.children, true).filter(function (tag) {
+                        return !(tag === null || tag === void 0 ? void 0 : tag.hasOwnProperty('mcid')) && !(tag === null || tag === void 0 ? void 0 : tag.hasOwnProperty('rect'));
+                    });
                     nextStepObject = __assign({}, (clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors_1.children)[node[0]]);
                 }
             }
@@ -647,6 +663,9 @@ var convertContextToPath = function (errorContext) {
                 }
             });
             return path_2;
+        }
+        if (contextString.endsWith('PDStructTreeRoot)')) {
+            return [[0, 'TREE_ROOT']];
         }
         contextString = contextString.split('PDStructTreeRoot)/')[1].split('/'); // cut path before start of Document
         contextString.forEach(function (nodeString) {
