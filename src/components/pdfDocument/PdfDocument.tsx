@@ -85,7 +85,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [bboxes, structureTree]);
 
   useEffect(() => {
-    const mcidList = getMcidList(parsedTree ?? {});    
+    const mcidList = getMcidList(parsedTree ?? {});
     setTreeElementsBboxes(createBboxMap(mcidList));
   }, [parsedTree]);
 

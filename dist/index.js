@@ -158,13 +158,13 @@ var Bbox = function (props) {
     var isDisabled = React.useMemo(function () { return props.disabled ? ' pdf-bbox_disabled' : ''; }, [props.disabled]);
     var isStructured = React.useMemo(function () { return props.structured ? ' pdf-bbox_structured' : ''; }, [props.structured]);
     var isStructuredSelected = React.useMemo(function () { return props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''; }, [props.structured, props.selected]);
-    var isStructuredSelectedSingle = React.useMemo(function () {
+    var isStructuredSelectedMultiple = React.useMemo(function () {
         if (props.structured && props.selected && props.selectionMode === 'all')
             return ' pdf-bbox_structured_selected_multiple';
         else
             return '';
     }, [props.structured, props.selected, props.selectionMode]);
-    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox".concat(isSelected).concat(isRelated).concat(isStructured).concat(isStructuredSelected).concat(isDisabled).concat(isStructuredSelectedSingle), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
+    return React__default["default"].createElement(BboxDiv, { className: "pdf-bbox".concat(isSelected).concat(isRelated).concat(isStructured).concat(isStructuredSelected).concat(isStructuredSelectedMultiple).concat(isDisabled), left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: props.colorScheme || {}, title: props.bbox.bboxTitle, "aria-describedby": props.bbox.bboxTitle, onClick: props.onClick });
 };
 var Bbox$1 = React.memo(Bbox);
 var templateObject_1$1;

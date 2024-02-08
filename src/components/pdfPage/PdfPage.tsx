@@ -216,7 +216,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       }
     }, [activeBboxes, scale, props.page]),
   [activeBboxes]);
-    
+
   return (
     <StyledPdfPage
       className={`pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`}
