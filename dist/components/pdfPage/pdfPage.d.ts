@@ -2,10 +2,12 @@ import React from 'react';
 import { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { AnyObject } from '../../types/generics';
+import { TTreeBboxSelectionMode } from '../../types/bboxData';
 import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
     bboxList?: IBbox[];
     treeElementsBboxes?: TreeElementBbox[];
+    treeBboxSelectionMode?: TTreeBboxSelectionMode;
     isTreeBboxesVisible: boolean;
     defaultHeight?: number;
     defaultWidth?: number;

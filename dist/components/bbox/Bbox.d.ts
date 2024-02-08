@@ -1,4 +1,5 @@
 import React from 'react';
+import { TTreeBboxSelectionMode } from '../../types/bboxData';
 import './bbox.scss';
 export interface IBbox {
     location: (number | string)[];
@@ -44,6 +45,7 @@ interface IBboxProps {
     structured?: boolean;
     scale: number;
     colorScheme?: IColorScheme;
+    selectionMode?: TTreeBboxSelectionMode;
     onClick?(e: any): void;
 }
 export type TreeElementBbox = [Array<IMcidItem | undefined>, string];

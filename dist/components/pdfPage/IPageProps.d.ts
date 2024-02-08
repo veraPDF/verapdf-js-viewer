@@ -1,6 +1,6 @@
 import React from 'react';
 import { PDFPageProxy, RenderFunction, TextItem } from 'react-pdf/dist/Page';
-import { TSelectedBboxData } from '../../types/selectedBboxData';
+import { TSelectedBboxData } from '../../types/bboxData';
 import { OrNull } from '../../types/generics';
 export interface IPageProps {
     page: number;

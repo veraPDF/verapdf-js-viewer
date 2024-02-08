@@ -1,5 +1,6 @@
 import React, { FC, memo, useMemo } from 'react';
 import styled from 'styled-components';
+import { TTreeBboxSelectionMode } from '../../types/bboxData';
 
 import './bbox.scss';
 
@@ -65,6 +66,7 @@ interface IBboxProps {
   structured?: boolean;
   scale: number;
   colorScheme?: IColorScheme;
+  selectionMode?: TTreeBboxSelectionMode;
   onClick?(e: any): void;
 }
 
@@ -110,6 +112,9 @@ const BboxDiv = styled.div`
     border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder};
     background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured};
   }
+  &.pdf-bbox_structured_selected_multiple {
+    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.background || bboxBg};
+  }
 `;
 
 const Bbox: FC<IBboxProps> = (props) => {
@@ -135,8 +140,12 @@ const Bbox: FC<IBboxProps> = (props) => {
   const isDisabled = useMemo(() => props.disabled ? ' pdf-bbox_disabled' : '', [props.disabled]);
   const isStructured = useMemo(() => props.structured ? ' pdf-bbox_structured' : '', [props.structured]);
   const isStructuredSelected = useMemo(() => props.structured && props.selected ? ' pdf-bbox_structured_selected' : '', [props.structured, props.selected]);
+  const isStructuredSelectedSingle = useMemo(() => {
+    if (props.structured && props.selected && props.selectionMode === 'all') return ' pdf-bbox_structured_selected_multiple';
+    else return '';
+  }, [props.structured, props.selected, props.selectionMode]);
 
-  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isDisabled}`}
+  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isDisabled}${isStructuredSelectedSingle}`}
                   left={left}
                   bottom={bottom}
                   width={width}
