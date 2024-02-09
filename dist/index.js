@@ -579,7 +579,9 @@ var getTagsFromErrorPlace = function (context, structure) {
                     nextStepObject = objectOfErrors_1;
                 }
                 else {
-                    var clearedChildrenArray = __spreadArray([], objectOfErrors_1.children, true).filter(function (tag) { return !(tag === null || tag === void 0 ? void 0 : tag.hasOwnProperty('mcid')); });
+                    var clearedChildrenArray = __spreadArray([], objectOfErrors_1.children, true).filter(function (tag) {
+                        return !(tag === null || tag === void 0 ? void 0 : tag.hasOwnProperty('mcid')) && !(tag === null || tag === void 0 ? void 0 : tag.hasOwnProperty('rect'));
+                    });
                     nextStepObject = __assign({}, (clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors_1.children)[node[0]]);
                 }
             }

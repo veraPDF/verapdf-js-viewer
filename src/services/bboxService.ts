@@ -389,7 +389,9 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
         if (objectOfErrors?.name === node[1] && index === 0) {
           nextStepObject = objectOfErrors;
         } else {
-          const clearedChildrenArray = [...objectOfErrors.children].filter((tag: AnyObject) => !tag?.hasOwnProperty('mcid'));
+          const clearedChildrenArray = [...objectOfErrors.children].filter((tag: AnyObject) => {
+            return !tag?.hasOwnProperty('mcid') && !tag?.hasOwnProperty('rect');
+          });
           nextStepObject = { ...(clearedChildrenArray.length ? clearedChildrenArray : objectOfErrors.children)[node[0]] };
         }
       }
