@@ -7,6 +7,7 @@ import _ from 'lodash';
 import Bbox, { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
+import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
 import { getBboxForGlyph, parseMcidToBbox, createAllBboxes, checkIsBboxOutOfThePage } from '../../services/bboxService';
 import { WARNING_CODES } from "../../services/constants";
@@ -16,6 +17,7 @@ import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
   treeElementsBboxes?: TreeElementBbox[];
+  treeBboxSelectionMode?: TreeBboxSelectionMode;
   isTreeBboxesVisible: boolean;
   defaultHeight?: number;
   defaultWidth?: number;
@@ -164,7 +166,17 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
 
   const isBboxSelected = useCallback((bbox: IBbox) => {
     const isBboxMode = !_.isNil(props.activeBboxIndex);
-    return isBboxMode ? bbox.index === props.activeBboxIndex : bbox?.id === props?.activeBboxId;
+    const isErrorBboxSelected = bbox.index === props.activeBboxIndex;
+    let isStructureBboxSelected;
+    switch (props.treeBboxSelectionMode) {
+      case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
+        isStructureBboxSelected = bbox?.id?.startsWith(String(props?.activeBboxId));
+        break;
+      }
+      case TreeBboxSelectionMode.SELECTED:
+      default: isStructureBboxSelected = bbox?.id === props?.activeBboxId;
+    }
+    return isBboxMode ? isErrorBboxSelected : isStructureBboxSelected;
   }, [props.activeBboxIndex, props.activeBboxId]);
   const isBboxRelated = useCallback((bbox: IBbox) => {
     const [, , activeId] = props?.groupId?.split('-') || [];
@@ -247,6 +259,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
             selected={isBboxSelected(bbox)}
             related={isBboxRelated(bbox)}
             scale={pageScale}
+            selectionMode={props.treeBboxSelectionMode}
             colorScheme={props.colorScheme} />
         )) : null}
       </> : null}
