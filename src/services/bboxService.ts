@@ -375,20 +375,6 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
     ]]];
   } else if (selectedTag instanceof Array) {
     let objectOfErrors = { ...structure };
-
-    if (selectedTag.length === 1 && selectedTag[0][1] === 'TREE_ROOT') {
-      let nextStepObject;
-      if (!objectOfErrors.children) {
-        nextStepObject = objectOfErrors[selectedTag[0][0]];
-      } else if (!(objectOfErrors.children instanceof Array)) {
-        nextStepObject = objectOfErrors.children;
-      } else {
-        nextStepObject = objectOfErrors;
-      }
-      objectOfErrors = { ...nextStepObject };
-      return findAllMcid({ ...nextStepObject });
-    }
-
     selectedTag.forEach((node, index) => {
       let nextStepObject;
       if (!objectOfErrors.children) {
@@ -474,10 +460,6 @@ const convertContextToPath = (errorContext = '') => {
         }
       });
       return path;
-    }
-
-    if (contextString.endsWith('PDStructTreeRoot)')) {      
-      return [[0, 'TREE_ROOT']];
     }
 
     contextString = contextString.split('PDStructTreeRoot)/')[1].split('/'); // cut path before start of Document
