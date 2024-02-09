@@ -10,8 +10,9 @@ import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
 import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
+import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject, OrNull } from '../../types/generics';
-import { TSelectedBboxData, TTreeBboxSelectionMode } from '../../types/bboxData';
+import { TSelectedBboxData } from '../../types/bboxData';
 import { IBboxLocation } from '../../index';
 import {
   activeBboxInViewport,
@@ -44,7 +45,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   activeBboxId?: string;
   bboxes: IBboxLocation[];
   isTreeBboxesVisible: boolean;
-  treeBboxSelectionMode?: TTreeBboxSelectionMode;
+  treeBboxSelectionMode?: TreeBboxSelectionMode;
   colorScheme?: IColorScheme;
   onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;

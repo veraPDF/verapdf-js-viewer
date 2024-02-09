@@ -1,6 +1,6 @@
 import React, { FC, memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { TTreeBboxSelectionMode } from '../../types/bboxData';
+import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 
 import './bbox.scss';
 
@@ -66,7 +66,7 @@ interface IBboxProps {
   structured?: boolean;
   scale: number;
   colorScheme?: IColorScheme;
-  selectionMode?: TTreeBboxSelectionMode;
+  selectionMode?: TreeBboxSelectionMode;
   onClick?(e: any): void;
 }
 
@@ -141,7 +141,7 @@ const Bbox: FC<IBboxProps> = (props) => {
   const isStructured = useMemo(() => props.structured ? ' pdf-bbox_structured' : '', [props.structured]);
   const isStructuredSelected = useMemo(() => props.structured && props.selected ? ' pdf-bbox_structured_selected' : '', [props.structured, props.selected]);
   const isStructuredSelectedMultiple = useMemo(() => {
-    if (props.structured && props.selected && props.selectionMode === 'all') return ' pdf-bbox_structured_selected_multiple';
+    if (props.structured && props.selected && props.selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS) return ' pdf-bbox_structured_selected_multiple';
     else return '';
   }, [props.structured, props.selected, props.selectionMode]);
 

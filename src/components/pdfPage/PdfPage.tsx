@@ -7,8 +7,8 @@ import _ from 'lodash';
 import Bbox, { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
+import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
-import { TTreeBboxSelectionMode } from '../../types/bboxData';
 import { getBboxForGlyph, parseMcidToBbox, createAllBboxes, checkIsBboxOutOfThePage } from '../../services/bboxService';
 import { WARNING_CODES } from "../../services/constants";
 
@@ -17,7 +17,7 @@ import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
   treeElementsBboxes?: TreeElementBbox[];
-  treeBboxSelectionMode?: TTreeBboxSelectionMode;
+  treeBboxSelectionMode?: TreeBboxSelectionMode;
   isTreeBboxesVisible: boolean;
   defaultHeight?: number;
   defaultWidth?: number;
@@ -169,11 +169,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     const isErrorBboxSelected = bbox.index === props.activeBboxIndex;
     let isStructureBboxSelected;
     switch (props.treeBboxSelectionMode) {
-      case 'all': {
+      case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
         isStructureBboxSelected = bbox?.id?.startsWith(String(props?.activeBboxId));
         break;
       }
-      case 'current':
+      case TreeBboxSelectionMode.SELECTED:
       default: isStructureBboxSelected = bbox?.id === props?.activeBboxId;
     }
     return isBboxMode ? isErrorBboxSelected : isStructureBboxSelected;

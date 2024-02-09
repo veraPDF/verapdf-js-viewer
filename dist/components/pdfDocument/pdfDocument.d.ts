@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
-import { TTreeBboxSelectionMode } from '../../types/bboxData';
+import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { IBboxLocation } from '../../index';
 import { IColorScheme } from '../bbox/Bbox';
 import './pdfDocument.scss';
@@ -12,7 +12,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     activeBboxId?: string;
     bboxes: IBboxLocation[];
     isTreeBboxesVisible: boolean;
-    treeBboxSelectionMode?: TTreeBboxSelectionMode;
+    treeBboxSelectionMode?: TreeBboxSelectionMode;
     colorScheme?: IColorScheme;
     onBboxesParsed?(pages: number[]): void;
     onPageChange?(page: number): void;

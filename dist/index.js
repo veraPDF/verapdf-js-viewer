@@ -122,6 +122,12 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
+var TreeBboxSelectionMode;
+(function (TreeBboxSelectionMode) {
+    TreeBboxSelectionMode["SELECTED"] = "SELECTED";
+    TreeBboxSelectionMode["SELECTED_WITH_KIDS"] = "SELECTED_WITH_KIDS";
+})(TreeBboxSelectionMode || (TreeBboxSelectionMode = {}));
+
 ___$insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 3;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_disabled {\n  display: none;\n}\n\nsection[data-annotation-id] {\n  z-index: 2 !important;\n}\nsection[data-annotation-id] * {\n  color: transparent !important;\n}");
 
 var bboxBorder = 'grey';
@@ -159,7 +165,7 @@ var Bbox = function (props) {
     var isStructured = React.useMemo(function () { return props.structured ? ' pdf-bbox_structured' : ''; }, [props.structured]);
     var isStructuredSelected = React.useMemo(function () { return props.structured && props.selected ? ' pdf-bbox_structured_selected' : ''; }, [props.structured, props.selected]);
     var isStructuredSelectedMultiple = React.useMemo(function () {
-        if (props.structured && props.selected && props.selectionMode === 'all')
+        if (props.structured && props.selected && props.selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS)
             return ' pdf-bbox_structured_selected_multiple';
         else
             return '';
@@ -967,11 +973,11 @@ var PdfPage = function (props) {
         var isErrorBboxSelected = bbox.index === props.activeBboxIndex;
         var isStructureBboxSelected;
         switch (props.treeBboxSelectionMode) {
-            case 'all': {
+            case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
                 isStructureBboxSelected = (_a = bbox === null || bbox === void 0 ? void 0 : bbox.id) === null || _a === void 0 ? void 0 : _a.startsWith(String(props === null || props === void 0 ? void 0 : props.activeBboxId));
                 break;
             }
-            case 'current':
+            case TreeBboxSelectionMode.SELECTED:
             default: isStructureBboxSelected = (bbox === null || bbox === void 0 ? void 0 : bbox.id) === (props === null || props === void 0 ? void 0 : props.activeBboxId);
         }
         return isBboxMode ? isErrorBboxSelected : isStructureBboxSelected;
