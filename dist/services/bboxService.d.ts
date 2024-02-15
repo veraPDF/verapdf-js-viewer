@@ -1,6 +1,7 @@
 import { IBboxLocation } from '../index';
 import { AnyObject, OrNull } from '../types/generics';
 import { IBbox, TreeElementBbox } from "../components/bbox/Bbox";
+export declare const cleanArray: (arr: Array<AnyObject | null>) => AnyObject[];
 export declare const buildBboxMap: (bboxes: IBboxLocation[], structure: AnyObject) => {};
 export declare const parseTree: (tree: AnyObject | AnyObject[]) => AnyObject;
 export declare const structurizeTree: (node: AnyObject) => OrNull<AnyObject>;

@@ -4,15 +4,6 @@ import {IBboxLocation} from '../index';
 import {AnyObject, OrNull} from '../types/generics';
 import {IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from "../components/bbox/Bbox";
 
-const cleanArray = (arr: AnyObject[]): AnyObject[] => {
-  if (_.isNil(arr)) return [];
-  if (arr.some(el => _.isNil(el))) {
-      arr = arr.filter(el => !_.isNil(el));
-      return arr.length ? arr : [];
-  }
-  return arr;
-};
-
 const groupChildren = (children: AnyObject[]): AnyObject[][] => {
   if (_.isNil(children)) children = [];
   const group = _.groupBy(cleanArray(children), (child) => {
@@ -53,6 +44,15 @@ const updateMcidList = (oldMcidList: AnyObject[], children: AnyObject[]): AnyObj
           }
       }),
   ];
+};
+
+export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
+  if (_.isNil(arr)) return [];
+  if (arr.some(el => _.isNil(el))) {
+      arr = arr.filter(el => !_.isNil(el));
+      return arr.length ? arr as AnyObject[] : [];
+  }
+  return arr as AnyObject[];
 };
 
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
@@ -208,19 +208,22 @@ export const createBboxMap = (mcidList: TreeElementBbox[]): AnyObject => {
 
 export const createAllBboxes = (bboxesAll: TreeElementBbox[] | undefined, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number): IBbox[] => {
   if (_.isNil(bboxesAll)) return [];
-  return bboxesAll?.map((bbox) => {
+  const unfilteredBboxes = bboxesAll?.map((bbox) => {
     const [mcid, id] = bbox as [AnyObject[], string];
-      const listOfMcid = cleanArray(mcid).map((obj: AnyObject) => obj?.mcid);
-      const location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
-      const [,, width, height] = location;
-      return {
-        id,
-        location: location,
-        area: width * height,
-      };
+    const listOfMcid = cleanArray(mcid).map((obj: AnyObject) => obj?.mcid);
+    const location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
+    if (_.isEmpty(location)) {
+      return null;
     }
-  ).sort(
-    ({area: area1}, {area: area2}) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0);
+    const [,, width, height] = location;
+    return {
+      id,
+      location: location,
+      area: width * height,
+    };
+  });
+  return cleanArray(unfilteredBboxes).sort(
+    ({area: area1}, {area: area2}) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0) as IBbox[];
 };
 
 export const calculateLocationInStreamOperator = (location: string) => {
@@ -550,7 +553,7 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
       };
     }
   }
-  if (!coords) return [];
+  if (!coords || _.isEmpty(coords)) return [];
   const coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
   const rotatedViewport = rotateViewport(rotateAngle, viewport);
   return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
@@ -620,16 +623,21 @@ export const scrollToActiveBbox = (): void => {
 function elementInViewport (el: any): boolean {
   let top = el.offsetTop;
   let left = el.offsetLeft;
-  let width = el.offsetWidth;
-  let height = el.offsetHeight;
+  const width = el.offsetWidth;
+  const height = el.offsetHeight;
+  const elementArea = width * height;
   while(el.offsetParent && !el.offsetParent.className.includes('pdf-viewer')) {
     el = el.offsetParent;
     top += el.offsetTop;
     left += el.offsetLeft;
   }
   const parent = (document.querySelector('.pdf-viewer') as any);
+  const parentArea = parent.offsetWidth * parent.offsetHeight;
   const parentScrollTop = parent.scrollTop as unknown as number;
   const parentScrollLeft = parent.scrollLeft as unknown as number;
+  if (elementArea >= parentArea) {
+    return true;
+  }
   return (
     top >= parentScrollTop &&
     left >= parentScrollLeft &&

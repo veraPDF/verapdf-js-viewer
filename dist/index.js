@@ -191,15 +191,6 @@ var ViewerProvider = function (props) {
     return React__default["default"].createElement(ViewerContext.Provider, { value: context }, props.children);
 };
 
-var cleanArray = function (arr) {
-    if (___default["default"].isNil(arr))
-        return [];
-    if (arr.some(function (el) { return ___default["default"].isNil(el); })) {
-        arr = arr.filter(function (el) { return !___default["default"].isNil(el); });
-        return arr.length ? arr : [];
-    }
-    return arr;
-};
 var groupChildren = function (children) {
     var _a, _b, _c;
     if (___default["default"].isNil(children))
@@ -244,6 +235,15 @@ var updateMcidList = function (oldMcidList, children) {
             return child.mcidList;
         }
     }), true);
+};
+var cleanArray = function (arr) {
+    if (___default["default"].isNil(arr))
+        return [];
+    if (arr.some(function (el) { return ___default["default"].isNil(el); })) {
+        arr = arr.filter(function (el) { return !___default["default"].isNil(el); });
+        return arr.length ? arr : [];
+    }
+    return arr;
 };
 var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
@@ -414,17 +414,21 @@ var createBboxMap = function (mcidList) {
 var createAllBboxes = function (bboxesAll, pageMap, annotations, viewport, rotateAngle) {
     if (___default["default"].isNil(bboxesAll))
         return [];
-    return bboxesAll === null || bboxesAll === void 0 ? void 0 : bboxesAll.map(function (bbox) {
+    var unfilteredBboxes = bboxesAll === null || bboxesAll === void 0 ? void 0 : bboxesAll.map(function (bbox) {
         var _a = bbox, mcid = _a[0], id = _a[1];
         var listOfMcid = cleanArray(mcid).map(function (obj) { return obj === null || obj === void 0 ? void 0 : obj.mcid; });
         var location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
+        if (___default["default"].isEmpty(location)) {
+            return null;
+        }
         var width = location[2], height = location[3];
         return {
             id: id,
             location: location,
             area: width * height,
         };
-    }).sort(function (_a, _b) {
+    });
+    return cleanArray(unfilteredBboxes).sort(function (_a, _b) {
         var area1 = _a.area;
         var area2 = _b.area;
         return (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0;
@@ -743,7 +747,7 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rota
             };
         }
     }
-    if (!coords)
+    if (!coords || ___default["default"].isEmpty(coords))
         return [];
     var coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
     var rotatedViewport = rotateViewport(rotateAngle, viewport);
@@ -809,14 +813,19 @@ function elementInViewport(el) {
     var left = el.offsetLeft;
     var width = el.offsetWidth;
     var height = el.offsetHeight;
+    var elementArea = width * height;
     while (el.offsetParent && !el.offsetParent.className.includes('pdf-viewer')) {
         el = el.offsetParent;
         top += el.offsetTop;
         left += el.offsetLeft;
     }
     var parent = document.querySelector('.pdf-viewer');
+    var parentArea = parent.offsetWidth * parent.offsetHeight;
     var parentScrollTop = parent.scrollTop;
     var parentScrollLeft = parent.scrollLeft;
+    if (elementArea >= parentArea) {
+        return true;
+    }
     return (top >= parentScrollTop &&
         left >= parentScrollLeft &&
         (top + height) <= (parentScrollTop + parent.offsetHeight) &&
@@ -905,6 +914,9 @@ var PdfPage = function (props) {
             var errorBboxes = bboxList.map(function (bbox) {
                 if (bbox.mcidList) {
                     bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+                    if (___default["default"].isEmpty(bbox.location)) {
+                        return null;
+                    }
                 }
                 else if (bbox.contentItemPath) {
                     var contentItemsPath_1 = bbox.contentItemPath.slice(2);
@@ -934,7 +946,7 @@ var PdfPage = function (props) {
                 return bbox;
             });
             setBboxesAll(allBboxes);
-            setBboxesErrors(errorBboxes);
+            setBboxesErrors(cleanArray(errorBboxes));
         });
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
     }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
@@ -976,7 +988,7 @@ var PdfPage = function (props) {
         var isStructureBboxSelected;
         switch (props.treeBboxSelectionMode) {
             case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
-                isStructureBboxSelected = (_a = bbox === null || bbox === void 0 ? void 0 : bbox.id) === null || _a === void 0 ? void 0 : _a.startsWith(String(props === null || props === void 0 ? void 0 : props.activeBboxId));
+                isStructureBboxSelected = (bbox === null || bbox === void 0 ? void 0 : bbox.id) === (props === null || props === void 0 ? void 0 : props.activeBboxId) || ((_a = bbox === null || bbox === void 0 ? void 0 : bbox.id) === null || _a === void 0 ? void 0 : _a.startsWith("".concat(props === null || props === void 0 ? void 0 : props.activeBboxId, ":")));
                 break;
             }
             case TreeBboxSelectionMode.SELECTED:

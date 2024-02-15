@@ -9,7 +9,7 @@ import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
-import { getBboxForGlyph, parseMcidToBbox, createAllBboxes, checkIsBboxOutOfThePage } from '../../services/bboxService';
+import { cleanArray, getBboxForGlyph, parseMcidToBbox, createAllBboxes, checkIsBboxOutOfThePage } from '../../services/bboxService';
 import { WARNING_CODES } from "../../services/constants";
 
 import './pdfPage.scss';
@@ -97,6 +97,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       const errorBboxes = bboxList.map((bbox) => {
         if (bbox.mcidList) {
           bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+          if (_.isEmpty(bbox.location)) {
+            return null;
+          }
         } else if (bbox.contentItemPath) {
           const contentItemsPath = bbox.contentItemPath.slice(2);
           let contentItemsBBoxes = noMCIDData[bbox.contentItemPath[1]];
@@ -126,7 +129,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
         return bbox;
       });
       setBboxesAll(allBboxes);
-      setBboxesErrors(errorBboxes);
+      setBboxesErrors(cleanArray(errorBboxes) as IBbox[]);
     });
     props.onPageLoadSuccess?.(page);
   }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
@@ -170,7 +173,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     let isStructureBboxSelected;
     switch (props.treeBboxSelectionMode) {
       case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
-        isStructureBboxSelected = bbox?.id?.startsWith(String(props?.activeBboxId));
+        isStructureBboxSelected = bbox?.id === props?.activeBboxId || bbox?.id?.startsWith(`${props?.activeBboxId}:`);
         break;
       }
       case TreeBboxSelectionMode.SELECTED:
