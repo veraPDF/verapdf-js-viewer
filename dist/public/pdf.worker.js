@@ -971,7 +971,8 @@ const OPS = exports.OPS = {
   paintSolidColorImageMask: 90,
   constructPath: 91,
   boundingBoxes: 100,
-  operationPosition: 101
+  operationPosition: 101,
+  annotBBoxesAndOpPos: 102
 };
 const UNSUPPORTED_FEATURES = exports.UNSUPPORTED_FEATURES = {
   unknown: "unknown",
@@ -3300,6 +3301,7 @@ class Page {
       }
       if (annotations.length === 0 || intent & _util.RenderingIntentFlag.ANNOTATIONS_DISABLE) {
         if (intent & _util.RenderingIntentFlag.OPLIST) {
+          pageOpList.addOp(_util.OPS.annotBBoxesAndOpPos, []);
           pageOpList.addOp(_util.OPS.operationPosition, positionByOperationIndex);
           pageOpList.addOp(_util.OPS.boundingBoxes, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
         }
@@ -3324,10 +3326,12 @@ class Page {
       return Promise.all(opListPromises).then(function (opLists) {
         let form = false,
           canvas = false;
+        const annotationsBBoxesAndOperationPosition = [];
         for (const {
           opList,
           separateForm,
-          separateCanvas
+          separateCanvas,
+          annotBBoxesAndOpPos
         } of opLists) {
           pageOpList.addOpList(opList);
           if (separateForm) {
@@ -3336,8 +3340,10 @@ class Page {
           if (separateCanvas) {
             canvas = separateCanvas;
           }
+          annotationsBBoxesAndOperationPosition.push(annotBBoxesAndOpPos ? [annotBBoxesAndOpPos.operationPosition, annotBBoxesAndOpPos.boundingBoxes] : []);
         }
         if (intent & _util.RenderingIntentFlag.OPLIST) {
+          pageOpList.addOp(_util.OPS.annotBBoxesAndOpPos, annotationsBBoxesAndOperationPosition);
           pageOpList.addOp(_util.OPS.operationPosition, positionByOperationIndex);
           pageOpList.addOp(_util.OPS.boundingBoxes, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
         }
@@ -4554,6 +4560,7 @@ class Annotation {
     this.setColor(dict.getArray("C"));
     this.setBorderStyle(dict);
     this.setAppearance(dict);
+    this.initAppearancePos = this.appearance?.pos;
     this.setOptionalContent(dict);
     const MK = dict.get("MK");
     this.setBorderAndBackgroundColors(MK);
@@ -4815,8 +4822,10 @@ class Annotation {
       opList.addOp(_util.OPS.beginMarkedContentProps, ["OC", optionalContent]);
     }
     opList.addOp(_util.OPS.beginAnnotation, [data.id, data.rect, transform, matrix, isUsingOwnCanvas]);
-    await evaluator.getOperatorList({
+    const [MCIDBBoxes, opPos, noMCIDBBoxes] = await evaluator.getOperatorList({
+      initStreamPos: this.initAppearancePos,
       stream: appearance,
+      intent,
       task,
       resources,
       operatorList: opList,
@@ -4830,7 +4839,11 @@ class Annotation {
     return {
       opList,
       separateForm: false,
-      separateCanvas: isUsingOwnCanvas
+      separateCanvas: isUsingOwnCanvas,
+      annotBBoxesAndOpPos: {
+        operationPosition: opPos,
+        boundingBoxes: [MCIDBBoxes, noMCIDBBoxes]
+      }
     };
   }
   async save(evaluator, task, annotationStorage) {
@@ -5347,7 +5360,8 @@ class WidgetAnnotation extends Annotation {
     }
     opList.addOp(_util.OPS.beginAnnotation, [this.data.id, this.data.rect, transform, this.getRotationMatrix(annotationStorage), false]);
     const stream = new _stream.StringStream(content);
-    await evaluator.getOperatorList({
+    const [MCIDBBoxes, opPos, noMCIDBBoxes] = await evaluator.getOperatorList({
+      intent,
       stream,
       task,
       resources: this._fieldResources.mergedResources,
@@ -5360,7 +5374,11 @@ class WidgetAnnotation extends Annotation {
     return {
       opList,
       separateForm: false,
-      separateCanvas: false
+      separateCanvas: false,
+      annotBBoxesAndOpPos: {
+        operationPosition: opPos,
+        boundingBoxes: [MCIDBBoxes, noMCIDBBoxes]
+      }
     };
   }
   _getMKDict(rotation) {
@@ -9091,6 +9109,7 @@ class PartialEvaluator {
     return null;
   }
   getOperatorList({
+    initStreamPos,
     stream,
     task,
     resources,
@@ -9108,6 +9127,8 @@ class PartialEvaluator {
     var self = this;
     var xref = this.xref;
     let parsingText = false;
+    let prevStreamPos;
+    if (initStreamPos != null) stream.pos = initStreamPos;
     const localImageCache = new _image_utils.LocalImageCache();
     const localColorSpaceCache = new _image_utils.LocalColorSpaceCache();
     const localGStateCache = new _image_utils.LocalGStateCache();
@@ -9138,6 +9159,7 @@ class PartialEvaluator {
       const operation = {};
       let stop, i, ii, cs, name, isValidName;
       while (!(stop = timeSlotManager.check())) {
+        if (prevStreamPos) stream.pos = prevStreamPos;
         operation.args = null;
         if (!preprocessor.read(operation)) {
           break;
@@ -9145,6 +9167,7 @@ class PartialEvaluator {
         let args = operation.args;
         let fn = operation.fn;
         boundingBoxCalculator.incrementOperation(fn);
+        prevStreamPos = stream.pos;
         switch (fn | 0) {
           case _util.OPS.paintXObject:
             isValidName = args[0] instanceof _primitives.Name;
