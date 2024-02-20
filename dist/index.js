@@ -48431,6 +48431,8 @@ exports.BoundingBoxesCalculator = function PartialEvaluatorClosure() {
     this.boundingBoxes = {};
     this.ignoreCalculations = ignoreCalculations;
     this.operationArray = [];
+    this.mcidArray = [];
+    this.sameMcidDepth = 0;
     this.operationIndex = -1;
   }
   BoundingBoxesCalculator.prototype = {
@@ -48822,7 +48824,14 @@ exports.BoundingBoxesCalculator = function PartialEvaluatorClosure() {
           break;
         case _util.OPS.beginMarkedContentProps:
           if ((0, _primitives.isDict)(args[1]) && args[1].has('MCID')) {
-            this.boundingBoxesStack.begin(args[1].get('MCID'));
+            const mcid = args[1].get('MCID');
+            if (this.mcidArray.includes(mcid)) {
+              this.sameMcidDepth++;
+              break;
+            } else {
+              this.mcidArray.push(mcid);
+            }
+            this.boundingBoxesStack.begin(mcid);
             this.graphicsStateManager.state.x = null;
             this.graphicsStateManager.state.y = null;
             this.graphicsStateManager.state.w = null;
@@ -48832,6 +48841,10 @@ exports.BoundingBoxesCalculator = function PartialEvaluatorClosure() {
           }
           break;
         case _util.OPS.endMarkedContent:
+          if (this.sameMcidDepth !== 0) {
+            this.sameMcidDepth--;
+            break;
+          }
           let boundingBox = this.boundingBoxesStack.end();
           if (boundingBox !== null) {
             this.boundingBoxes[boundingBox.mcid] = {
@@ -52436,6 +52449,7 @@ class ExtendedCatalog extends Catalog {
         name: name ? (0, _util.stringToUTF8String)(name) : null,
         roleName: roleName ? (0, _util.stringToUTF8String)(roleName) : null,
         children: this.getTreeElement(el.get('K'), page, el.getRaw('K')),
+        pageIndex: page,
         ref: ref
       };
     }
@@ -52494,6 +52508,7 @@ class ExtendedCatalog extends Catalog {
         name: name ? (0, _util.stringToUTF8String)(name) : null,
         roleName: roleName ? (0, _util.stringToUTF8String)(roleName) : null,
         children: [],
+        pageIndex: page,
         ref: ref
       };
     }
