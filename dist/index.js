@@ -65936,7 +65936,7 @@ var PdfDocument = function (props) {
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
-___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  justify-content: flex-start;\n  overflow: auto;\n  outline: none;\n}");
+___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n  justify-content: flex-start;\n  overflow: auto;\n  outline: none;\n}\n.pdf-viewer .annotationLayer section {\n  pointer-events: none;\n}");
 
 var App = function (props) {
     var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, pdfProps = __rest(props, ["className", "bboxes"]);
