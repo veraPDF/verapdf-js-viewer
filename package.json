@@ -1,6 +1,6 @@
 {
-  "name": "verapdf-js-viewer",
-  "version": "1.7.8",
+  "name": "@duallab/verapdf-js-viewer",
+  "version": "1.7.9",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "rollup -c -w"
   },
   "keywords": [],
-  "author": "",
+  "author": "duallab",
   "license": "MPL-2.0",
   "devDependencies": {
     "@types/lodash": "^4.14.168",
