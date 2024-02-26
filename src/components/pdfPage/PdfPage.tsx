@@ -91,6 +91,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setIsRendered(true);
     setPageViewport(page.view);
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
+      const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
       const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
       const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
@@ -123,7 +124,14 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           }
         }
         if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
-          bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, operationData, page.view, page.rotate);
+          const annotIndex = bbox.annotIndex ?? -1;
+          let opData = operationData, left = 0, bottom = 0;
+          if (annotIndex >= 0) {
+            opData = annotBBoxesAndOpPos[annotIndex]?.[0] ?? [];
+            left = annotations[annotIndex]?.rect[0] ?? 0;
+            bottom = annotations[annotIndex]?.rect[1] ?? 0;
+          }
+          bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
         }
 
         return bbox;
