@@ -72,6 +72,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
             operatorIndex: bboxPosition.operatorIndex,
             glyphIndex: bboxPosition.glyphIndex,
+            annotIndex: bboxPosition.annotIndex,
             bboxTitle: bbox.bboxTitle,
           }
         ];
@@ -231,9 +232,13 @@ export const calculateLocationInStreamOperator = (location: string) => {
   let pageIndex = -1;
   let operatorIndex = -1;
   let glyphIndex = -1;
+  let annotIndex = -1;
   path.forEach((step) => {
     if (step.startsWith('pages')) {
       pageIndex = parseInt(step.split(/[\[\]]/)[1]);
+    }
+    if (step.startsWith('annots')) {
+      annotIndex = parseInt(step.split(/[\[\]]/)[1]);
     }
     if (step.startsWith('operators')) {
       operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
@@ -243,12 +248,13 @@ export const calculateLocationInStreamOperator = (location: string) => {
     }
   });
   if (pageIndex === -1 || operatorIndex === -1 || glyphIndex === -1) {
-      return null;
+    return null;
   }
   return {
     pageIndex,
     operatorIndex,
-    glyphIndex
+    glyphIndex,
+    annotIndex,
   }
 }
 
@@ -516,12 +522,23 @@ function findAllMcid(tagObject: AnyObject) {
   return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
 }
 
-export const getBboxForGlyph = (operatorIndex: number, glyphIndex: number, operationsList: number[][][], viewport: number[], rotateAngle: number) => {
+export const getBboxForGlyph = (
+  operatorIndex: number,
+  glyphIndex: number,
+  operationsList: number[][][],
+  viewport: number[],
+  rotateAngle: number,
+  leftOffset: number,
+  bottomOffset: number,
+) => {
   const bbox = operationsList[operatorIndex] ? operationsList[operatorIndex][glyphIndex] : null;
   if (!bbox) {
     return [];
   }
-  const coordsArray = rotateCoordinates(bbox, rotateAngle, viewport);
+  const coords = [...bbox];
+  coords[0] += leftOffset;
+  coords[1] += bottomOffset;
+  const coordsArray = rotateCoordinates(coords, rotateAngle, viewport);
   const rotatedViewport = rotateViewport(rotateAngle, viewport);
   return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 }

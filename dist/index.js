@@ -262,6 +262,7 @@ var buildBboxMap = function (bboxes, structure) {
                         isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                         operatorIndex: bboxPosition.operatorIndex,
                         glyphIndex: bboxPosition.glyphIndex,
+                        annotIndex: bboxPosition.annotIndex,
                         bboxTitle: bbox.bboxTitle,
                     }
                 ], false);
@@ -439,9 +440,13 @@ var calculateLocationInStreamOperator = function (location) {
     var pageIndex = -1;
     var operatorIndex = -1;
     var glyphIndex = -1;
+    var annotIndex = -1;
     path.forEach(function (step) {
         if (step.startsWith('pages')) {
             pageIndex = parseInt(step.split(/[\[\]]/)[1]);
+        }
+        if (step.startsWith('annots')) {
+            annotIndex = parseInt(step.split(/[\[\]]/)[1]);
         }
         if (step.startsWith('operators')) {
             operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
@@ -456,7 +461,8 @@ var calculateLocationInStreamOperator = function (location) {
     return {
         pageIndex: pageIndex,
         operatorIndex: operatorIndex,
-        glyphIndex: glyphIndex
+        glyphIndex: glyphIndex,
+        annotIndex: annotIndex,
     };
 };
 var getSelectedPageByLocation = function (bboxLocation) {
@@ -712,12 +718,15 @@ function findAllMcid(tagObject) {
     func(tagObject);
     return ___default["default"].map(mcidMap, function (value, key) { return [value, ___default["default"].toNumber(key)]; });
 }
-var getBboxForGlyph = function (operatorIndex, glyphIndex, operationsList, viewport, rotateAngle) {
+var getBboxForGlyph = function (operatorIndex, glyphIndex, operationsList, viewport, rotateAngle, leftOffset, bottomOffset) {
     var bbox = operationsList[operatorIndex] ? operationsList[operatorIndex][glyphIndex] : null;
     if (!bbox) {
         return [];
     }
-    var coordsArray = rotateCoordinates(bbox, rotateAngle, viewport);
+    var coords = __spreadArray([], bbox, true);
+    coords[0] += leftOffset;
+    coords[1] += bottomOffset;
+    var coordsArray = rotateCoordinates(coords, rotateAngle, viewport);
     var rotatedViewport = rotateViewport(rotateAngle, viewport);
     return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 };
@@ -908,10 +917,12 @@ var PdfPage = function (props) {
         setPageViewport(page.view);
         Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
             var operatorList = _a[0], annotations = _a[1];
+            var annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
             var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
             var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1];
             var allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
             var errorBboxes = bboxList.map(function (bbox) {
+                var _a, _b, _c, _d, _e, _f, _g;
                 if (bbox.mcidList) {
                     bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
                     if (___default["default"].isEmpty(bbox.location)) {
@@ -941,7 +952,14 @@ var PdfPage = function (props) {
                     }
                 }
                 if (___default["default"].isNumber(bbox.operatorIndex) && ___default["default"].isNumber(bbox.glyphIndex)) {
-                    bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, operationData, page.view, page.rotate);
+                    var annotIndex = (_a = bbox.annotIndex) !== null && _a !== void 0 ? _a : -1;
+                    var opData = operationData, left = 0, bottom = 0;
+                    if (annotIndex >= 0) {
+                        opData = (_c = (_b = annotBBoxesAndOpPos[annotIndex]) === null || _b === void 0 ? void 0 : _b[0]) !== null && _c !== void 0 ? _c : [];
+                        left = (_e = (_d = annotations[annotIndex]) === null || _d === void 0 ? void 0 : _d.rect[0]) !== null && _e !== void 0 ? _e : 0;
+                        bottom = (_g = (_f = annotations[annotIndex]) === null || _f === void 0 ? void 0 : _f.rect[1]) !== null && _g !== void 0 ? _g : 0;
+                    }
+                    bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
                 }
                 return bbox;
             });

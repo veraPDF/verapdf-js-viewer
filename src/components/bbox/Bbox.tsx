@@ -27,6 +27,7 @@ export interface IBbox {
   bboxTitle?: string;
   mcidList?: number[];
   glyphIndex?: number;
+  annotIndex?: number;
   operatorIndex?: number;
   contentItemPath?: number[];
   area?: number,
