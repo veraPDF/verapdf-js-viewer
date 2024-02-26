@@ -141,7 +141,7 @@ var bboxBgSelected = 'rgba(255,69,0,0.5)';
 var bboxBgRelated = 'rgba(255,176,0,0.3)';
 var bboxBgStructured = 'rgba(255,255,255,0)';
 var bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
-var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-2g5pja" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected_multiple {\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected_multiple {\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated; }, bboxStructuredBorderHover, function (props) { return props.colorScheme && props.colorScheme.borderStructured || bboxStructuredBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundStructured || bboxBgStructured; }, function (props) { return props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; });
+var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1jfsiwo" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected_multiple {\n    background-color: ", ";\n  }\n"], ["\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected_multiple {\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated; }, bboxStructuredBorderHover, function (props) { return props.colorScheme && props.colorScheme.borderStructured || bboxStructuredBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundStructured || bboxBgStructured; }, function (props) { return props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; });
 var Bbox = function (props) {
     var _a = React.useMemo(function () {
         return [
@@ -224,6 +224,18 @@ var getMultiBboxPagesObj = function (mcidList) {
     }
     mcidListPages.forEach(function (page, index) { return multiBbox[page + 1].push(mcidList[index]); });
     return multiBbox;
+};
+var extractMcidFromNode = function (children) {
+    if (___default["default"].isNil(children))
+        return [];
+    var mcidList = [];
+    if (!(children instanceof Array)) {
+        children.hasOwnProperty('mcid') && mcidList.push(children);
+    }
+    else {
+        mcidList.push.apply(mcidList, ___default["default"].filter(children, function (child) { return child.hasOwnProperty('mcid'); }));
+    }
+    return mcidList;
 };
 var updateMcidList = function (oldMcidList, children) {
     if (___default["default"].isNil(oldMcidList))
@@ -331,12 +343,18 @@ var structurizeTree = function (node) {
             node.children = [];
         }
         else {
+            node.mcidListChildren = extractMcidFromNode(node.children.children);
             node.children = [structurizeTree(node.children)];
             node.mcidList = updateMcidList(node.mcidList, node.children);
         }
     }
     else {
+        var mcidListChildren_1 = [];
         var _a = groupChildren(node.children), nodeList = _a[0], mcidList = _a[1], annotList = _a[2];
+        ___default["default"].forEach(node.children, function (child) {
+            return mcidListChildren_1.push.apply(mcidListChildren_1, extractMcidFromNode(child.children));
+        });
+        node.mcidListChildren = mcidListChildren_1;
         node.children = ___default["default"].map(nodeList, function (child) { return structurizeTree(child); });
         node.mcidList = updateMcidList(mcidList, node.children);
         if (annotList.length) {
@@ -867,7 +885,7 @@ var WARNING_CODES = {
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 var bboxBorderHover = 'orangered';
-var StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1589ncr" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
+var StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1qxpiv" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  min-height: ", ";\n  min-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'auto'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'auto'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
 var PdfPage = function (props) {
     var scrollIntoPage = React.useContext(ViewerContext).scrollIntoPage;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
