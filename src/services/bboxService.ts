@@ -1,21 +1,21 @@
 import _ from 'lodash';
 
-import {IBboxLocation} from '../index';
+import {IBboxLocation} from '../index'; 
 import {AnyObject, OrNull} from '../types/generics';
 import {IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from "../components/bbox/Bbox";
 
 const groupChildren = (children: AnyObject[]): AnyObject[][] => {
   if (_.isNil(children)) children = [];
   const group = _.groupBy(cleanArray(children), (child) => {
-      if (child.hasOwnProperty('name')) return 'nodeList';
-      if (child.hasOwnProperty('mcid')) return 'mcidList';
-      if (child.hasOwnProperty('rect')) return 'annotList';
-      return null;
+    if (child.hasOwnProperty('name')) return 'nodeList';
+    if (child.hasOwnProperty('mcid')) return 'mcidList';
+    if (child.hasOwnProperty('rect')) return 'annotList';
+    return null;
   });
   return [
-      group.nodeList ?? [],
-      group.mcidList ?? [],
-      group.annotList ?? [],
+    group.nodeList ?? [],
+    group.mcidList ?? [],
+    group.annotList ?? [],
   ];
 };
 
@@ -33,26 +33,33 @@ const getMultiBboxPagesObj = (mcidList: Array<IMcidItem | undefined>): AnyObject
   return multiBbox;
 };
 
+const extractMcidFromNode = (children: AnyObject | AnyObject[]): AnyObject[] => {
+  if (_.isNil(children)) return [];
+  const mcidList = [];
+  if (!(children instanceof Array)) {
+    children.hasOwnProperty('mcid') && mcidList.push(children);
+  } else {
+    mcidList.push(..._.filter(children, (child: AnyObject) => child?.hasOwnProperty('mcid')));
+  }
+  return mcidList;
+};
+
 const updateMcidList = (oldMcidList: AnyObject[], children: AnyObject[]): AnyObject[] => {
   if (_.isNil(oldMcidList)) oldMcidList = [];
   if (_.isNil(children)) children = [];
   return [
-      ...oldMcidList,
-      ..._.flatMap(cleanArray(children), child => {
-          if (child.hasOwnProperty('mcidList') && !_.isNil(child.mcidList)) {
-              return child.mcidList;
-          }
-      }),
+    ...oldMcidList,
+    ..._.flatMap(cleanArray(children), child => {
+      if (child.hasOwnProperty('mcidList') && !_.isNil(child.mcidList)) {
+        return child.mcidList;
+      }
+    }),
   ];
 };
 
 export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
   if (_.isNil(arr)) return [];
-  if (arr.some(el => _.isNil(el))) {
-      arr = arr.filter(el => !_.isNil(el));
-      return arr.length ? arr as AnyObject[] : [];
-  }
-  return arr as AnyObject[];
+  return arr.filter(el => !_.isNil(el)) as AnyObject[];
 };
 
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
@@ -63,7 +70,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
       if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
         const bboxPosition = calculateLocationInStreamOperator(bbox.location);
         if (!bboxPosition) {
-            return;
+          return;
         }
         bboxMap[bboxPosition.pageIndex + 1] = [
           ...(bboxMap[bboxPosition.pageIndex + 1] || []),
@@ -115,10 +122,10 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
 
 export const parseTree = (tree: AnyObject | AnyObject[]): AnyObject => {
   if (tree instanceof Array && tree.length === 1) {
-      return tree[0];
+    return tree[0];
   }
   if (tree instanceof Array) {
-      return { name: 'Document', children: tree };
+    return { name: 'Document', children: tree };
   }
   return tree;
 };
@@ -126,27 +133,33 @@ export const parseTree = (tree: AnyObject | AnyObject[]): AnyObject => {
 export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
   if (_.isNil(node)) return null;
   if (_.isNil(node.children)) {
-      if (node.hasOwnProperty('name')) return node;
-      return null;
+    if (node.hasOwnProperty('name')) return node;
+    return null;
   }
   if (!(node.children instanceof Array)) {
-      if (node.children.hasOwnProperty('mcid')) {
-          node.mcidList = [node.children];
-          node.children = [];
-      } else if (node.children.hasOwnProperty('rect')) {
-          node.annotList = [node.children];
-          node.children = [];
-      } else {
-          node.children = [structurizeTree(node.children)];
-          node.mcidList = updateMcidList(node.mcidList, node.children);
-      }
+    if (node.children.hasOwnProperty('mcid')) {
+      node.mcidList = [node.children];
+      node.children = [];
+    } else if (node.children.hasOwnProperty('rect')) {
+      node.annotList = [node.children];
+      node.children = [];
+    } else {
+      node.mcidListChildren = extractMcidFromNode(node.children.children);
+      node.children = [structurizeTree(node.children)];
+      node.mcidList = updateMcidList(node.mcidList, node.children);
+    }
   } else {
-      const [nodeList, mcidList, annotList] = groupChildren(node.children);
-      node.children = _.map(nodeList, child => structurizeTree(child));
-      node.mcidList = updateMcidList(mcidList, node.children);
-      if (annotList.length) {
-          node.annotList = annotList;
-      }
+    const mcidListChildren = [] as AnyObject[];
+    const [nodeList, mcidList, annotList] = groupChildren(node.children);
+    _.forEach(node.children, (child: OrNull<AnyObject>) =>
+      mcidListChildren.push(...extractMcidFromNode(child?.children))
+    );
+    node.mcidListChildren = mcidListChildren;
+    node.children = _.map(nodeList, child => structurizeTree(child));
+    node.mcidList = updateMcidList(mcidList, node.children);
+    if (annotList.length) {
+      node.annotList = annotList;
+    }
   }
   node.children = cleanArray(node.children);
   return node;
@@ -156,15 +169,15 @@ export const setTreeIds = (node: AnyObject, annotMap: AnyObject = {}, id: string
   if (_.isNil(node)) return [null, annotMap];
   node.id = id;
   if (node?.hasOwnProperty('annotList')) {
-      node.annotList.forEach((annot: IAnnotItem) => {
-        const index = `${annot.pageIndex}:${annot.annotIndex}`;
-        annotMap[index] = id;
-      });
+    node.annotList.forEach((annot: IAnnotItem) => {
+      const index = `${annot.pageIndex}:${annot.annotIndex}`;
+      annotMap[index] = id;
+    });
   }
   if (_.isNil(node?.children)) node.children = [];
   if (!node?.children.length) {
-      node.final = true;
-      return [node, annotMap];
+    node.final = true;
+    return [node, annotMap];
   }
   if (!(node.children instanceof Array)) node.children = [setTreeIds(node.children, annotMap, `${id}:0`)[0]];
   else node.children = _.map(node.children, (child, index) => setTreeIds(child, annotMap, `${id}:${index}`)[0]);
@@ -194,7 +207,7 @@ export const createBboxMap = (mcidList: TreeElementBbox[]): AnyObject => {
   });
   const mcidListPagesDict = Array.from(new Set(mcidListPages.flat()));
   for (const value of mcidListPagesDict) {
-      bboxMap[value + 1] = [];
+    bboxMap[value + 1] = [];
   }
   mcidListPages.forEach((page, index) => {
     if (!(page instanceof Array)) bboxMap[page + 1].push(mcidList[index]);
