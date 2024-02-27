@@ -233,7 +233,7 @@ var extractMcidFromNode = function (children) {
         children.hasOwnProperty('mcid') && mcidList.push(children);
     }
     else {
-        mcidList.push.apply(mcidList, ___default["default"].filter(children, function (child) { return child.hasOwnProperty('mcid'); }));
+        mcidList.push.apply(mcidList, ___default["default"].filter(children, function (child) { return child === null || child === void 0 ? void 0 : child.hasOwnProperty('mcid'); }));
     }
     return mcidList;
 };
@@ -251,11 +251,7 @@ var updateMcidList = function (oldMcidList, children) {
 var cleanArray = function (arr) {
     if (___default["default"].isNil(arr))
         return [];
-    if (arr.some(function (el) { return ___default["default"].isNil(el); })) {
-        arr = arr.filter(function (el) { return !___default["default"].isNil(el); });
-        return arr.length ? arr : [];
-    }
-    return arr;
+    return arr.filter(function (el) { return !___default["default"].isNil(el); });
 };
 var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
@@ -352,7 +348,7 @@ var structurizeTree = function (node) {
         var mcidListChildren_1 = [];
         var _a = groupChildren(node.children), nodeList = _a[0], mcidList = _a[1], annotList = _a[2];
         ___default["default"].forEach(node.children, function (child) {
-            return mcidListChildren_1.push.apply(mcidListChildren_1, extractMcidFromNode(child.children));
+            return mcidListChildren_1.push.apply(mcidListChildren_1, extractMcidFromNode(child === null || child === void 0 ? void 0 : child.children));
         });
         node.mcidListChildren = mcidListChildren_1;
         node.children = ___default["default"].map(nodeList, function (child) { return structurizeTree(child); });

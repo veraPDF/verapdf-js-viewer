@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import {IBboxLocation} from '../index';
+import {IBboxLocation} from '../index'; 
 import {AnyObject, OrNull} from '../types/generics';
 import {IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from "../components/bbox/Bbox";
 
@@ -39,7 +39,7 @@ const extractMcidFromNode = (children: AnyObject | AnyObject[]): AnyObject[] => 
   if (!(children instanceof Array)) {
     children.hasOwnProperty('mcid') && mcidList.push(children);
   } else {
-    mcidList.push(..._.filter(children, (child: AnyObject) => child.hasOwnProperty('mcid')));
+    mcidList.push(..._.filter(children, (child: AnyObject) => child?.hasOwnProperty('mcid')));
   }
   return mcidList;
 };
@@ -59,11 +59,7 @@ const updateMcidList = (oldMcidList: AnyObject[], children: AnyObject[]): AnyObj
 
 export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
   if (_.isNil(arr)) return [];
-  if (arr.some(el => _.isNil(el))) {
-    arr = arr.filter(el => !_.isNil(el));
-    return arr.length ? arr as AnyObject[] : [];
-  }
-  return arr as AnyObject[];
+  return arr.filter(el => !_.isNil(el)) as AnyObject[];
 };
 
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
@@ -155,8 +151,8 @@ export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
   } else {
     const mcidListChildren = [] as AnyObject[];
     const [nodeList, mcidList, annotList] = groupChildren(node.children);
-    _.forEach(node.children, (child: AnyObject) =>
-      mcidListChildren.push(...extractMcidFromNode(child.children))
+    _.forEach(node.children, (child: OrNull<AnyObject>) =>
+      mcidListChildren.push(...extractMcidFromNode(child?.children))
     );
     node.mcidListChildren = mcidListChildren;
     node.children = _.map(nodeList, child => structurizeTree(child));
