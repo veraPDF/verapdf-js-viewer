@@ -55,11 +55,14 @@ export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
   return arr as AnyObject[];
 };
 
+const annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
   const bboxMap = {};
   bboxes.forEach((bbox, index) => {
     try {
       if (_.isNil(bbox.location)) return;
+      const match = bbox.location.match(annotIndexRegExp);
+      const annotIndex = parseInt(match?.groups?.annotIndex!, 10) || undefined;
       if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
         const bboxPosition = calculateLocationInStreamOperator(bbox.location);
         if (!bboxPosition) {
@@ -69,10 +72,10 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
           ...(bboxMap[bboxPosition.pageIndex + 1] || []),
           {
             index,
+            annotIndex,
             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
             operatorIndex: bboxPosition.operatorIndex,
             glyphIndex: bboxPosition.glyphIndex,
-            annotIndex: bboxPosition.annotIndex,
             bboxTitle: bbox.bboxTitle,
           }
         ];
@@ -83,6 +86,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             ...(bboxMap[pageIndex + 1] || []),
             {
               index,
+              annotIndex,
               isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
               mcidList,
               contentItemPath,
@@ -98,6 +102,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             ...(bboxMap[bboxWithLocation.page] || []),
             {
               index,
+              annotIndex,
               isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
               location: bboxWithLocation.location,
               groupId: bbox.groupId || undefined,
@@ -232,13 +237,9 @@ export const calculateLocationInStreamOperator = (location: string) => {
   let pageIndex = -1;
   let operatorIndex = -1;
   let glyphIndex = -1;
-  let annotIndex = -1;
   path.forEach((step) => {
     if (step.startsWith('pages')) {
       pageIndex = parseInt(step.split(/[\[\]]/)[1]);
-    }
-    if (step.startsWith('annots')) {
-      annotIndex = parseInt(step.split(/[\[\]]/)[1]);
     }
     if (step.startsWith('operators')) {
       operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
@@ -254,7 +255,6 @@ export const calculateLocationInStreamOperator = (location: string) => {
     pageIndex,
     operatorIndex,
     glyphIndex,
-    annotIndex,
   }
 }
 
@@ -430,7 +430,7 @@ const convertContextToPath = (errorContext = '') => {
   try {
     if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
       const result: any = contextString.match(
-        /pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/
+        /pages\[(?<pages>\d+)\](\(.+\))?\/(annots\[(?<annots>\d+)\](\(.+\))?\/appearance\[\d\](\(.+\))?\/)?contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/
       );
       if (result) {
         try {
@@ -442,6 +442,7 @@ const convertContextToPath = (errorContext = '') => {
             const contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/);
             return parseInt(contentItemIndex?.groups?.contentItem || '-1', 10);
           });
+          path.annotIndex = parseInt(result.groups.annots, 10) || undefined;
           return path;
         } catch (err) {
           console.log('NoMCIDContentItemPathParseError:', err.message || err);
@@ -543,7 +544,15 @@ export const getBboxForGlyph = (
   return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 }
 
-export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => {
+export const parseMcidToBbox = (
+  listOfMcid: number[] | AnyObject,
+  pageMap: AnyObject,
+  annotations: AnyObject,
+  viewport: number[],
+  rotateAngle: number,
+  leftOffset = 0,
+  bottomOffset = 0,
+) => {
   let coords: AnyObject = {};
 
   if (listOfMcid instanceof Array) {
@@ -571,7 +580,12 @@ export const parseMcidToBbox = (listOfMcid: number[] | AnyObject, pageMap: AnyOb
     }
   }
   if (!coords || _.isEmpty(coords)) return [];
-  const coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
+  const coordsArray = rotateCoordinates([
+    coords.x + leftOffset,
+    coords.y + bottomOffset,
+    coords.width,
+    coords.height,
+  ], rotateAngle, viewport);
   const rotatedViewport = rotateViewport(rotateAngle, viewport);
   return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 }

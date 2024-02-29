@@ -13,13 +13,12 @@ export declare const calculateLocationInStreamOperator: (location: string) => {
     pageIndex: number;
     operatorIndex: number;
     glyphIndex: number;
-    annotIndex: number;
 } | null;
 export declare const getSelectedPageByLocation: (bboxLocation: string) => number;
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
 export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean;
 export declare const getBboxForGlyph: (operatorIndex: number, glyphIndex: number, operationsList: number[][][], viewport: number[], rotateAngle: number, leftOffset: number, bottomOffset: number) => number[];
-export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => number[];
+export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number, leftOffset?: number, bottomOffset?: number) => number[];
 export declare const rotateViewport: (rotateAngle: number, viewport: number[]) => number[];
 export declare const rotateCoordinates: (coords: number[], rotateAngle: number, viewport: number[]) => number[];
 export declare const rotatePoint: (rotateAngle: number, point: number[], viewport: number[]) => number[];

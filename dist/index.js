@@ -245,12 +245,16 @@ var cleanArray = function (arr) {
     }
     return arr;
 };
+var annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
 var buildBboxMap = function (bboxes, structure) {
     var bboxMap = {};
     bboxes.forEach(function (bbox, index) {
+        var _a;
         try {
             if (___default["default"].isNil(bbox.location))
                 return;
+            var match = bbox.location.match(annotIndexRegExp);
+            var annotIndex_1 = parseInt((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.annotIndex, 10) || undefined;
             if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
                 var bboxPosition = calculateLocationInStreamOperator(bbox.location);
                 if (!bboxPosition) {
@@ -259,10 +263,10 @@ var buildBboxMap = function (bboxes, structure) {
                 bboxMap[bboxPosition.pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[bboxPosition.pageIndex + 1] || []), true), [
                     {
                         index: index,
+                        annotIndex: annotIndex_1,
                         isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                         operatorIndex: bboxPosition.operatorIndex,
                         glyphIndex: bboxPosition.glyphIndex,
-                        annotIndex: bboxPosition.annotIndex,
                         bboxTitle: bbox.bboxTitle,
                     }
                 ], false);
@@ -274,6 +278,7 @@ var buildBboxMap = function (bboxes, structure) {
                     bboxMap[pageIndex + 1] = __spreadArray(__spreadArray([], (bboxMap[pageIndex + 1] || []), true), [
                         {
                             index: index,
+                            annotIndex: annotIndex_1,
                             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                             mcidList: mcidList,
                             contentItemPath: contentItemPath,
@@ -289,6 +294,7 @@ var buildBboxMap = function (bboxes, structure) {
                     bboxMap[bboxWithLocation.page] = __spreadArray(__spreadArray([], (bboxMap[bboxWithLocation.page] || []), true), [
                         {
                             index: index,
+                            annotIndex: annotIndex_1,
                             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                             location: bboxWithLocation.location,
                             groupId: bbox.groupId || undefined,
@@ -440,13 +446,9 @@ var calculateLocationInStreamOperator = function (location) {
     var pageIndex = -1;
     var operatorIndex = -1;
     var glyphIndex = -1;
-    var annotIndex = -1;
     path.forEach(function (step) {
         if (step.startsWith('pages')) {
             pageIndex = parseInt(step.split(/[\[\]]/)[1]);
-        }
-        if (step.startsWith('annots')) {
-            annotIndex = parseInt(step.split(/[\[\]]/)[1]);
         }
         if (step.startsWith('operators')) {
             operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
@@ -462,7 +464,6 @@ var calculateLocationInStreamOperator = function (location) {
         pageIndex: pageIndex,
         operatorIndex: operatorIndex,
         glyphIndex: glyphIndex,
-        annotIndex: annotIndex,
     };
 };
 var getSelectedPageByLocation = function (bboxLocation) {
@@ -629,7 +630,7 @@ var convertContextToPath = function (errorContext) {
     var contextString = errorContext;
     try {
         if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
-            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/);
+            var result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/(annots\[(?<annots>\d+)\](\(.+\))?\/appearance\[\d\](\(.+\))?\/)?contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/);
             if (result) {
                 try {
                     var path = {};
@@ -641,6 +642,7 @@ var convertContextToPath = function (errorContext) {
                         var contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/);
                         return parseInt(((_a = contentItemIndex === null || contentItemIndex === void 0 ? void 0 : contentItemIndex.groups) === null || _a === void 0 ? void 0 : _a.contentItem) || '-1', 10);
                     });
+                    path.annotIndex = parseInt(result.groups.annots, 10) || undefined;
                     return path;
                 }
                 catch (err) {
@@ -730,8 +732,10 @@ var getBboxForGlyph = function (operatorIndex, glyphIndex, operationsList, viewp
     var rotatedViewport = rotateViewport(rotateAngle, viewport);
     return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 };
-var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rotateAngle) {
+var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rotateAngle, leftOffset, bottomOffset) {
     var _a;
+    if (leftOffset === void 0) { leftOffset = 0; }
+    if (bottomOffset === void 0) { bottomOffset = 0; }
     var coords = {};
     if (listOfMcid instanceof Array) {
         listOfMcid.forEach(function (mcid) {
@@ -758,7 +762,12 @@ var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rota
     }
     if (!coords || ___default["default"].isEmpty(coords))
         return [];
-    var coordsArray = rotateCoordinates([coords.x, coords.y, coords.width, coords.height], rotateAngle, viewport);
+    var coordsArray = rotateCoordinates([
+        coords.x + leftOffset,
+        coords.y + bottomOffset,
+        coords.width,
+        coords.height,
+    ], rotateAngle, viewport);
     var rotatedViewport = rotateViewport(rotateAngle, viewport);
     return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 };
@@ -922,16 +931,26 @@ var PdfPage = function (props) {
             var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1];
             var allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
             var errorBboxes = bboxList.map(function (bbox) {
-                var _a, _b, _c, _d, _e, _f, _g;
+                var _a;
+                var _b, _c, _d, _e, _f, _g, _h, _j;
+                var opData = operationData, posData = positionData, nMcidData = noMCIDData;
+                var left = 0, bottom = 0;
+                var annotIndex = bbox.annotIndex;
+                if (annotIndex != null) {
+                    left = (_c = (_b = annotations[annotIndex]) === null || _b === void 0 ? void 0 : _b.rect[0]) !== null && _c !== void 0 ? _c : 0;
+                    bottom = (_e = (_d = annotations[annotIndex]) === null || _d === void 0 ? void 0 : _d.rect[1]) !== null && _e !== void 0 ? _e : 0;
+                    opData = (_g = (_f = annotBBoxesAndOpPos[annotIndex]) === null || _f === void 0 ? void 0 : _f[0]) !== null && _g !== void 0 ? _g : [];
+                    _a = (_j = (_h = annotBBoxesAndOpPos[annotIndex]) === null || _h === void 0 ? void 0 : _h[1]) !== null && _j !== void 0 ? _j : [[], []], posData = _a[0], nMcidData = _a[1];
+                }
                 if (bbox.mcidList) {
-                    bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+                    bbox.location = parseMcidToBbox(bbox.mcidList, posData, annotations, page.view, page.rotate, left, bottom);
                     if (___default["default"].isEmpty(bbox.location)) {
                         return null;
                     }
                 }
                 else if (bbox.contentItemPath) {
                     var contentItemsPath_1 = bbox.contentItemPath.slice(2);
-                    var contentItemsBBoxes_1 = noMCIDData[bbox.contentItemPath[1]];
+                    var contentItemsBBoxes_1 = nMcidData[bbox.contentItemPath[1]];
                     try {
                         contentItemsPath_1.forEach(function (ci, i) {
                             if (contentItemsPath_1.length > i + 1 || !contentItemsBBoxes_1.final) {
@@ -940,8 +959,8 @@ var PdfPage = function (props) {
                             contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[ci];
                         });
                         bbox.location = [
-                            contentItemsBBoxes_1.contentItem.x,
-                            contentItemsBBoxes_1.contentItem.y,
+                            contentItemsBBoxes_1.contentItem.x + left,
+                            contentItemsBBoxes_1.contentItem.y + bottom,
                             contentItemsBBoxes_1.contentItem.w,
                             contentItemsBBoxes_1.contentItem.h
                         ];
@@ -952,13 +971,6 @@ var PdfPage = function (props) {
                     }
                 }
                 if (___default["default"].isNumber(bbox.operatorIndex) && ___default["default"].isNumber(bbox.glyphIndex)) {
-                    var annotIndex = (_a = bbox.annotIndex) !== null && _a !== void 0 ? _a : -1;
-                    var opData = operationData, left = 0, bottom = 0;
-                    if (annotIndex >= 0) {
-                        opData = (_c = (_b = annotBBoxesAndOpPos[annotIndex]) === null || _b === void 0 ? void 0 : _b[0]) !== null && _c !== void 0 ? _c : [];
-                        left = (_e = (_d = annotations[annotIndex]) === null || _d === void 0 ? void 0 : _d.rect[0]) !== null && _e !== void 0 ? _e : 0;
-                        bottom = (_g = (_f = annotations[annotIndex]) === null || _f === void 0 ? void 0 : _f.rect[1]) !== null && _g !== void 0 ? _g : 0;
-                    }
                     bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
                 }
                 return bbox;

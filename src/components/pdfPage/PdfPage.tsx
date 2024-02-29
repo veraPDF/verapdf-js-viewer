@@ -96,14 +96,34 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
       const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
       const errorBboxes = bboxList.map((bbox) => {
+        let opData = operationData,
+            posData = positionData,
+            nMcidData = noMCIDData;
+        let left = 0, bottom = 0;
+        const { annotIndex } = bbox;
+        if (annotIndex != null) {
+          left = annotations[annotIndex]?.rect[0] ?? 0;
+          bottom = annotations[annotIndex]?.rect[1] ?? 0;
+          opData = annotBBoxesAndOpPos[annotIndex]?.[0] ?? [];
+          [posData, nMcidData] = annotBBoxesAndOpPos[annotIndex]?.[1] ?? [[], []];
+        }
+
         if (bbox.mcidList) {
-          bbox.location = parseMcidToBbox(bbox.mcidList, positionData, annotations, page.view, page.rotate);
+          bbox.location = parseMcidToBbox(
+            bbox.mcidList,
+            posData,
+            annotations,
+            page.view,
+            page.rotate,
+            left,
+            bottom,
+          );
           if (_.isEmpty(bbox.location)) {
             return null;
           }
         } else if (bbox.contentItemPath) {
           const contentItemsPath = bbox.contentItemPath.slice(2);
-          let contentItemsBBoxes = noMCIDData[bbox.contentItemPath[1]];
+          let contentItemsBBoxes = nMcidData[bbox.contentItemPath[1]];
           try {
             contentItemsPath.forEach((ci, i) => {
               if (contentItemsPath.length > i + 1 || !contentItemsBBoxes.final) {
@@ -113,8 +133,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
             });
 
             bbox.location = [
-              contentItemsBBoxes.contentItem.x,
-              contentItemsBBoxes.contentItem.y,
+              contentItemsBBoxes.contentItem.x + left,
+              contentItemsBBoxes.contentItem.y + bottom,
               contentItemsBBoxes.contentItem.w,
               contentItemsBBoxes.contentItem.h
             ];
@@ -124,13 +144,6 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           }
         }
         if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
-          const annotIndex = bbox.annotIndex ?? -1;
-          let opData = operationData, left = 0, bottom = 0;
-          if (annotIndex >= 0) {
-            opData = annotBBoxesAndOpPos[annotIndex]?.[0] ?? [];
-            left = annotations[annotIndex]?.rect[0] ?? 0;
-            bottom = annotations[annotIndex]?.rect[1] ?? 0;
-          }
           bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
         }
 
