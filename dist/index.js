@@ -225,6 +225,18 @@ var getMultiBboxPagesObj = function (mcidList) {
     mcidListPages.forEach(function (page, index) { return multiBbox[page + 1].push(mcidList[index]); });
     return multiBbox;
 };
+var extractMcidFromNode = function (children) {
+    if (___default["default"].isNil(children))
+        return [];
+    var mcidList = [];
+    if (!(children instanceof Array)) {
+        children.hasOwnProperty('mcid') && mcidList.push(children);
+    }
+    else {
+        mcidList.push.apply(mcidList, ___default["default"].filter(children, function (child) { return child === null || child === void 0 ? void 0 : child.hasOwnProperty('mcid'); }));
+    }
+    return mcidList;
+};
 var updateMcidList = function (oldMcidList, children) {
     if (___default["default"].isNil(oldMcidList))
         oldMcidList = [];
@@ -239,11 +251,7 @@ var updateMcidList = function (oldMcidList, children) {
 var cleanArray = function (arr) {
     if (___default["default"].isNil(arr))
         return [];
-    if (arr.some(function (el) { return ___default["default"].isNil(el); })) {
-        arr = arr.filter(function (el) { return !___default["default"].isNil(el); });
-        return arr.length ? arr : [];
-    }
-    return arr;
+    return arr.filter(function (el) { return !___default["default"].isNil(el); });
 };
 var annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
 var buildBboxMap = function (bboxes, structure) {
@@ -337,12 +345,18 @@ var structurizeTree = function (node) {
             node.children = [];
         }
         else {
+            node.mcidListChildren = extractMcidFromNode(node.children.children);
             node.children = [structurizeTree(node.children)];
             node.mcidList = updateMcidList(node.mcidList, node.children);
         }
     }
     else {
+        var mcidListChildren_1 = [];
         var _a = groupChildren(node.children), nodeList = _a[0], mcidList = _a[1], annotList = _a[2];
+        ___default["default"].forEach(node.children, function (child) {
+            return mcidListChildren_1.push.apply(mcidListChildren_1, extractMcidFromNode(child === null || child === void 0 ? void 0 : child.children));
+        });
+        node.mcidListChildren = mcidListChildren_1;
         node.children = ___default["default"].map(nodeList, function (child) { return structurizeTree(child); });
         node.mcidList = updateMcidList(mcidList, node.children);
         if (annotList.length) {
