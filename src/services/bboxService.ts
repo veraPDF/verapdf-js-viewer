@@ -69,7 +69,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
     try {
       if (_.isNil(bbox.location)) return;
       const match = bbox.location.match(annotIndexRegExp);
-      const annotIndex = parseInt(match?.groups?.annotIndex!, 10) || undefined;
+      const annotIndex = parseInt(match?.groups?.annotIndex!, 10);
       if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
         const bboxPosition = calculateLocationInStreamOperator(bbox.location);
         if (!bboxPosition) {
@@ -79,7 +79,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
           ...(bboxMap[bboxPosition.pageIndex + 1] || []),
           {
             index,
-            annotIndex,
+            annotIndex: Number.isNaN(annotIndex) ? undefined : annotIndex,
             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
             operatorIndex: bboxPosition.operatorIndex,
             glyphIndex: bboxPosition.glyphIndex,
@@ -93,7 +93,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             ...(bboxMap[pageIndex + 1] || []),
             {
               index,
-              annotIndex,
+              annotIndex: Number.isNaN(annotIndex) ? undefined : annotIndex,
               isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
               mcidList,
               contentItemPath,
@@ -109,7 +109,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             ...(bboxMap[bboxWithLocation.page] || []),
             {
               index,
-              annotIndex,
+              annotIndex: Number.isNaN(annotIndex) ? undefined : annotIndex,
               isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
               location: bboxWithLocation.location,
               groupId: bbox.groupId || undefined,

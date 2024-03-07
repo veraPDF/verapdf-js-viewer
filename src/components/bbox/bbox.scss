@@ -12,6 +12,7 @@
   }
 
   &_selected {
+    z-index: 1000;
     background: $bbox-bg-color--selected;
   }
 
