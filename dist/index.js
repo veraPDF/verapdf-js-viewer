@@ -990,13 +990,15 @@ var PdfPage = function (props) {
                 return bbox;
             });
             setBboxesAll(allBboxes);
-            setBboxesErrors(cleanArray(errorBboxes));
+            setBboxesErrors(errorBboxes);
         });
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
     }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
     React.useEffect(function () {
         if (bboxList.length) {
             setBboxesErrors(function (prev) { return ___default["default"].map(prev, function (bbox, index) {
+                if (___default["default"].isNil(bbox))
+                    return null;
                 return __assign(__assign({}, bbox), { isVisible: bboxList[index].hasOwnProperty('isVisible') ? bboxList[index].isVisible : true });
             }); });
         }
@@ -1060,7 +1062,7 @@ var PdfPage = function (props) {
           Note: if the area of error bbox equal to the area of structure bbox,
           then we assume that the structure bbox has a larger area
         */
-        return __spreadArray(__spreadArray([], bboxesAll, true), bboxesErrors, true).sort(function (_a, _b) {
+        return __spreadArray(__spreadArray([], bboxesAll, true), cleanArray(bboxesErrors), true).sort(function (_a, _b) {
             var locationAll = _a.location;
             var locationError = _b.location;
             var getArea = function (arr) { return ___default["default"].round(+arr[2], 4) * ___default["default"].round(+arr[3], 4); };

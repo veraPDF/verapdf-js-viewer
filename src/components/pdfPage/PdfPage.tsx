@@ -51,7 +51,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const { bboxList = [], scale = 1 } = props;
   const intersectionRef = useRef(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
-  const [bboxesErrors, setBboxesErrors] = useState<IBbox[]>([]);
+  const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
   const [loaded, setLoaded] = useState(false);
   const [pageScale, setPageScale] = useState(scale);
   const [pageViewport, setPageViewport] = useState<number[]>([]);
@@ -150,7 +150,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
         return bbox;
       });
       setBboxesAll(allBboxes);
-      setBboxesErrors(cleanArray(errorBboxes) as IBbox[]);
+      setBboxesErrors(errorBboxes);
     });
     props.onPageLoadSuccess?.(page);
   }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
@@ -158,6 +158,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   useEffect(() => {
     if (bboxList.length) {
       setBboxesErrors((prev) => _.map(prev, (bbox, index) => {
+        if (_.isNil(bbox)) return null;
         return {
           ...bbox,
           isVisible: bboxList[index].hasOwnProperty('isVisible') ? bboxList[index].isVisible : true,
@@ -220,13 +221,13 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       Note: if the area of error bbox equal to the area of structure bbox,
       then we assume that the structure bbox has a larger area
     */
-    return [...bboxesAll, ...bboxesErrors].sort(
+    return [...bboxesAll, ...cleanArray(bboxesErrors)].sort(
       ({ location: locationAll }, { location: locationError }) => {
         const getArea = (arr: Array<number | string>): number => _.round(+arr[2], 4) * _.round(+arr[3], 4);
         const areaAll = locationAll ? getArea(locationAll) : 0;
         const areaError = locationError ? getArea(locationError) : 0;
         return areaAll < areaError ? 1 : (areaAll > areaError ? -1 : 0);
-      })
+      }) as IBbox[];
   }, [bboxesErrors, bboxesAll]);
   const activeBboxes = useMemo(() => bboxes.filter((bbox) => {
     const isBboxMode = !_.isNil(props.activeBboxIndex);
