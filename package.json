@@ -1,6 +1,6 @@
 {
   "name": "@duallab/verapdf-js-viewer",
-  "version": "1.7.12",
+  "version": "1.7.13",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
