@@ -1,6 +1,6 @@
-# Verapdf-js-viewer
+# veraPDF-js-viewer
 
-Display pdf with opportunity of bounding boxes selection
+Display PDF with an option to highlight a collection of rectangles on top of page rendering. Used by veraPDF web application to visualize locations of validation errors
 
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](LICENSE.MPL)
 
@@ -8,11 +8,11 @@ Display pdf with opportunity of bounding boxes selection
 
 #### React
 
-To use the latest version of Verapdf-js-viewer, your project needs to use React 16.3 or later.
+To use the latest version of veraPDF-js-viewer, your project needs to use React 16.3 or later.
 
 #### Internet Explorer
 
-Internet Explorer is not supported in Verapdf-js-viewer. Use Edge instead
+Internet Explorer is not supported in veraPDF-js-viewer. Use Edge instead
 
 ### Usage
 
@@ -20,7 +20,7 @@ Here's an example of basic usage:
 
 ```js
 import React, { useState } from 'react';
-import PdfViewer from 'verapdf-js-viewer';
+import PdfViewer from '@duallab/verapdf-js-viewer';
 
 function MyApp() {
   const [numPages, setNumPages] = useState(null);
