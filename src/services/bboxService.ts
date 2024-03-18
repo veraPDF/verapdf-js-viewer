@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import {IBboxLocation} from '../index'; 
+import {IBboxLocation} from '../index';
 import {AnyObject, OrNull} from '../types/generics';
 import {IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from "../components/bbox/Bbox";
 
@@ -33,7 +33,7 @@ const getMultiBboxPagesObj = (mcidList: Array<IMcidItem | undefined>): AnyObject
   return multiBbox;
 };
 
-const extractMcidFromNode = (children: AnyObject | AnyObject[]): AnyObject[] => {
+const extractMcidFromNode = (children: AnyObject | AnyObject[] | null): AnyObject[] => {
   if (_.isNil(children)) return [];
   const mcidList = [];
   if (!(children instanceof Array)) {
@@ -143,13 +143,13 @@ export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
   }
   if (!(node.children instanceof Array)) {
     if (node.children.hasOwnProperty('mcid')) {
+      node.mcidListChildren = extractMcidFromNode(node.children);
       node.mcidList = [node.children];
       node.children = [];
     } else if (node.children.hasOwnProperty('rect')) {
       node.annotList = [node.children];
       node.children = [];
     } else {
-      node.mcidListChildren = extractMcidFromNode(node.children.children);
       node.children = [structurizeTree(node.children)];
       node.mcidList = updateMcidList(node.mcidList, node.children);
     }
@@ -157,7 +157,7 @@ export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
     const mcidListChildren = [] as AnyObject[];
     const [nodeList, mcidList, annotList] = groupChildren(node.children);
     _.forEach(node.children, (child: OrNull<AnyObject>) =>
-      mcidListChildren.push(...extractMcidFromNode(child?.children))
+      mcidListChildren.push(...extractMcidFromNode(child))
     );
     node.mcidListChildren = mcidListChildren;
     node.children = _.map(nodeList, child => structurizeTree(child));
