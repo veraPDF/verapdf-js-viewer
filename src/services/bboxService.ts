@@ -1,8 +1,8 @@
 import _ from 'lodash';
 
-import {IBboxLocation} from '../index';
-import {AnyObject, OrNull} from '../types/generics';
-import {IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from "../components/bbox/Bbox";
+import { IBboxLocation } from '../index';
+import { AnyObject, OrNull } from '../types/generics';
+import { IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from '../components/bbox/Bbox';
 
 const groupChildren = (children: AnyObject[]): AnyObject[][] => {
   if (_.isNil(children)) children = [];
@@ -61,6 +61,31 @@ export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
   if (_.isNil(arr)) return [];
   return arr.filter(el => !_.isNil(el)) as AnyObject[];
 };
+
+export const getFormattedAnnotations = (annots: AnyObject): AnyObject[] => {
+  type parentAnnot = {
+    id: string,
+    rect: number[],
+  };
+  const formattedAnnots = [] as AnyObject;
+
+  _.forEach(annots, (annot: any) => {
+    if (annot.hasOwnProperty('parentId')
+      && annot.hasOwnProperty('parentRect')
+      && annot.hasOwnProperty('parentType')
+      && annot.parentType === 'Highlight') {
+      formattedAnnots.push({
+        ['id']: annot.parentId,
+        ['rect']: annot.parentRect,
+      });
+    }
+    formattedAnnots.push(annot);
+  });
+
+  return formattedAnnots.sort(({ id: id1 }: parentAnnot, { id: id2 }: parentAnnot) => {
+    return parseInt(id1) > parseInt(id2) ? 1 : -1;
+  });
+}
 
 const annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
