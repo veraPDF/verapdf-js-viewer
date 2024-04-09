@@ -9,8 +9,15 @@ import { IPageProps } from './IPageProps';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
-import { cleanArray, getBboxForGlyph, parseMcidToBbox, createAllBboxes, checkIsBboxOutOfThePage } from '../../services/bboxService';
-import { WARNING_CODES } from "../../services/constants";
+import {
+  cleanArray,
+  getBboxForGlyph,
+  parseMcidToBbox,
+  createAllBboxes,
+  checkIsBboxOutOfThePage, 
+  getFormattedAnnotations
+} from '../../services/bboxService';
+import { WARNING_CODES } from '../../services/constants';
 
 import './pdfPage.scss';
 
@@ -94,7 +101,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
       const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
-      const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotations, page.view, page.rotate);
+      const annotsFormatted = getFormattedAnnotations(annotations);
+      const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotsFormatted, page.view, page.rotate);
       const errorBboxes = bboxList.map((bbox) => {
         let opData = operationData,
             posData = positionData,
@@ -112,7 +120,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           bbox.location = parseMcidToBbox(
             bbox.mcidList,
             posData,
-            annotations,
+            annotsFormatted,
             page.view,
             page.rotate,
             left,
@@ -227,7 +235,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
         const areaAll = locationAll ? getArea(locationAll) : 0;
         const areaError = locationError ? getArea(locationError) : 0;
         return areaAll < areaError ? 1 : (areaAll > areaError ? -1 : 0);
-      }) as IBbox[];
+    }) as IBbox[];
   }, [bboxesErrors, bboxesAll]);
   const activeBboxes = useMemo(() => bboxes.filter((bbox) => {
     const isBboxMode = !_.isNil(props.activeBboxIndex);

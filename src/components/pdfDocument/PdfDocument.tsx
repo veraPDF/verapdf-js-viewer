@@ -237,7 +237,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return () => {
       document.removeEventListener('keydown', handlekeydownEvent)
     }
-  }, [props.activeBboxIndex, props.page, maxPage])
+  }, [props.activeBboxIndex, props.page, maxPage]);
 
   return (
     <Document
