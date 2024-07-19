@@ -14,7 +14,7 @@ import {
   getBboxForGlyph,
   parseMcidToBbox,
   createAllBboxes,
-  checkIsBboxOutOfThePage, 
+  checkIsBboxOutOfThePage,
   getFormattedAnnotations
 } from '../../services/bboxService';
 import { WARNING_CODES } from '../../services/constants';
@@ -293,7 +293,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
             related={isBboxRelated(bbox)}
             scale={pageScale}
             selectionMode={props.treeBboxSelectionMode}
-            colorScheme={props.colorScheme} />
+            colorScheme={props.colorScheme}
+          />
         )) : null}
       </> : null}
     </StyledPdfPage>
