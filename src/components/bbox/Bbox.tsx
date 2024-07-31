@@ -1,6 +1,7 @@
-import React, { FC, memo, useMemo } from 'react';
+import React, { FC, memo, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
+import { ViewerContext } from "../viewerContext/ViewerContext";
 
 import './bbox.scss';
 
@@ -71,6 +72,21 @@ interface IBboxProps {
   onClick?(e: any): void;
 }
 
+export interface IRenderBboxProps {
+  left: string;
+  width: string;
+  height: string;
+  top: string;
+  disabled: boolean;
+  related?: boolean;
+  selected?: boolean;
+  structured?: boolean;
+  scale: number;
+  colorScheme?: IColorScheme;
+  selectionMode?: TreeBboxSelectionMode;
+  onClick?(e: any): void;
+}
+
 interface IBboxDivProps {
   left: string;
   bottom: string;
@@ -118,33 +134,63 @@ const BboxDiv = styled.div`
   }
 `;
 
-const Bbox: FC<IBboxProps> = (props) => {
+const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
+  const {
+    bbox,
+    disabled,
+    selected,
+    related,
+    structured,
+    scale,
+    colorScheme,
+    selectionMode,
+    onClick,
+  } = props;
+  const { renderBbox } = useContext(ViewerContext);
+
   const [left, bottom, width, height, top] = useMemo(() => {
     return [
-      (parseFloat(props.bbox.location[0] as string) * props.scale) + 'px',
-      (props.bbox.location[3] === 'bottom'
-        ? '0'
-        : (parseFloat(props.bbox.location[1] as string) * props.scale) + 'px'),
-      (parseFloat(props.bbox.location[2] as string) * props.scale) + 'px',
-      (props.bbox.location[3] === 'top'
-        ? 'auto'
-        : (parseFloat(props.bbox.location[3] as string) * props.scale) + 'px'),
-      props.bbox.location[3] === 'top'
-        ? '0' : props.bbox.location[3] === 'bottom'
-        ? `calc(100% - ${parseFloat(props.bbox.location[1] as string) * props.scale}px)`
-        : 'auto',
+      (parseFloat(bbox.location[0] as string) * scale) + 'px',
+      (bbox.location[3] === 'bottom'
+          ? '0'
+          : (parseFloat(bbox.location[1] as string) * scale) + 'px'),
+      (parseFloat(bbox.location[2] as string) * scale) + 'px',
+      (bbox.location[3] === 'top'
+          ? 'auto'
+          : (parseFloat(bbox.location[3] as string) * scale) + 'px'),
+      bbox.location[3] === 'top'
+          ? '0' : bbox.location[3] === 'bottom'
+              ? `calc(100% - ${parseFloat(bbox.location[1] as string) * scale}px)`
+              : 'auto',
     ]
-  }, [props.bbox.location, props.scale]);
+  }, [bbox.location, scale]);
 
-  const isSelected = useMemo(() => props.selected ? ' pdf-bbox_selected' : '', [props.selected]);
-  const isRelated = useMemo(() => props.related ? ' pdf-bbox_related' : '', [props.related]);
-  const isDisabled = useMemo(() => props.disabled ? ' pdf-bbox_disabled' : '', [props.disabled]);
-  const isStructured = useMemo(() => props.structured ? ' pdf-bbox_structured' : '', [props.structured]);
-  const isStructuredSelected = useMemo(() => props.structured && props.selected ? ' pdf-bbox_structured_selected' : '', [props.structured, props.selected]);
+  const isSelected = useMemo(() => selected ? ' pdf-bbox_selected' : '', [selected]);
+  const isRelated = useMemo(() => related ? ' pdf-bbox_related' : '', [related]);
+  const isDisabled = useMemo(() => disabled ? ' pdf-bbox_disabled' : '', [disabled]);
+  const isStructured = useMemo(() => structured ? ' pdf-bbox_structured' : '', [structured]);
+  const isStructuredSelected = useMemo(() => structured && selected ? ' pdf-bbox_structured_selected' : '', [structured, selected]);
   const isStructuredSelectedMultiple = useMemo(() => {
-    if (props.structured && props.selected && props.selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS) return ' pdf-bbox_structured_selected_multiple';
+    if (structured && selected && selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS) return ' pdf-bbox_structured_selected_multiple';
     else return '';
-  }, [props.structured, props.selected, props.selectionMode]);
+  }, [structured, selected, selectionMode]);
+
+  if (renderBbox) {
+    return renderBbox({
+      left,
+      width,
+      height,
+      top,
+      colorScheme,
+      disabled,
+      related,
+      selected,
+      scale,
+      selectionMode,
+      structured,
+      onClick,
+    });
+  }
 
   return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`}
                   left={left}
@@ -152,11 +198,11 @@ const Bbox: FC<IBboxProps> = (props) => {
                   width={width}
                   height={height}
                   top={top}
-                  colorScheme={props.colorScheme || {}}
-                  title={props.bbox.bboxTitle}
-                  aria-describedby={props.bbox.bboxTitle}
-                  onClick={props.onClick}
+                  colorScheme={colorScheme || {}}
+                  title={bbox.bboxTitle}
+                  aria-describedby={bbox.bboxTitle}
+                  onClick={onClick}
   />;
-};
+}
 
 export default memo(Bbox);

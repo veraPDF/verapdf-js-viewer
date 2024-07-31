@@ -1,8 +1,9 @@
-import React, { FC } from 'react';
+import React, { FC, ReactElement } from 'react';
 
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import ViewerProvider from './components/viewerContext/ViewerContext';
 import { scrollToActiveBbox } from './services/bboxService';
+import { IRenderBboxProps } from "./components/bbox/Bbox";
 
 import './styles.scss'
 
@@ -16,13 +17,15 @@ export interface IBboxLocation {
 
 interface IPdfViewerProps extends IPdfDocumentProps {
   bboxes: IBboxLocation[];
-  className?: string
+  className?: string;
+  renderBbox?: (props: IRenderBboxProps) => ReactElement;
 }
 
 const App: FC<IPdfViewerProps> = (props) => {
-  const { className = '', bboxes = [], ...pdfProps } = props;
+  const { className = '', bboxes = [], renderBbox, ...pdfProps } = props;
+
   return (
-    <ViewerProvider>
+    <ViewerProvider renderBbox={renderBbox}>
       <div className={`pdf-viewer ${className}`} role="button" tabIndex={0}>
         <PdfDocument {...pdfProps} bboxes={bboxes}/>
       </div>
