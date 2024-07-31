@@ -49,6 +49,20 @@ interface IBboxProps {
     selectionMode?: TreeBboxSelectionMode;
     onClick?(e: any): void;
 }
+export interface IRenderBboxProps {
+    left: string;
+    width: string;
+    height: string;
+    top: string;
+    disabled: boolean;
+    related?: boolean;
+    selected?: boolean;
+    structured?: boolean;
+    scale: number;
+    colorScheme?: IColorScheme;
+    selectionMode?: TreeBboxSelectionMode;
+    onClick?(e: any): void;
+}
 export type TreeElementBbox = [Array<IMcidItem | undefined>, string];
 declare const _default: React.NamedExoticComponent<IBboxProps>;
 export default _default;
