@@ -1,5 +1,5 @@
 import React from 'react';
-import { PDFPageProxy, RenderFunction, TextItem } from 'react-pdf/dist/Page';
+import { PDFPageProxy, RenderFunction, TextItem, TextLayerItemInternal } from 'react-pdf/dist/Page';
 import { TSelectedBboxData } from '../../types/selectedBboxData';
 import { OrNull } from '../../types/generics';
 
@@ -25,4 +25,5 @@ export interface IPageProps {
   onGetTextSuccess?({ items }: { items: TextItem[] }): void;
   onGetTextError?(error: Error): void;
   onBboxClick?(data: OrNull<TSelectedBboxData>): void;
+  customTextRenderer?(layer: TextLayerItemInternal): string;
 }

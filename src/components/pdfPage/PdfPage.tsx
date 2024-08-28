@@ -281,6 +281,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetAnnotationsError={props.onGetAnnotationsError}
           onGetTextSuccess={props.onGetTextSuccess}
           onGetTextError={props.onGetTextError}
+          customTextRenderer={props.customTextRenderer}
         />
         {isRendered ? bboxes.map((bbox: IBbox, index) => (
           <Bbox
