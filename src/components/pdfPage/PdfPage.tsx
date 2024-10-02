@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo } from 'react';
-import { Page, PDFPageProxy } from 'react-pdf';
+import { Page } from 'react-pdf';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 import _ from 'lodash';
@@ -20,6 +20,7 @@ import {
 import { WARNING_CODES } from '../../services/constants';
 
 import './pdfPage.scss';
+import { PageCallback } from "react-pdf/src/shared/types";
 
 interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
@@ -94,7 +95,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       }
     });
   }, []);
-  const onPageLoadSuccess = useCallback((page: PDFPageProxy) => {
+  const onPageLoadSuccess = useCallback((page: PageCallback) => {
     setIsRendered(true);
     setPageViewport(page.view);
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
@@ -270,7 +271,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           loading={props.pageLoading}
           inputRef={props.inputRef}
           renderAnnotationLayer={props.renderAnnotationLayer}
-          renderInteractiveForms={props.renderInteractiveForms}
+          renderForms={props.renderInteractiveForms}
           renderTextLayer={props.renderTextLayer}
           scale={props.scale}
           onLoadError={props.onPageLoadError}

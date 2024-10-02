@@ -1,14 +1,12 @@
 import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
 import { Document } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { useDebounce } from 'react-use';
 import _ from 'lodash';
 
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
-import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject, OrNull } from '../../types/generics';
@@ -28,15 +26,17 @@ import {
 } from '../../services/bboxService';
 import { IColorScheme } from '../bbox/Bbox';
 // @ts-ignore
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs';
 
 import './pdfDocument.scss';
+import { DocumentCallback } from "react-pdf/dist/cjs/shared/types";
+import { PageCallback } from "react-pdf/src/shared/types";
 
-interface IDocumentData extends PDFDocumentProxy {
+interface IDocumentData extends DocumentCallback {
   _pdfInfo: {
     structureTree: AnyObject;
   }
-  parsedTree: AnyObject; 
+  parsedTree: AnyObject;
 }
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
@@ -97,7 +97,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       return;
     }
     const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
-    const finder = isBboxMode 
+    const finder = isBboxMode
         ? (value: AnyObject[]) => _.find(value, { index: props.activeBboxIndex })
         : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === props.activeBboxId);
     let bboxPage = 0;
@@ -141,7 +141,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setLoaded(true);
     props.onLoadSuccess?.(data);
   }, [props.onLoadSuccess, bboxes]);
-  const onPageLoadSuccess = useCallback((data: PDFPageProxy) => {
+
+  const onPageLoadSuccess = useCallback((data: PageCallback) => {
     props.onPageLoadSuccess?.(data);
   }, [props.onPageLoadSuccess]);
 
@@ -252,7 +253,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       onItemClick={props.onItemClick}
       rotate={props.rotate}
       options={{
-        workerSrc: pdfjsWorker,
+        worker: pdfjsWorker,
       }}
     >
       {useMemo(() => loaded ? shownPages.map((page) => <PdfPage
