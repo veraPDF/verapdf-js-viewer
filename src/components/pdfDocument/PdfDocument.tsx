@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
-import { Document } from 'react-pdf';
+import { Document, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { useDebounce } from 'react-use';
 import _ from 'lodash';
@@ -26,11 +26,12 @@ import {
 } from '../../services/bboxService';
 import { IColorScheme } from '../bbox/Bbox';
 // @ts-ignore
-import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs';
 
 import './pdfDocument.scss';
 import { DocumentCallback } from "react-pdf/dist/cjs/shared/types";
 import { PageCallback } from "react-pdf/src/shared/types";
+
+pdfjs.GlobalWorkerOptions.workerSrc = "pdfjs-dist/build/pdf.worker.mjs";
 
 interface IDocumentData extends DocumentCallback {
   _pdfInfo: {
@@ -252,9 +253,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       noData={props.noData}
       onItemClick={props.onItemClick}
       rotate={props.rotate}
-      options={{
-        worker: pdfjsWorker,
-      }}
     >
       {useMemo(() => loaded ? shownPages.map((page) => <PdfPage
           defaultHeight={defaultHeight}
