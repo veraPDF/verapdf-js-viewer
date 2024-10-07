@@ -11,11 +11,7 @@ import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
 import {
   cleanArray,
-  getBboxForGlyph,
-  parseMcidToBbox,
-  createAllBboxes,
   checkIsBboxOutOfThePage,
-  getFormattedAnnotations
 } from '../../services/bboxService';
 import { WARNING_CODES } from '../../services/constants';
 
@@ -98,7 +94,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const onPageLoadSuccess = useCallback((page: PageCallback) => {
     setIsRendered(true);
     setPageViewport(page.view);
-    Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
+    console.log(setBboxesAll);
+    /*Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
       const [positionData, noMCIDData] = operatorList.argsArray[operatorList.argsArray.length - 1];
@@ -161,7 +158,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxesAll(allBboxes);
       setBboxesErrors(errorBboxes);
     });
-    props.onPageLoadSuccess?.(page);
+    */props.onPageLoadSuccess?.(page);
   }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
 
   useEffect(() => {

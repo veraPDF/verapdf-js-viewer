@@ -1,6 +1,7 @@
 import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
 import { Document, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import { useDebounce } from 'react-use';
 import _ from 'lodash';
 
@@ -31,7 +32,16 @@ import './pdfDocument.scss';
 import { DocumentCallback } from "react-pdf/dist/cjs/shared/types";
 import { PageCallback } from "react-pdf/src/shared/types";
 
-pdfjs.GlobalWorkerOptions.workerSrc = "pdfjs-dist/build/pdf.worker.mjs";
+//import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs';
+console.log(new URL(
+  'pdfjs-dist/build/pdf.worker.mjs',
+  import.meta.url,
+).toString());
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.mjs',
+  import.meta.url,
+).toString();
+/*pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.4.1684.4.168/build/pdf.worker.mjs`;*/
 
 interface IDocumentData extends DocumentCallback {
   _pdfInfo: {

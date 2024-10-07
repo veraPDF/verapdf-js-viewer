@@ -4,7 +4,7 @@
   "description": "Display PDF with an option to highlight a collection of rectangles on top of page rendering. Used by veraPDF web application to visualize locations of validation errors",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rollup -c --inlineDynamicImports",
+    "build": "rollup -c",
     "start": "rollup -c -w"
   },
   "keywords": [],
@@ -43,7 +43,7 @@
   ],
   "dependencies": {
     "pdfjs-dist": "github:veraPDF/pdfjs-dist#v2.16.105-taggedPdf-0.1.18",
-    "react-pdf": "^8.0.2",
+    "react-pdf": "^9.1.1",
     "react-use": "^17.1.0",
     "rollup-plugin-mjs-entry": "^0.1.1",
     "styled-components": "^5.2.1",
