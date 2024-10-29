@@ -1,15 +1,17 @@
 import React from 'react';
-import { PDFPageProxy, RenderFunction, TextItem, TextLayerItemInternal } from 'react-pdf/dist/Page';
-import { TSelectedBboxData } from '../../types/selectedBboxData';
+import { NodeOrRenderer, PageCallback } from 'react-pdf/src/shared/types';
+import { TextItem, TextContent } from 'pdfjs-dist/types/src/display/api.js';
+
 import { OrNull } from '../../types/generics';
+import { TSelectedBboxData } from '../../types/selectedBboxData';
 
 export interface IPageProps {
   page: number;
-  inputRef?: React.LegacyRef<HTMLDivElement>;
-  pageError?: string | React.ReactElement | RenderFunction;
+  inputRef?: React.Ref<HTMLDivElement | null>;
+  pageError?: string | React.ReactElement | NodeOrRenderer;
   height?: number;
   width?: number;
-  pageLoading?: string | React.ReactElement | RenderFunction;
+  pageLoading?: string | React.ReactElement | NodeOrRenderer;
   renderAnnotationLayer?: boolean;
   renderInteractiveForms?: boolean;
   renderTextLayer?: boolean;
@@ -17,13 +19,13 @@ export interface IPageProps {
   activeBboxIndex?: number;
   activeBboxId?: string;
   onPageLoadError?(error: Error): void;
-  onPageLoadSuccess?(page: PDFPageProxy): void;
+  onPageLoadSuccess?(page: PageCallback): void;
   onPageRenderError?(error: Error): void;
   onPageRenderSuccess?(): void;
   onGetAnnotationsSuccess?(annotations: any): void;
   onGetAnnotationsError?(error: Error): void;
-  onGetTextSuccess?({ items }: { items: TextItem[] }): void;
+  onGetTextSuccess?(textContent: TextContent): void;
   onGetTextError?(error: Error): void;
   onBboxClick?(data: OrNull<TSelectedBboxData>): void;
-  customTextRenderer?(layer: TextLayerItemInternal): string;
+  customTextRenderer?(layer: { pageIndex: number; pageNumber: number; itemIndex: number } & TextItem): string;
 }
