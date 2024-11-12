@@ -30,12 +30,12 @@ export default {
     }),
 	copy({
       targets: [
-        { src: 'node_modules/pdfjs-dist/build/pdf.worker.js', dest: 'dist/public' },
+        { src: 'node_modules/pdfjs-dist/build/pdf.worker.mjs', dest: 'dist/public' },
       ]
     }),
 	commonjs({
       namedExports: {
-        'node_modules/pdfjs-dist/build/pdf.worker.entry': ['pdfjsWorker'],
+        'node_modules/pdfjs-dist/build/pdf.worker.mjs': ['pdfjsWorker'],
       },
     }),
   ],

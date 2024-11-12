@@ -1,14 +1,14 @@
 import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
-import { Document } from 'react-pdf';
+import { Document, pdfjs } from 'react-pdf';
+import { DocumentCallback, PageCallback } from 'react-pdf/src/shared/types';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { useDebounce } from 'react-use';
 import _ from 'lodash';
 
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
 import PdfPage from '../pdfPage/PdfPage';
-import { PDFPageProxy } from 'react-pdf/dist/Page';
 import { ViewerContext } from '../viewerContext/ViewerContext';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject, OrNull } from '../../types/generics';
@@ -28,15 +28,26 @@ import {
 } from '../../services/bboxService';
 import { IColorScheme } from '../bbox/Bbox';
 // @ts-ignore
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+//import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs';
+
+//console.log(pdfjsWorker);
+
+//pdfjs.GlobalWorkerOptions.workerSrc = '//unpkg.com/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs';
+import pdfWorkerURL from 'pdfjs-dist/build/pdf.worker?url'
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  pdfWorkerURL,
+  import.meta.url,
+).toString();
+
+//pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjsWorker';
 
 import './pdfDocument.scss';
 
-interface IDocumentData extends PDFDocumentProxy {
+interface IDocumentData extends DocumentCallback {
   _pdfInfo: {
     structureTree: AnyObject;
   }
-  parsedTree: AnyObject; 
+  parsedTree?: AnyObject;
 }
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
@@ -141,7 +152,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setLoaded(true);
     props.onLoadSuccess?.(data);
   }, [props.onLoadSuccess, bboxes]);
-  const onPageLoadSuccess = useCallback((data: PDFPageProxy) => {
+  const onPageLoadSuccess = useCallback((data: PageCallback) => {
     props.onPageLoadSuccess?.(data);
   }, [props.onPageLoadSuccess]);
 
@@ -251,9 +262,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       noData={props.noData}
       onItemClick={props.onItemClick}
       rotate={props.rotate}
-      options={{
-        workerSrc: pdfjsWorker,
-      }}
     >
       {useMemo(() => loaded ? shownPages.map((page) => <PdfPage
           defaultHeight={defaultHeight}
