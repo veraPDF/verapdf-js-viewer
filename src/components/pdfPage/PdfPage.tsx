@@ -35,6 +35,7 @@ interface IPdfPageProps extends IPageProps {
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
   isPageSelected?: boolean;
   onWarning?(warningCode: string): void;
+  pageIntersectionThreshold?: number[];
 }
 
 interface IStyledPdfPageProps {
@@ -56,7 +57,7 @@ const StyledPdfPage = styled.div`
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
   const { scrollIntoPage } = useContext(ViewerContext);
-  const { bboxList = [], scale = 1 } = props;
+  const { bboxList = [], scale = 1, pageIntersectionThreshold = [.2, .4, .5, .6, .8, 1] } = props;
   const intersectionRef = useRef(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
@@ -66,8 +67,10 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
+  const pageRef = useRef<PageCallback | null>(null);
+  const prevBboxList = useRef<IBbox[]>([]);
   useIntersection(intersectionRef, {
-    threshold: [.2, .4, .5, .6, .8, 1],
+    threshold: pageIntersectionThreshold,
   }, (entry) => {
     if (isIntersecting !== entry.isIntersecting) {
       setIsIntersecting(entry.isIntersecting);
@@ -95,9 +98,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       }
     });
   }, []);
-  const onPageLoadSuccess = useCallback((page: PageCallback) => {
-    setIsRendered(true);
-    setPageViewport(page.view);
+  const createBBoxes = useCallback((page: PageCallback) => {
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
@@ -161,6 +162,13 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxesAll(allBboxes);
       setBboxesErrors(errorBboxes);
     });
+  },[props.bboxList, props.treeElementsBboxes])
+  
+  const onPageLoadSuccess = useCallback((page: PageCallback) => {
+    setIsRendered(true);
+    setPageViewport(page.view);
+    createBBoxes(page);
+    pageRef.current= page;
     props.onPageLoadSuccess?.(page);
   }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
 
@@ -250,6 +258,34 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       }
     }, [activeBboxes, scale, props.page]),
   [activeBboxes]);
+
+  /**
+   * Effect hook that updates the errors map and bboxes state when the bboxList changes.
+   *
+   * @description This effect is triggered when the bboxList or bboxes dependencies change.
+   * It checks if the bboxList has changed since the previous render and if the pageRef is not null.
+   * If both conditions are true, it updates the prevBboxList and creates an errors map for the pageRef.
+   * If the bboxList is empty and bboxes is not empty, it resets the bboxesErrors and bboxesAll states.
+   *
+   * @param {Array} bboxList - The list of bounding boxes.
+   * @param {Array} bboxes - The list of final bounding boxes to be rendered.
+   * @param {Object} pageRef - The reference to the page element.
+   * @param {Array} prevBboxList - The previous list of bounding boxes.
+   * @param {Function} setBboxesErrors - The function to update the bboxesErrors state.
+   * @param {Function} setBboxesAll - The function to update the bboxesAll state.
+   */
+  useEffect(() => {
+    const isSameAsPrev = _.isEqual(prevBboxList.current, bboxList);
+
+    if (bboxList.length && !isSameAsPrev && !_.isNil(pageRef.current)) {
+      prevBboxList.current = bboxList;
+      createBBoxes(pageRef.current);
+    }
+    if (!bboxList.length && bboxes.length) {
+      setBboxesErrors([]);
+      setBboxesAll([]);
+    }
+  }, [bboxList, bboxes]);
 
   return (
     <StyledPdfPage

@@ -14,6 +14,11 @@ To use the latest version of veraPDF-js-viewer, your project needs to use React 
 
 Internet Explorer is not supported in veraPDF-js-viewer. Use Edge instead
 
+### Prerequisites
+
+- Configure PDFWorker: [react-pdf?tab=readme-ov-file#configure-pdfjs-worker](https://github.com/wojtekmaj/react-pdf?tab=readme-ov-file#configure-pdfjs-worker)
+- In your package.json add a dependency `"pdfjs-dist": "github:veraPDF/pdfjs-dist#v4.4.168-taggedPdf-0.1.18",`
+
 ### Usage
 
 Here's an example of basic usage:
@@ -89,6 +94,7 @@ function MyApp() {
 |onGetTextError|Function called in case of an error while loading text layer items.|n/a| `(error) => alert('Error while loading text layer items! ' + error.message)`                                                                                                                                                                                                                                      |
 |onSelectBbox|Function that is called when the bbox is selected by keypress handlers.|n/a| `(index) => alert('Select bounding box with index: ' + index)`                                                                                                                                                                                                                                                    |
 |customTextRenderer|Function that customizes how a text layer is rendered.|n/a| `({ str, itemIndex }) => str.replace(/ipsum/g, value => `<mark>${value}</mark>`)`                                                                                                                                                                                                                                                    |
+|pageIntersectionThreshold|Threshold number or array of numbers definining when to render page.|[.2, .4, .5, .6, .8, 1]| `[0.02, 0.1, 0.2, 0.4, 0.5, 0.6, 0.8, 1]`                                                                                                                                                                                                                                                    |
 |<b>Bbox props</b>|
 |colorScheme|Set custom colors for bbox|```{ border?: string; borderSelected?: string; borderRelated?: string; borderStructured?: string; borderStructuredSelected?: string; borderHovered?: string; borderStructuredHovered?: string; background?: string; backgroundSelected?: string; backgroundHovered?: string; backgroundRelated?: string; backgroundStructured?: string; backgroundStructuredSelected?: string;}```| n/a                                                                                                                                                                                                                                                                                                               |
 | renderBbox              | Function for rendering custom Bbox component | ```n/a``` | `({ left: string; width: string; height: string; top: string; disabled: boolean; related?: boolean; selected?: boolean; structured?: boolean; scale: number; colorScheme?: IColorScheme; selectionMode?: TreeBboxSelectionMode; onClick?(e: any): void; }) =>  ReactElement`  |

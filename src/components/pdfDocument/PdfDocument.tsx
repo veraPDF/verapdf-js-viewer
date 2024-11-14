@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
-import { Document, pdfjs } from 'react-pdf';
+import { Document } from 'react-pdf';
 import { DocumentCallback, PageCallback } from 'react-pdf/src/shared/types';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -27,19 +27,6 @@ import {
   scrollToActiveBbox
 } from '../../services/bboxService';
 import { IColorScheme } from '../bbox/Bbox';
-// @ts-ignore
-//import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs';
-
-//console.log(pdfjsWorker);
-
-//pdfjs.GlobalWorkerOptions.workerSrc = '//unpkg.com/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs';
-import pdfWorkerURL from 'pdfjs-dist/build/pdf.worker?url'
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  pdfWorkerURL,
-  import.meta.url,
-).toString();
-
-//pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjsWorker';
 
 import './pdfDocument.scss';
 
@@ -62,6 +49,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   onPageChange?(page: number): void;
   onWarning?(warningCode: string): void;
   onSelectBbox(index: number | undefined): void;
+  pageIntersectionThreshold?: number[];
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
@@ -297,6 +285,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           colorScheme={props.colorScheme}
           isPageSelected={selectedPage === page}
           onWarning={props.onWarning}
+          pageIntersectionThreshold={props.pageIntersectionThreshold}
         />
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])}
     </Document>

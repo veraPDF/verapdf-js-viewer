@@ -19,6 +19,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     onPageChange?(page: number): void;
     onWarning?(warningCode: string): void;
     onSelectBbox(index: number | undefined): void;
+    pageIntersectionThreshold?: number[];
 }
 declare const _default: React.NamedExoticComponent<IPdfDocumentProps>;
 export default _default;
