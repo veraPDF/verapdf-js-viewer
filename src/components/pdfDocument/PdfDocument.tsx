@@ -77,6 +77,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [defaultHeight, setDefaultHeight] = useState(0);
   const [defaultWidth, setDefaultWidth] = useState(0);
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
+  const [isRenderedPage, setIsRenderedPage] = useState(0);
   const activeBbox = useMemo(() => {
     return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null
   }, [props.activeBboxIndex, bboxes]);
@@ -94,7 +95,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   useEffect(() => {
     setBboxMap(buildBboxMap(bboxes, structureTree));
     props.onBboxesParsed?.(getBboxPages(bboxes, structureTree));
-  }, [bboxes, structureTree]);
+  }, [bboxes, structureTree, isRenderedPage]);
 
   useEffect(() => {
     const mcidList = getMcidList(parsedTree ?? {});
@@ -108,7 +109,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       return;
     }
     const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
-    const finder = isBboxMode 
+    const finder = isBboxMode
         ? (value: AnyObject[]) => _.find(value, { index: props.activeBboxIndex })
         : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === props.activeBboxId);
     let bboxPage = 0;
@@ -263,7 +264,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       onItemClick={props.onItemClick}
       rotate={props.rotate}
     >
-      {useMemo(() => loaded ? shownPages.map((page) => <PdfPage
+      {useMemo(() => loaded ? shownPages.map((page, index) => <PdfPage
           defaultHeight={defaultHeight}
           defaultWidth={defaultWidth}
           key={page}
@@ -297,6 +298,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           colorScheme={props.colorScheme}
           isPageSelected={selectedPage === page}
           onWarning={props.onWarning}
+          setIsRenderedPage={index < 2 ? setIsRenderedPage : undefined}
         />
       ) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])}
     </Document>
