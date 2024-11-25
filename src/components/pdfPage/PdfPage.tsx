@@ -66,6 +66,8 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
+  const pageRef = useRef<PageCallback | null>(null);
+  const prevBboxList = useRef<IBbox[]>([]);
   useIntersection(intersectionRef, {
     threshold: [.2, .4, .5, .6, .8, 1],
   }, (entry) => {
@@ -95,9 +97,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       }
     });
   }, []);
-  const onPageLoadSuccess = useCallback((page: PageCallback) => {
-    setIsRendered(true);
-    setPageViewport(page.view);
+  const createBBoxes = useCallback((page: PageCallback) => {
     Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
       const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
       const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
@@ -161,6 +161,14 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxesAll(allBboxes);
       setBboxesErrors(errorBboxes);
     });
+    props.onPageLoadSuccess?.(page);
+  }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
+
+  const onPageLoadSuccess = useCallback((page: PageCallback) => {
+    setIsRendered(true);
+    setPageViewport(page.view);
+    createBBoxes(page);
+    pageRef.current= page;
     props.onPageLoadSuccess?.(page);
   }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
 
@@ -250,6 +258,19 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       }
     }, [activeBboxes, scale, props.page]),
   [activeBboxes]);
+
+  useEffect(() => {
+    const isSameAsPrev = _.isEqual(prevBboxList.current, bboxList);
+
+    if (bboxList.length && !isSameAsPrev && !_.isNil(pageRef.current)) {
+      prevBboxList.current = bboxList;
+      createBBoxes(pageRef.current);
+    }
+    if (!bboxList.length && bboxes.length) {
+      setBboxesErrors([]);
+      setBboxesAll([]);
+    }
+  }, [bboxList, bboxes]);
 
   return (
     <StyledPdfPage
