@@ -1146,8 +1146,8 @@ var PdfDocument = function (props) {
     var _g = React.useState({}), treeElementsBboxes = _g[0], setTreeElementsBboxes = _g[1];
     var _h = React.useState([]), pagesByViewport = _h[0], setPagesByViewport = _h[1];
     var _j = React.useState([]), ratioArray = _j[0], setRatioArray = _j[1];
-    var _k = React.useState(0), defaultHeight = _k[0], setDefaultHeight = _k[1];
-    var _l = React.useState(0), defaultWidth = _l[0], setDefaultWidth = _l[1];
+    var _k = React.useState(props.defaultHeight), defaultHeight = _k[0], setDefaultHeight = _k[1];
+    var _l = React.useState(props.defaultWidth), defaultWidth = _l[0], setDefaultWidth = _l[1];
     var _m = React.useState(undefined), selectedPage = _m[0], setSelectedPage = _m[1];
     var activeBbox = React.useMemo(function () {
         return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null;
@@ -1204,7 +1204,7 @@ var PdfDocument = function (props) {
         }
     }, [activeBbox]);
     var onDocumentLoadSuccess = React.useCallback(function (data) { return __awaiter(void 0, void 0, void 0, function () {
-        var parsedTree, treeWithData, _a, treeWithIds, annotMap, pageData;
+        var parsedTree, treeWithData, _a, treeWithIds, annotMap, pageData, width, scale;
         var _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -1220,15 +1220,17 @@ var PdfDocument = function (props) {
                     return [4 /*yield*/, data.getPage(1)];
                 case 1:
                     pageData = _c.sent();
-                    setDefaultHeight(pageData.view[3]);
-                    setDefaultWidth(pageData.view[2]);
+                    width = Math.min(pageData.view[2], props.defaultWidth || pageData.view[2]);
+                    scale = width / pageData.view[2];
+                    setDefaultWidth(width);
+                    setDefaultHeight(pageData.view[3] * scale);
                     setMaxPage(data.numPages);
                     setLoaded(true);
                     (_b = props.onLoadSuccess) === null || _b === void 0 ? void 0 : _b.call(props, data);
                     return [2 /*return*/];
             }
         });
-    }); }, [props.onLoadSuccess, bboxes]);
+    }); }, [props.onLoadSuccess, bboxes, props.defaultHeight, props.defaultWidth]);
     var onPageLoadSuccess = React.useCallback(function (data) {
         var _a;
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, data);
