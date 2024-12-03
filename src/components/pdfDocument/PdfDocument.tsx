@@ -58,6 +58,8 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   isTreeBboxesVisible: boolean;
   treeBboxSelectionMode?: TreeBboxSelectionMode;
   colorScheme?: IColorScheme;
+  defaultHeight?: number;
+  defaultWidth?: number;
   onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;
   onWarning?(warningCode: string): void;
@@ -74,8 +76,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [treeElementsBboxes, setTreeElementsBboxes] = useState({});
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
   const [ratioArray, setRatioArray] = useState<number[]>([]);
-  const [defaultHeight, setDefaultHeight] = useState(0);
-  const [defaultWidth, setDefaultWidth] = useState(0);
+  const [defaultHeight, setDefaultHeight] = useState(props.defaultHeight);
+  const [defaultWidth, setDefaultWidth] = useState(props.defaultWidth);
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
   const activeBbox = useMemo(() => {
     return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null
@@ -146,12 +148,15 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setParsedTree(treeWithIds ?? {});
     data.parsedTree = treeWithIds ?? {};
     const pageData = await data.getPage(1);
-    setDefaultHeight(pageData.view[3]);
-    setDefaultWidth(pageData.view[2]);
+    const width = Math.min(pageData.view[2], props.defaultWidth || pageData.view[2]);
+    const scale = width / pageData.view[2];
+    setDefaultWidth(width);
+    setDefaultHeight(pageData.view[3] * scale);
     setMaxPage(data.numPages);
     setLoaded(true);
     props.onLoadSuccess?.(data);
-  }, [props.onLoadSuccess, bboxes]);
+  }, [props.onLoadSuccess, bboxes, props.defaultHeight, props.defaultWidth]);
+
   const onPageLoadSuccess = useCallback((data: PageCallback) => {
     props.onPageLoadSuccess?.(data);
   }, [props.onPageLoadSuccess]);
