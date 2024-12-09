@@ -9,7 +9,7 @@ export declare const structurizeTree: (node: AnyObject) => OrNull<AnyObject>;
 export declare const setTreeIds: (node: AnyObject, annotMap?: AnyObject, id?: string) => [OrNull<AnyObject>, AnyObject];
 export declare const getMcidList: (node: AnyObject, mcidList?: TreeElementBbox[]) => TreeElementBbox[];
 export declare const createBboxMap: (mcidList: TreeElementBbox[]) => AnyObject;
-export declare const createAllBboxes: (bboxesAll: TreeElementBbox[] | undefined, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => IBbox[];
+export declare const createAllBboxes: (bboxesAll: TreeElementBbox[] | undefined, pageMap: AnyObject, refMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => IBbox[];
 export declare const calculateLocationInStreamOperator: (location: string) => {
     pageIndex: number;
     operatorIndex: number;
@@ -19,7 +19,7 @@ export declare const getSelectedPageByLocation: (bboxLocation: string) => number
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
 export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean;
 export declare const getBboxForGlyph: (operatorIndex: number, glyphIndex: number, operationsList: number[][][], viewport: number[], rotateAngle: number, leftOffset: number, bottomOffset: number) => number[];
-export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number, leftOffset?: number, bottomOffset?: number) => number[];
+export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject[] | AnyObject, pageMap: AnyObject, refMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number, leftOffset?: number, bottomOffset?: number) => number[];
 export declare const rotateViewport: (rotateAngle: number, viewport: number[]) => number[];
 export declare const rotateCoordinates: (coords: number[], rotateAngle: number, viewport: number[]) => number[];
 export declare const rotatePoint: (rotateAngle: number, point: number[], viewport: number[]) => number[];

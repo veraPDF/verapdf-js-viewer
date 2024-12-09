@@ -250,12 +250,19 @@ export const createBboxMap = (mcidList: TreeElementBbox[]): AnyObject => {
   return bboxMap;
 };
 
-export const createAllBboxes = (bboxesAll: TreeElementBbox[] | undefined, pageMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number): IBbox[] => {
+export const createAllBboxes = (
+  bboxesAll: TreeElementBbox[] | undefined,
+  pageMap: AnyObject,
+  refMap: AnyObject,
+  annotations: AnyObject,
+  viewport: number[],
+  rotateAngle: number,
+): IBbox[] => {
   if (_.isNil(bboxesAll)) return [];
   const unfilteredBboxes = bboxesAll?.map((bbox) => {
     const [mcid, id] = bbox as [AnyObject[], string];
-    const listOfMcid = cleanArray(mcid).map((obj: AnyObject) => obj?.mcid);
-    const location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
+    const listOfMcid = cleanArray(mcid).map((obj: AnyObject) => obj?.stm ? { mcid: obj?.mcid, ref: obj?.stm?.num } : obj?.mcid);
+    const location = parseMcidToBbox(listOfMcid, pageMap, refMap, annotations, viewport, rotateAngle);
     if (_.isEmpty(location)) {
       return null;
     }
@@ -411,7 +418,8 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
   }
 
   if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-    return [[[selectedTag.mcid], selectedTag.pageIndex]];
+    const mcid = selectedTag.stm ? { mcid: selectedTag.mcid, ref: selectedTag.stm.num } : selectedTag.mcid;
+    return [[[mcid], selectedTag.pageIndex]];
   } else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
     return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
   } else if (selectedTag.hasOwnProperty('contentItems')) {
@@ -583,8 +591,9 @@ export const getBboxForGlyph = (
 }
 
 export const parseMcidToBbox = (
-  listOfMcid: number[] | AnyObject,
+  listOfMcid: number[] | AnyObject[] | AnyObject,
   pageMap: AnyObject,
+  refMap: AnyObject,
   annotations: AnyObject,
   viewport: number[],
   rotateAngle: number,
@@ -595,7 +604,12 @@ export const parseMcidToBbox = (
 
   if (listOfMcid instanceof Array) {
     listOfMcid.forEach(mcid => {
-      const currentBbox = pageMap[mcid];
+      let currentBbox;
+      if (mcid instanceof Object) {
+        currentBbox = _.isNil(mcid.ref) ? pageMap[mcid.mcid] : refMap?.[`${mcid.ref}R`]?.[mcid.mcid];
+      } else {
+        currentBbox = pageMap[mcid];
+      }
       if (
         !_.isNil(currentBbox) &&
         !_.isNaN(currentBbox.x) &&

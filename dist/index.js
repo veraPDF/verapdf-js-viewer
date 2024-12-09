@@ -476,13 +476,13 @@ var createBboxMap = function (mcidList) {
     });
     return bboxMap;
 };
-var createAllBboxes = function (bboxesAll, pageMap, annotations, viewport, rotateAngle) {
+var createAllBboxes = function (bboxesAll, pageMap, refMap, annotations, viewport, rotateAngle) {
     if (___default["default"].isNil(bboxesAll))
         return [];
     var unfilteredBboxes = bboxesAll === null || bboxesAll === void 0 ? void 0 : bboxesAll.map(function (bbox) {
         var _a = bbox, mcid = _a[0], id = _a[1];
-        var listOfMcid = cleanArray(mcid).map(function (obj) { return obj === null || obj === void 0 ? void 0 : obj.mcid; });
-        var location = parseMcidToBbox(listOfMcid, pageMap, annotations, viewport, rotateAngle);
+        var listOfMcid = cleanArray(mcid).map(function (obj) { var _a; return (obj === null || obj === void 0 ? void 0 : obj.stm) ? { mcid: obj === null || obj === void 0 ? void 0 : obj.mcid, ref: (_a = obj === null || obj === void 0 ? void 0 : obj.stm) === null || _a === void 0 ? void 0 : _a.num } : obj === null || obj === void 0 ? void 0 : obj.mcid; });
+        var location = parseMcidToBbox(listOfMcid, pageMap, refMap, annotations, viewport, rotateAngle);
         if (___default["default"].isEmpty(location)) {
             return null;
         }
@@ -629,7 +629,8 @@ var getTagsFromErrorPlace = function (context, structure) {
         return defaultValue;
     }
     if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-        return [[[selectedTag.mcid], selectedTag.pageIndex]];
+        var mcid = selectedTag.stm ? { mcid: selectedTag.mcid, ref: selectedTag.stm.num } : selectedTag.mcid;
+        return [[[mcid], selectedTag.pageIndex]];
     }
     else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
         return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
@@ -790,14 +791,21 @@ var getBboxForGlyph = function (operatorIndex, glyphIndex, operationsList, viewp
     var rotatedViewport = rotateViewport(rotateAngle, viewport);
     return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 };
-var parseMcidToBbox = function (listOfMcid, pageMap, annotations, viewport, rotateAngle, leftOffset, bottomOffset) {
+var parseMcidToBbox = function (listOfMcid, pageMap, refMap, annotations, viewport, rotateAngle, leftOffset, bottomOffset) {
     var _a;
     if (leftOffset === void 0) { leftOffset = 0; }
     if (bottomOffset === void 0) { bottomOffset = 0; }
     var coords = {};
     if (listOfMcid instanceof Array) {
         listOfMcid.forEach(function (mcid) {
-            var currentBbox = pageMap[mcid];
+            var _a;
+            var currentBbox;
+            if (mcid instanceof Object) {
+                currentBbox = ___default["default"].isNil(mcid.ref) ? pageMap[mcid.mcid] : (_a = refMap === null || refMap === void 0 ? void 0 : refMap["".concat(mcid.ref, "R")]) === null || _a === void 0 ? void 0 : _a[mcid.mcid];
+            }
+            else {
+                currentBbox = pageMap[mcid];
+            }
             if (!___default["default"].isNil(currentBbox) &&
                 !___default["default"].isNaN(currentBbox.x) &&
                 !___default["default"].isNaN(currentBbox.y) &&
@@ -986,9 +994,9 @@ var PdfPage = function (props) {
             var operatorList = _a[0], annotations = _a[1];
             var annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
             var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
-            var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1];
+            var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1], refPositionData = _b[2];
             var annotsFormatted = getFormattedAnnotations(annotations);
-            var allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, annotsFormatted, page.view, page.rotate);
+            var allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, refPositionData, annotsFormatted, page.view, page.rotate);
             var errorBboxes = bboxList.map(function (bbox) {
                 var _a;
                 var _b, _c, _d, _e, _f, _g, _h, _j;
@@ -1002,7 +1010,7 @@ var PdfPage = function (props) {
                     _a = (_j = (_h = annotBBoxesAndOpPos[annotIndex]) === null || _h === void 0 ? void 0 : _h[1]) !== null && _j !== void 0 ? _j : [[], []], posData = _a[0], nMcidData = _a[1];
                 }
                 if (bbox.mcidList) {
-                    bbox.location = parseMcidToBbox(bbox.mcidList, posData, annotsFormatted, page.view, page.rotate, left, bottom);
+                    bbox.location = parseMcidToBbox(bbox.mcidList, posData, refPositionData, annotsFormatted, page.view, page.rotate, left, bottom);
                     if (___default["default"].isEmpty(bbox.location)) {
                         return null;
                     }
