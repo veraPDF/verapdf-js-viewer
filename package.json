@@ -1,6 +1,6 @@
 {
   "name": "@duallab/verapdf-js-viewer",
-  "version": "1.7.22",
+  "version": "1.7.23",
   "description": "Display PDF with an option to highlight a collection of rectangles on top of page rendering. Used by veraPDF web application to visualize locations of validation errors",
   "main": "dist/index.js",
   "scripts": {
@@ -42,7 +42,7 @@
     "dist"
   ],
   "dependencies": {
-    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v4.4.168-taggedPdf-0.1.19",
+    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v4.4.168-taggedPdf-0.1.20",
     "react-pdf": "9.1.1",
     "react-use": "^17.1.0",
     "styled-components": "^5.2.1",
@@ -50,6 +50,6 @@
     "use-intersection": "^0.2.1"
   },
   "resolutions": {
-    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v4.4.168-taggedPdf-0.1.19"
+    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v4.4.168-taggedPdf-0.1.20"
   }
 }

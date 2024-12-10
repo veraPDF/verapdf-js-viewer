@@ -474,9 +474,9 @@ const convertContextToPath = (errorContext = '') => {
   let contextString: string | string[] = errorContext;
 
   try {
-    if (contextString.includes('contentItem') && !contextString.includes('mcid')) {
+    if (contextString.includes('contentItem')) {
       const result: any = contextString.match(
-        /pages\[(?<pages>\d+)\](\(.+\))?\/(annots\[(?<annots>\d+)\](\(.+\))?\/appearance\[\d\](\(.+\))?\/)?contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](?<contentItems>((\(.+\))?\/contentItem\[(\d+)\])+)/
+        /pages\[(?<pages>\d+)\](\(.+\))?\/(annots\[(?<annots>\d+)\](\(.+\))?\/appearance\[\d\](\(.+\))?\/)?contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](\{mcid:\d+\})?(?<contentItems>((\(.+\))?\/contentItem\[(\d+)\](\{mcid:\d+\})?)+)/
       );
       if (result) {
         try {
@@ -494,9 +494,6 @@ const convertContextToPath = (errorContext = '') => {
           console.log('NoMCIDContentItemPathParseError:', err.message || err);
         }
       }
-    }
-
-    if (contextString.includes('contentItem')) {
       let path: AnyObject = {};
       contextString.split('/').forEach(nodeString => {
         if (nodeString.includes('page')) {
@@ -597,10 +594,12 @@ export const parseMcidToBbox = (
   annotations: AnyObject,
   viewport: number[],
   rotateAngle: number,
-  leftOffset = 0,
-  bottomOffset = 0,
+  left = 0,
+  bottom = 0,
 ) => {
   let coords: AnyObject = {};
+  let leftOffset = left;
+  let bottomOffset = bottom;
 
   if (listOfMcid instanceof Array) {
     listOfMcid.forEach(mcid => {
@@ -629,6 +628,8 @@ export const parseMcidToBbox = (
         width: Math.abs(rect[0] - rect[2]),
         height: Math.abs(rect[1] - rect[3]),
       };
+      leftOffset = 0;
+      bottomOffset = 0;
     }
   }
   if (!coords || _.isEmpty(coords)) return [];
