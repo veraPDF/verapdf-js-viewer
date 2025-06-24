@@ -63,11 +63,7 @@ export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
 };
 
 export const getFormattedAnnotations = (annots: AnyObject): AnyObject[] => {
-  type parentAnnot = {
-    id: string,
-    rect: number[],
-  };
-  const formattedAnnots = [] as AnyObject;
+  const formattedAnnots: AnyObject[] = [];
 
   _.forEach(annots, (annot: any) => {
     if (annot.hasOwnProperty('parentId')
@@ -82,9 +78,7 @@ export const getFormattedAnnotations = (annots: AnyObject): AnyObject[] => {
     formattedAnnots.push(annot);
   });
 
-  return formattedAnnots.sort(({ id: id1 }: parentAnnot, { id: id2 }: parentAnnot) => {
-    return parseInt(id1) > parseInt(id2) ? 1 : -1;
-  });
+  return formattedAnnots;
 }
 
 const annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
