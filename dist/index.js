@@ -291,11 +291,7 @@ var getFormattedAnnotations = function (annots) {
         }
         formattedAnnots.push(annot);
     });
-    return formattedAnnots.sort(function (_a, _b) {
-        var id1 = _a.id;
-        var id2 = _b.id;
-        return parseInt(id1) > parseInt(id2) ? 1 : -1;
-    });
+    return formattedAnnots;
 };
 var annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
 var buildBboxMap = function (bboxes, structure) {
