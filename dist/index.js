@@ -946,14 +946,15 @@ var PdfPage = function (props) {
     var scrollInto = React.useContext(ViewerContext).scrollInto;
     var _a = props.bboxList, bboxList = _a === void 0 ? [] : _a, _b = props.scale, scale = _b === void 0 ? 1 : _b;
     var intersectionRef = React.useRef(null);
-    var _c = React.useState([]), bboxesAll = _c[0], setBboxesAll = _c[1];
-    var _d = React.useState([]), bboxesErrors = _d[0], setBboxesErrors = _d[1];
-    var _e = React.useState(false), loaded = _e[0], setLoaded = _e[1];
-    var _f = React.useState(scale), pageScale = _f[0], setPageScale = _f[1];
-    var _g = React.useState([]), pageViewport = _g[0], setPageViewport = _g[1];
-    var _h = React.useState(false), isRendered = _h[0], setIsRendered = _h[1];
-    var _j = React.useState(false), isIntersecting = _j[0], setIsIntersecting = _j[1];
-    var _k = React.useState(0), intersectionRatio = _k[0], setIntersectionRatio = _k[1];
+    var _c = React.useState(null), page = _c[0], setPage = _c[1];
+    var _d = React.useState([]), bboxesAll = _d[0], setBboxesAll = _d[1];
+    var _e = React.useState([]), bboxesErrors = _e[0], setBboxesErrors = _e[1];
+    var _f = React.useState(false), loaded = _f[0], setLoaded = _f[1];
+    var _g = React.useState(scale), pageScale = _g[0], setPageScale = _g[1];
+    var _h = React.useState([]), pageViewport = _h[0], setPageViewport = _h[1];
+    var _j = React.useState(false), isRendered = _j[0], setIsRendered = _j[1];
+    var _k = React.useState(false), isIntersecting = _k[0], setIsIntersecting = _k[1];
+    var _l = React.useState(0), intersectionRatio = _l[0], setIntersectionRatio = _l[1];
     useIntersection.useIntersection(intersectionRef, {
         threshold: [.2, .4, .5, .6, .8, 1],
     }, function (entry) {
@@ -987,74 +988,70 @@ var PdfPage = function (props) {
     }, []);
     var onPageLoadSuccess = React.useCallback(function (page) {
         var _a;
+        setPage(page);
         setIsRendered(true);
         setPageViewport(page.view);
-        Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
-            var operatorList = _a[0], annotations = _a[1];
-            var annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
-            var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
-            var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1], refPositionData = _b[2];
-            var annotsFormatted = getFormattedAnnotations(annotations);
-            var allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, refPositionData, annotsFormatted, page.view, page.rotate);
-            var errorBboxes = bboxList.map(function (bbox) {
-                var _a;
-                var _b, _c, _d, _e, _f, _g, _h, _j;
-                var opData = operationData, posData = positionData, nMcidData = noMCIDData;
-                var left = 0, bottom = 0;
-                var annotIndex = bbox.annotIndex;
-                if (annotIndex != null) {
-                    left = (_c = (_b = annotations[annotIndex]) === null || _b === void 0 ? void 0 : _b.rect[0]) !== null && _c !== void 0 ? _c : 0;
-                    bottom = (_e = (_d = annotations[annotIndex]) === null || _d === void 0 ? void 0 : _d.rect[1]) !== null && _e !== void 0 ? _e : 0;
-                    opData = (_g = (_f = annotBBoxesAndOpPos[annotIndex]) === null || _f === void 0 ? void 0 : _f[0]) !== null && _g !== void 0 ? _g : [];
-                    _a = (_j = (_h = annotBBoxesAndOpPos[annotIndex]) === null || _h === void 0 ? void 0 : _h[1]) !== null && _j !== void 0 ? _j : [[], []], posData = _a[0], nMcidData = _a[1];
-                }
-                if (bbox.mcidList) {
-                    bbox.location = parseMcidToBbox(bbox.mcidList, posData, refPositionData, annotsFormatted, page.view, page.rotate, left, bottom);
-                    if (___default["default"].isEmpty(bbox.location)) {
-                        return null;
-                    }
-                }
-                else if (bbox.contentItemPath) {
-                    var contentItemsPath_1 = bbox.contentItemPath.slice(2);
-                    var contentItemsBBoxes_1 = nMcidData[bbox.contentItemPath[1]];
-                    try {
-                        contentItemsPath_1.forEach(function (ci, i) {
-                            if (contentItemsPath_1.length > i + 1 || !contentItemsBBoxes_1.final) {
-                                contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[0];
-                            }
-                            contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[ci];
-                        });
-                        bbox.location = [
-                            contentItemsBBoxes_1.contentItem.x + left,
-                            contentItemsBBoxes_1.contentItem.y + bottom,
-                            contentItemsBBoxes_1.contentItem.w,
-                            contentItemsBBoxes_1.contentItem.h
-                        ];
-                    }
-                    catch (err) {
-                        console.log('NoMCIDDataParseError:', err.message || err);
-                        bbox.location = [0, 0, 0, 0];
-                    }
-                }
-                if (___default["default"].isNumber(bbox.operatorIndex) && ___default["default"].isNumber(bbox.glyphIndex)) {
-                    bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
-                }
-                return bbox;
-            });
-            setBboxesAll(allBboxes);
-            setBboxesErrors(errorBboxes);
-        });
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
     }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
     React.useEffect(function () {
-        if (bboxList.length) {
-            setBboxesErrors(function (prev) { return ___default["default"].map(prev, function (bbox, index) {
-                if (___default["default"].isNil(bbox))
-                    return null;
-                return __assign(__assign({}, bbox), { isVisible: bboxList[index].hasOwnProperty('isVisible') ? bboxList[index].isVisible : true });
-            }); });
+        if (page && bboxList.length) {
+            Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
+                var operatorList = _a[0], annotations = _a[1];
+                var annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
+                var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
+                var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1], refPositionData = _b[2];
+                var annotsFormatted = getFormattedAnnotations(annotations);
+                var allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, refPositionData, annotsFormatted, page.view, page.rotate);
+                var errorBboxes = bboxList.map(function (bbox) {
+                    var _a;
+                    var _b, _c, _d, _e, _f, _g, _h, _j;
+                    var opData = operationData, posData = positionData, nMcidData = noMCIDData;
+                    var left = 0, bottom = 0;
+                    var annotIndex = bbox.annotIndex;
+                    if (annotIndex != null) {
+                        left = (_c = (_b = annotations[annotIndex]) === null || _b === void 0 ? void 0 : _b.rect[0]) !== null && _c !== void 0 ? _c : 0;
+                        bottom = (_e = (_d = annotations[annotIndex]) === null || _d === void 0 ? void 0 : _d.rect[1]) !== null && _e !== void 0 ? _e : 0;
+                        opData = (_g = (_f = annotBBoxesAndOpPos[annotIndex]) === null || _f === void 0 ? void 0 : _f[0]) !== null && _g !== void 0 ? _g : [];
+                        _a = (_j = (_h = annotBBoxesAndOpPos[annotIndex]) === null || _h === void 0 ? void 0 : _h[1]) !== null && _j !== void 0 ? _j : [[], []], posData = _a[0], nMcidData = _a[1];
+                    }
+                    if (bbox.mcidList) {
+                        bbox.location = parseMcidToBbox(bbox.mcidList, posData, refPositionData, annotsFormatted, page.view, page.rotate, left, bottom);
+                        if (___default["default"].isEmpty(bbox.location)) {
+                            return null;
+                        }
+                    }
+                    else if (bbox.contentItemPath) {
+                        var contentItemsPath_1 = bbox.contentItemPath.slice(2);
+                        var contentItemsBBoxes_1 = nMcidData[bbox.contentItemPath[1]];
+                        try {
+                            contentItemsPath_1.forEach(function (ci, i) {
+                                if (contentItemsPath_1.length > i + 1 || !contentItemsBBoxes_1.final) {
+                                    contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[0];
+                                }
+                                contentItemsBBoxes_1 = contentItemsBBoxes_1.contentItems[ci];
+                            });
+                            bbox.location = [
+                                contentItemsBBoxes_1.contentItem.x + left,
+                                contentItemsBBoxes_1.contentItem.y + bottom,
+                                contentItemsBBoxes_1.contentItem.w,
+                                contentItemsBBoxes_1.contentItem.h
+                            ];
+                        }
+                        catch (err) {
+                            console.log('NoMCIDDataParseError:', err.message || err);
+                            bbox.location = [0, 0, 0, 0];
+                        }
+                    }
+                    if (___default["default"].isNumber(bbox.operatorIndex) && ___default["default"].isNumber(bbox.glyphIndex)) {
+                        bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
+                    }
+                    return bbox;
+                });
+                setBboxesAll(allBboxes);
+                setBboxesErrors(errorBboxes);
+            });
         }
-    }, [bboxList]);
+    }, [page, bboxList]);
     React.useEffect(function () {
         var _a;
         if (!loaded && isIntersecting) {
