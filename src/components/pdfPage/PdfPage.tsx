@@ -101,7 +101,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setIsRendered(true);
     setPageViewport(page.view);
     props.onPageLoadSuccess?.(page);
-  }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
+  }, [props.onPageLoadSuccess]);
 
   useEffect(() => {
     if (page && bboxList.length) {
@@ -169,8 +169,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
         setBboxesAll(allBboxes);
         setBboxesErrors(errorBboxes);
       });
+    } else {
+      setBboxesAll([]);
+      setBboxesErrors([]);
     }
-  }, [page, bboxList]);
+  }, [page, bboxList, props.treeElementsBboxes]);
   useEffect(() => {
     if (!loaded && isIntersecting) {
       setLoaded(true);

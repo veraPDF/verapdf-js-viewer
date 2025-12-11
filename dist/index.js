@@ -992,7 +992,7 @@ var PdfPage = function (props) {
         setIsRendered(true);
         setPageViewport(page.view);
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
-    }, [bboxList, props.treeElementsBboxes, props.width, props.height, scale]);
+    }, [props.onPageLoadSuccess]);
     React.useEffect(function () {
         if (page && bboxList.length) {
             Promise.all([page.getOperatorList(), page.getAnnotations()]).then(function (_a) {
@@ -1051,7 +1051,11 @@ var PdfPage = function (props) {
                 setBboxesErrors(errorBboxes);
             });
         }
-    }, [page, bboxList]);
+        else {
+            setBboxesAll([]);
+            setBboxesErrors([]);
+        }
+    }, [page, bboxList, props.treeElementsBboxes]);
     React.useEffect(function () {
         var _a;
         if (!loaded && isIntersecting) {
