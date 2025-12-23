@@ -173,7 +173,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       setBboxesAll([]);
       setBboxesErrors([]);
     }
-  }, [page, bboxList, props.treeElementsBboxes]);
+  }, [page, props.bboxList, props.treeElementsBboxes]);
   useEffect(() => {
     if (!loaded && isIntersecting) {
       setLoaded(true);

@@ -1055,7 +1055,7 @@ var PdfPage = function (props) {
             setBboxesAll([]);
             setBboxesErrors([]);
         }
-    }, [page, bboxList, props.treeElementsBboxes]);
+    }, [page, props.bboxList, props.treeElementsBboxes]);
     React.useEffect(function () {
         var _a;
         if (!loaded && isIntersecting) {
