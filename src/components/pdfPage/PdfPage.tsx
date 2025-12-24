@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo } from 'react';
+import { usePrevious } from 'react-use';
 import { Page } from 'react-pdf';
 import { PageCallback } from 'react-pdf/src/shared/types';
 import { useIntersection } from 'use-intersection';
@@ -56,9 +57,10 @@ const StyledPdfPage = styled.div`
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
   const { scrollInto } = useContext(ViewerContext);
-  const { bboxList = [], scale = 1 } = props;
-  const intersectionRef = useRef(null);
+  const { treeElementsBboxes, bboxList, scale = 1 } = props;
   const [page, setPage] = useState<PageCallback | null>(null);
+  const prevPageBboxes = usePrevious({ page, treeElementsBboxes });
+  const intersectionRef = useRef(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
   const [loaded, setLoaded] = useState(false);
@@ -104,76 +106,81 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, [props.onPageLoadSuccess]);
 
   useEffect(() => {
-    if (page && bboxList.length) {
-      Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
-        const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
-        const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
-        const [positionData, noMCIDData, refPositionData] = operatorList.argsArray[operatorList.argsArray.length - 1];
-        const annotsFormatted = getFormattedAnnotations(annotations);
-        const allBboxes = createAllBboxes(props.treeElementsBboxes, positionData, refPositionData, annotsFormatted, page.view, page.rotate);
-        const errorBboxes = bboxList.map((bbox) => {
-          let opData = operationData,
-              posData = positionData,
-              nMcidData = noMCIDData;
-          let left = 0, bottom = 0;
-          const { annotIndex } = bbox;
-          if (annotIndex != null) {
-            left = annotations[annotIndex]?.rect[0] ?? 0;
-            bottom = annotations[annotIndex]?.rect[1] ?? 0;
-            opData = annotBBoxesAndOpPos[annotIndex]?.[0] ?? [];
-            [posData, nMcidData] = annotBBoxesAndOpPos[annotIndex]?.[1] ?? [[], []];
-          }
-
-          if (bbox.mcidList) {
-            bbox.location = parseMcidToBbox(
-              bbox.mcidList,
-              posData,
-              refPositionData,
-              annotsFormatted,
-              page.view,
-              page.rotate,
-              left,
-              bottom,
-            );
-            if (_.isEmpty(bbox.location)) {
-              return null;
+    const triggeredByBboxList = prevPageBboxes
+      && prevPageBboxes.page === page
+      && prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
+    if (page) {
+      if (triggeredByBboxList && !bboxList?.length) setBboxesErrors([]);
+      else {
+        Promise.all([page.getOperatorList(), page.getAnnotations()]).then(([operatorList, annotations]) => {
+          const annotBBoxesAndOpPos = operatorList.argsArray[operatorList.argsArray.length - 3];
+          const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
+          const [positionData, noMCIDData, refPositionData] = operatorList.argsArray[operatorList.argsArray.length - 1];
+          const annotsFormatted = getFormattedAnnotations(annotations);
+          const errorBboxes = (bboxList ?? []).map((bbox) => {
+            let opData = operationData,
+                posData = positionData,
+                nMcidData = noMCIDData;
+            let left = 0, bottom = 0;
+            const { annotIndex } = bbox;
+            if (annotIndex != null) {
+              left = annotations[annotIndex]?.rect[0] ?? 0;
+              bottom = annotations[annotIndex]?.rect[1] ?? 0;
+              opData = annotBBoxesAndOpPos[annotIndex]?.[0] ?? [];
+              [posData, nMcidData] = annotBBoxesAndOpPos[annotIndex]?.[1] ?? [[], []];
             }
-          } else if (bbox.contentItemPath) {
-            const contentItemsPath = bbox.contentItemPath.slice(2);
-            let contentItemsBBoxes = nMcidData[bbox.contentItemPath[1]];
-            try {
-              contentItemsPath.forEach((ci, i) => {
-                if (contentItemsPath.length > i + 1 || !contentItemsBBoxes.final) {
-                  contentItemsBBoxes = contentItemsBBoxes.contentItems[0];
-                }
-                contentItemsBBoxes = contentItemsBBoxes.contentItems[ci];
-              });
 
-              bbox.location = [
-                contentItemsBBoxes.contentItem.x + left,
-                contentItemsBBoxes.contentItem.y + bottom,
-                contentItemsBBoxes.contentItem.w,
-                contentItemsBBoxes.contentItem.h
-              ];
-            } catch (err) {
-              console.log('NoMCIDDataParseError:', err.message || err);
-              bbox.location = [0, 0, 0, 0];
+            if (bbox.mcidList) {
+              bbox.location = parseMcidToBbox(
+                bbox.mcidList,
+                posData,
+                refPositionData,
+                annotsFormatted,
+                page.view,
+                page.rotate,
+                left,
+                bottom,
+              );
+              if (_.isEmpty(bbox.location)) {
+                return null;
+              }
+            } else if (bbox.contentItemPath) {
+              const contentItemsPath = bbox.contentItemPath.slice(2);
+              let contentItemsBBoxes = nMcidData[bbox.contentItemPath[1]];
+              try {
+                contentItemsPath.forEach((ci, i) => {
+                  if (contentItemsPath.length > i + 1 || !contentItemsBBoxes.final) {
+                    contentItemsBBoxes = contentItemsBBoxes.contentItems[0];
+                  }
+                  contentItemsBBoxes = contentItemsBBoxes.contentItems[ci];
+                });
+
+                bbox.location = [
+                  contentItemsBBoxes.contentItem.x + left,
+                  contentItemsBBoxes.contentItem.y + bottom,
+                  contentItemsBBoxes.contentItem.w,
+                  contentItemsBBoxes.contentItem.h
+                ];
+              } catch (err) {
+                console.log('NoMCIDDataParseError:', err.message || err);
+                bbox.location = [0, 0, 0, 0];
+              }
             }
-          }
-          if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
-            bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
-          }
+            if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
+              bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
+            }
 
-          return bbox;
+            return bbox;
+          });
+          if (!triggeredByBboxList) {
+            const allBboxes = createAllBboxes(treeElementsBboxes, positionData, refPositionData, annotsFormatted, page.view, page.rotate);
+            setBboxesAll(allBboxes);
+          }
+          setBboxesErrors(errorBboxes);
         });
-        setBboxesAll(allBboxes);
-        setBboxesErrors(errorBboxes);
-      });
-    } else {
-      setBboxesAll([]);
-      setBboxesErrors([]);
+      }
     }
-  }, [page, props.bboxList, props.treeElementsBboxes]);
+  }, [page, bboxList, treeElementsBboxes]);
   useEffect(() => {
     if (!loaded && isIntersecting) {
       setLoaded(true);
