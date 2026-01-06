@@ -67,7 +67,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
-  const { page, setPage, maxPage, setMaxPage, scrollIntoPage, setScrollIntoPage } = useContext(ViewerContext);
+  const { page, setPage, maxPage, setMaxPage, scrollInto, setScrollIntoPage } = useContext(ViewerContext);
   const { bboxes = [] } = props;
   const [loaded, setLoaded] = useState(false);
   const [structureTree, setStructureTree] = useState({});
@@ -207,11 +207,11 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
     if (newPageIndex !== -1 && pagesByViewport[newPageIndex]) {
       setPage(pagesByViewport[newPageIndex]);
-      if (scrollIntoPage) {
+      if (scrollInto.page) {
         setScrollIntoPage(0);
       }
     }
-  }, [pagesByViewport, page, ratioArray, scrollIntoPage]);
+  }, [pagesByViewport, page, ratioArray, scrollInto]);
   useDebounce(() => {
     if (props.page !== page) props.onPageChange?.(page)
   }, 30, [page]);

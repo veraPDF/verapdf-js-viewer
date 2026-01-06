@@ -5,7 +5,9 @@ export declare const ViewerContext: React.Context<{
     setPage(page: number): void;
     maxPage: number;
     setMaxPage(page: number): void;
-    scrollIntoPage: number;
+    scrollInto: {
+        page: number;
+    };
     setScrollIntoPage(page: number): void;
     renderBbox?: ((props: IRenderBboxProps) => ReactElement) | undefined;
 }>;
