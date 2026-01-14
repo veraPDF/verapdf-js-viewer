@@ -55,7 +55,7 @@ const StyledPdfPage = styled.div`
 `;
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
-  const { scrollIntoPage } = useContext(ViewerContext);
+  const { scrollInto } = useContext(ViewerContext);
   const { bboxList = [], scale = 1 } = props;
   const intersectionRef = useRef(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
@@ -183,10 +183,10 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     props.onPageInViewport?.(props.page, { isIntersecting, intersectionRatio });
   }, [isIntersecting, intersectionRatio, loaded]);
   useEffect(() => {
-    if (scrollIntoPage === props.page) {
+    if (scrollInto.page === props.page) {
       (intersectionRef.current as unknown as HTMLElement)?.scrollIntoView();
     }
-  }, [scrollIntoPage]);
+  }, [scrollInto]);
   useEffect(() => {
     const width = pageViewport[2] - pageViewport[0];
     const height = pageViewport[3] - pageViewport[1];

@@ -1,4 +1,4 @@
-import React, { FC, createContext, useState, ReactNode, ReactElement } from 'react';
+import React, { FC, createContext, useState, ReactNode, ReactElement, useCallback } from 'react';
 import { IRenderBboxProps } from "../bbox/Bbox";
 
 export const ViewerContext = createContext({} as {
@@ -6,22 +6,23 @@ export const ViewerContext = createContext({} as {
   setPage(page: number): void,
   maxPage: number,
   setMaxPage(page: number): void,
-  scrollIntoPage: number,
+  scrollInto: { page: number },
   setScrollIntoPage(page: number): void,
   renderBbox?: (props: IRenderBboxProps) => ReactElement,
 });
 
 const ViewerProvider: FC<{children: ReactNode, renderBbox?: (props: IRenderBboxProps) => ReactElement}> = ({renderBbox, children}) => {
   const [page, setPage] = useState(1);
-  const [scrollIntoPage, setScrollIntoPage] = useState<number>(0);
   const [maxPage, setMaxPage] = useState(0);
+  const [scrollInto, setScrollInto] = useState<{ page: number }>({ page: 0 });
+  const setScrollIntoPage = useCallback((page: number) => setScrollInto({ page }), [setScrollInto]);
 
   const context = {
     page,
     setPage,
     maxPage,
     setMaxPage,
-    scrollIntoPage,
+    scrollInto,
     setScrollIntoPage,
     renderBbox,
   };
