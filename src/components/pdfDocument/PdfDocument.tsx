@@ -1,8 +1,8 @@
 import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
 import { Document, pdfjs } from 'react-pdf';
 import { DocumentCallback, PageCallback } from 'react-pdf/src/shared/types';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { useDebounce } from 'react-use';
 import _ from 'lodash';
 
