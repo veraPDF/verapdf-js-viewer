@@ -39356,87 +39356,94 @@ class ExtendedCatalog extends Catalog {
     return shadow(this, "structTreeRootObject", structTreeRoot);
   }
   getTreeElement(el, page, ref) {
-    if (el instanceof Dict && el.has("Pg")) {
-      const pageRef = el.getRaw("Pg");
-      let newPage = this.pages.findIndex(pageEl => pageEl.num === pageRef.num && pageEl.gen === pageRef.gen);
-      newPage = newPage !== -1 ? newPage : null;
-      if (newPage !== page) {
-        page = newPage;
-      }
-    }
-    if (el instanceof Dict && el.has("K")) {
-      const name = el.has("S") ? el.get("S").name : null;
-      const roleName = this.getRoleName(el, name);
-      return {
-        name: name ? stringToUTF8String(name) : null,
-        roleName: roleName ? stringToUTF8String(roleName) : null,
-        children: this.getTreeElement(el.get("K"), page, el.getRaw("K")),
-        pageIndex: page,
-        ref: ref instanceof Ref ? ref : null
-      };
-    }
-    if (el instanceof Dict && el.has("Obj")) {
-      const obj = el.get("Obj");
-      let type = null;
-      if (obj.has("Type")) {
-        type = obj.get("Type").name;
-      }
-      if (obj.has("Subtype")) {
-        type = obj.get("Subtype").name;
-      }
-      switch (type) {
-        case "Link":
-        case "Annot":
-          const rect = obj.get("Rect");
-          const pageRef = Array.isArray(this.pages) && Number.isInteger(page) && page >= 0 ? this.pages[page] : null;
-          const pageObj = pageRef ? this.xref.fetch(pageRef) : null;
-          return {
-            annotIndex: this.getAnnotIndex(el, pageObj),
-            pageIndex: page,
-            rect: [rect[0], rect[1], rect[2], rect[3]]
-          };
-        default:
-          break;
-      }
-    }
-    if (Array.isArray(el)) {
-      return el.map(subel => {
-        if (Number.isInteger(subel)) {
-          return {
-            mcid: subel,
-            pageIndex: page
-          };
-        } else if (!(subel.hasOwnProperty("num") && subel.hasOwnProperty("gen")) && subel.get("Type") !== "OBJR") {
-          return this.getTreeElement(subel, page);
-        } else if (subel.hasOwnProperty("num") && subel.hasOwnProperty("gen")) {
-          return this.getTreeElement(this.xref.fetch(subel), page, subel);
+    try {
+      if (el instanceof Dict && el.has("Pg")) {
+        const pageRef = el.getRaw("Pg");
+        let newPage = this.pages.findIndex(pageEl => pageEl.num === pageRef.num && pageEl.gen === pageRef.gen);
+        newPage = newPage !== -1 ? newPage : null;
+        if (newPage !== page) {
+          page = newPage;
         }
-        return null;
-      });
-    }
-    if (Number.isInteger(el)) {
-      return {
-        mcid: el,
-        pageIndex: page
-      };
-    }
-    if (el instanceof Dict && el.has("Type") && el.get("Type").name === "MCR") {
-      return {
-        mcid: el.get("MCID"),
-        pageIndex: page,
-        stm: el.getRaw("Stm")
-      };
-    }
-    if (el instanceof Dict && el.has("S")) {
-      const name = el.get("S").name;
-      const roleName = this.getRoleName(el, name);
-      return {
-        name: name ? stringToUTF8String(name) : null,
-        roleName: roleName ? stringToUTF8String(roleName) : null,
-        children: [],
-        pageIndex: page,
-        ref: ref instanceof Ref ? ref : null
-      };
+      }
+      if (el instanceof Dict && el.has("K")) {
+        const name = el.has("S") ? el.get("S").name : null;
+        const roleName = this.getRoleName(el, name);
+        return {
+          name: name ? stringToUTF8String(name) : null,
+          roleName: roleName ? stringToUTF8String(roleName) : null,
+          children: this.getTreeElement(el.get("K"), page, el.getRaw("K")),
+          pageIndex: page,
+          ref: ref instanceof Ref ? ref : null
+        };
+      }
+      if (el instanceof Dict && el.has("Obj")) {
+        const obj = el.get("Obj");
+        if (!(obj instanceof Dict)) {
+          return null;
+        }
+        let type = null;
+        if (obj.has("Type")) {
+          type = obj.get("Type").name;
+        }
+        if (obj.has("Subtype")) {
+          type = obj.get("Subtype").name;
+        }
+        switch (type) {
+          case "Link":
+          case "Annot":
+            const rect = obj.get("Rect");
+            const pageRef = Array.isArray(this.pages) && Number.isInteger(page) && page >= 0 ? this.pages[page] : null;
+            const pageObj = pageRef ? this.xref.fetch(pageRef) : null;
+            return {
+              annotIndex: this.getAnnotIndex(el, pageObj),
+              pageIndex: page,
+              rect: [rect[0], rect[1], rect[2], rect[3]]
+            };
+          default:
+            break;
+        }
+      }
+      if (Array.isArray(el)) {
+        return el.map(subel => {
+          if (Number.isInteger(subel)) {
+            return {
+              mcid: subel,
+              pageIndex: page
+            };
+          } else if (!(subel.hasOwnProperty("num") && subel.hasOwnProperty("gen")) && subel.get("Type") !== "OBJR") {
+            return this.getTreeElement(subel, page);
+          } else if (subel.hasOwnProperty("num") && subel.hasOwnProperty("gen")) {
+            return this.getTreeElement(this.xref.fetch(subel), page, subel);
+          }
+          return null;
+        });
+      }
+      if (Number.isInteger(el)) {
+        return {
+          mcid: el,
+          pageIndex: page
+        };
+      }
+      if (el instanceof Dict && el.has("Type") && el.get("Type").name === "MCR") {
+        return {
+          mcid: el.get("MCID"),
+          pageIndex: page,
+          stm: el.getRaw("Stm")
+        };
+      }
+      if (el instanceof Dict && el.has("S")) {
+        const name = el.get("S").name;
+        const roleName = this.getRoleName(el, name);
+        return {
+          name: name ? stringToUTF8String(name) : null,
+          roleName: roleName ? stringToUTF8String(roleName) : null,
+          children: [],
+          pageIndex: page,
+          ref: ref instanceof Ref ? ref : null
+        };
+      }
+    } catch (e) {
+      console.error(`Failed to parse structure tree element: ${e.message}`);
     }
     return null;
   }
