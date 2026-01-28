@@ -43,7 +43,7 @@
   ],
   "dependencies": {
     "pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.21",
-    "react-pdf": "^10.3.0",
+    "react-pdf": "10.3.0",
     "react-use": "^17.1.0",
     "styled-components": "^5.2.1",
     "url": "^0.11.4",
