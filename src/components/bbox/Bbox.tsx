@@ -99,7 +99,7 @@ interface IBboxDivProps {
 export type TreeElementBbox = [Array<IMcidItem | undefined>, string];
 
 const BboxDiv = styled.div`
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
   left: ${(props: IBboxDivProps) => props.left};
   bottom: ${(props: IBboxDivProps) => props.bottom};
   height: ${(props: IBboxDivProps) => props.height};
