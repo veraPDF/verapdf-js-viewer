@@ -315,6 +315,7 @@ var buildBboxMap = function (bboxes, structure) {
                         annotIndex: Number.isNaN(annotIndex_1) ? undefined : annotIndex_1,
                         isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                         operatorIndex: bboxPosition.operatorIndex,
+                        contentIndex: bboxPosition.contentIndex,
                         glyphIndex: bboxPosition.glyphIndex,
                         bboxTitle: bbox.bboxTitle,
                     }
@@ -498,9 +499,7 @@ var createAllBboxes = function (bboxesAll, pageMap, refMap, annotations, viewpor
 };
 var calculateLocationInStreamOperator = function (location) {
     var path = location.split("/");
-    var pageIndex = -1;
-    var operatorIndex = -1;
-    var glyphIndex = -1;
+    var pageIndex, operatorIndex, glyphIndex, contentIndex;
     path.forEach(function (step) {
         if (step.startsWith('pages')) {
             pageIndex = parseInt(step.split(/[\[\]]/)[1]);
@@ -511,14 +510,18 @@ var calculateLocationInStreamOperator = function (location) {
         if (step.startsWith('usedGlyphs')) {
             glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
         }
+        if (step.startsWith('content')) {
+            contentIndex = parseInt(step.split(/[\[\]]/)[1]);
+        }
     });
-    if (pageIndex === -1 || operatorIndex === -1 || glyphIndex === -1) {
+    if (pageIndex == null || operatorIndex == null || (glyphIndex == null && contentIndex == null)) {
         return null;
     }
     return {
         pageIndex: pageIndex,
         operatorIndex: operatorIndex,
         glyphIndex: glyphIndex,
+        contentIndex: contentIndex,
     };
 };
 var getSelectedPageByLocation = function (bboxLocation) {
@@ -774,11 +777,7 @@ function findAllMcid(tagObject) {
     func(tagObject);
     return ___default["default"].map(mcidMap, function (value, key) { return [value, ___default["default"].toNumber(key)]; });
 }
-var getBboxForGlyph = function (operatorIndex, glyphIndex, operationsList, viewport, rotateAngle, leftOffset, bottomOffset) {
-    var bbox = operationsList[operatorIndex] ? operationsList[operatorIndex][glyphIndex] : null;
-    if (!bbox) {
-        return [];
-    }
+var getBboxForViewport = function (bbox, viewport, rotateAngle, leftOffset, bottomOffset) {
     var coords = __spreadArray([], bbox, true);
     coords[0] += leftOffset;
     coords[1] += bottomOffset;
@@ -1048,8 +1047,10 @@ var PdfPage = function (props) {
                                 bbox.location = [0, 0, 0, 0];
                             }
                         }
-                        if (___default["default"].isNumber(bbox.operatorIndex) && ___default["default"].isNumber(bbox.glyphIndex)) {
-                            bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
+                        if (___default["default"].isFinite(bbox.operatorIndex) && (___default["default"].isFinite(bbox.glyphIndex) || ___default["default"].isFinite(bbox.contentIndex))) {
+                            var operatorIndex = bbox.operatorIndex, glyphIndex = bbox.glyphIndex, contentIndex = bbox.contentIndex;
+                            var coords = opData[operatorIndex] ? opData[operatorIndex][glyphIndex || contentIndex] : null;
+                            bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
                         }
                         return bbox;
                     });
