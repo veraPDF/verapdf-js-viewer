@@ -1,6 +1,11 @@
 @import "../../styles/variables";
 
 .pdf-page {
+  .bbox-wrapper {
+    opacity: 0.75;
+    isolation: isolate;
+  }
+
   position: relative;
   background: #fff;
   margin-top: 8px;

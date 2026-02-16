@@ -290,20 +290,22 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           onGetTextError={props.onGetTextError}
           customTextRenderer={props.customTextRenderer}
         />
-        {isRendered ? bboxes.map((bbox: IBbox, index) => (
-          <Bbox
-            key={index}
-            bbox={bbox}
-            onClick={onBboxClick(bbox.index, bbox.id)}
-            disabled={isBboxDisabled(bbox)}
-            structured={isBboxStructured(bbox)}
-            selected={isBboxSelected(bbox)}
-            related={isBboxRelated(bbox)}
-            scale={pageScale}
-            selectionMode={props.treeBboxSelectionMode}
-            colorScheme={props.colorScheme}
-          />
-        )) : null}
+        {isRendered ? <div className="bbox-wrapper">
+          {bboxes.map((bbox: IBbox, index) => (
+            <Bbox
+              key={index}
+              bbox={bbox}
+              onClick={onBboxClick(bbox.index, bbox.id)}
+              disabled={isBboxDisabled(bbox)}
+              structured={isBboxStructured(bbox)}
+              selected={isBboxSelected(bbox)}
+              related={isBboxRelated(bbox)}
+              scale={pageScale}
+              selectionMode={props.treeBboxSelectionMode}
+              colorScheme={props.colorScheme}
+            />
+          ))}
+        </div> : null}
       </> : null}
     </StyledPdfPage>
   );
