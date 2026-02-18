@@ -169,7 +169,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
 
             if (_.isFinite(bbox.operatorIndex) && (_.isFinite(bbox.glyphIndex) || _.isFinite(bbox.contentIndex))) {
               const { operatorIndex, glyphIndex, contentIndex } = bbox;
-              const coords = opData[operatorIndex!] ? opData[operatorIndex!][glyphIndex || contentIndex!] : null;
+              const coords = opData[operatorIndex!] ? opData[operatorIndex!][glyphIndex ?? contentIndex!] : null;
               bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
             }
 

@@ -272,21 +272,17 @@ export const createAllBboxes = (
     ({area: area1}, {area: area2}) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0) as IBbox[];
 };
 
+const stepRegExp = /(pages|operators|usedGlyphs|content)\[(\d+)\]/;
 export const calculateLocationInStreamOperator = (location: string) => {
   const path = location.split("/");
   let pageIndex, operatorIndex, glyphIndex, contentIndex;
   path.forEach((step) => {
-    if (step.startsWith('pages')) {
-      pageIndex = parseInt(step.split(/[\[\]]/)[1]);
-    }
-    if (step.startsWith('operators')) {
-      operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
-    }
-    if (step.startsWith('usedGlyphs')) {
-      glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
-    }
-    if (step.startsWith('content')) {
-      contentIndex = parseInt(step.split(/[\[\]]/)[1]);
+    const [, stepName, index] = step.match(stepRegExp) ?? [];
+    switch (stepName) {
+      case 'pages': pageIndex = parseInt(index); break;
+      case 'operators': operatorIndex = parseInt(index); break;
+      case 'usedGlyphs': glyphIndex = parseInt(index); break;
+      case 'content': contentIndex = parseInt(index); break;
     }
   });
   if (pageIndex == null || operatorIndex == null || (glyphIndex == null && contentIndex == null)) {

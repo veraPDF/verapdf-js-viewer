@@ -497,21 +497,26 @@ var createAllBboxes = function (bboxesAll, pageMap, refMap, annotations, viewpor
         return (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0;
     });
 };
+var stepRegExp = /(pages|operators|usedGlyphs|content)\[(\d+)\]/;
 var calculateLocationInStreamOperator = function (location) {
     var path = location.split("/");
     var pageIndex, operatorIndex, glyphIndex, contentIndex;
     path.forEach(function (step) {
-        if (step.startsWith('pages')) {
-            pageIndex = parseInt(step.split(/[\[\]]/)[1]);
-        }
-        if (step.startsWith('operators')) {
-            operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
-        }
-        if (step.startsWith('usedGlyphs')) {
-            glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
-        }
-        if (step.startsWith('content')) {
-            contentIndex = parseInt(step.split(/[\[\]]/)[1]);
+        var _a;
+        var _b = (_a = step.match(stepRegExp)) !== null && _a !== void 0 ? _a : [], stepName = _b[1], index = _b[2];
+        switch (stepName) {
+            case 'pages':
+                pageIndex = parseInt(index);
+                break;
+            case 'operators':
+                operatorIndex = parseInt(index);
+                break;
+            case 'usedGlyphs':
+                glyphIndex = parseInt(index);
+                break;
+            case 'content':
+                contentIndex = parseInt(index);
+                break;
         }
     });
     if (pageIndex == null || operatorIndex == null || (glyphIndex == null && contentIndex == null)) {
@@ -1049,7 +1054,7 @@ var PdfPage = function (props) {
                         }
                         if (___default["default"].isFinite(bbox.operatorIndex) && (___default["default"].isFinite(bbox.glyphIndex) || ___default["default"].isFinite(bbox.contentIndex))) {
                             var operatorIndex = bbox.operatorIndex, glyphIndex = bbox.glyphIndex, contentIndex = bbox.contentIndex;
-                            var coords = opData[operatorIndex] ? opData[operatorIndex][glyphIndex || contentIndex] : null;
+                            var coords = opData[operatorIndex] ? opData[operatorIndex][glyphIndex !== null && glyphIndex !== void 0 ? glyphIndex : contentIndex] : null;
                             bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
                         }
                         return bbox;
