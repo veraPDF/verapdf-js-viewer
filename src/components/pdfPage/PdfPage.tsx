@@ -13,9 +13,9 @@ import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
 import {
   cleanArray,
-  getBboxForGlyph,
   parseMcidToBbox,
   createAllBboxes,
+  getBboxForViewport,
   checkIsBboxOutOfThePage,
   getFormattedAnnotations
 } from '../../services/bboxService';
@@ -166,8 +166,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
                 bbox.location = [0, 0, 0, 0];
               }
             }
-            if (_.isNumber(bbox.operatorIndex) && _.isNumber(bbox.glyphIndex)) {
-              bbox.location = getBboxForGlyph(bbox.operatorIndex, bbox.glyphIndex, opData, page.view, page.rotate, left, bottom);
+
+            if (_.isFinite(bbox.operatorIndex) && (_.isFinite(bbox.glyphIndex) || _.isFinite(bbox.contentIndex))) {
+              const { operatorIndex, glyphIndex, contentIndex } = bbox;
+              const coords = opData[operatorIndex!] ? opData[operatorIndex!][glyphIndex ?? contentIndex!] : null;
+              bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
             }
 
             return bbox;

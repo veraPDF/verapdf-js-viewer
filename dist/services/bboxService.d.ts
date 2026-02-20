@@ -11,14 +11,15 @@ export declare const getMcidList: (node: AnyObject, mcidList?: TreeElementBbox[]
 export declare const createBboxMap: (mcidList: TreeElementBbox[]) => AnyObject;
 export declare const createAllBboxes: (bboxesAll: TreeElementBbox[] | undefined, pageMap: AnyObject, refMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number) => IBbox[];
 export declare const calculateLocationInStreamOperator: (location: string) => {
-    pageIndex: number;
-    operatorIndex: number;
-    glyphIndex: number;
+    pageIndex: never;
+    operatorIndex: never;
+    glyphIndex: undefined;
+    contentIndex: undefined;
 } | null;
 export declare const getSelectedPageByLocation: (bboxLocation: string) => number;
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
 export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean;
-export declare const getBboxForGlyph: (operatorIndex: number, glyphIndex: number, operationsList: number[][][], viewport: number[], rotateAngle: number, leftOffset: number, bottomOffset: number) => number[];
+export declare const getBboxForViewport: (bbox: number[], viewport: number[], rotateAngle: number, leftOffset: number, bottomOffset: number) => number[];
 export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject[] | AnyObject, pageMap: AnyObject, refMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number, left?: number, bottom?: number) => number[];
 export declare const rotateViewport: (rotateAngle: number, viewport: number[]) => number[];
 export declare const rotateCoordinates: (coords: number[], rotateAngle: number, viewport: number[]) => number[];

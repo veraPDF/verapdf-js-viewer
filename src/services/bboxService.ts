@@ -101,6 +101,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             annotIndex: Number.isNaN(annotIndex) ? undefined : annotIndex,
             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
             operatorIndex: bboxPosition.operatorIndex,
+            contentIndex: bboxPosition.contentIndex,
             glyphIndex: bboxPosition.glyphIndex,
             bboxTitle: bbox.bboxTitle,
           }
@@ -271,29 +272,27 @@ export const createAllBboxes = (
     ({area: area1}, {area: area2}) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0) as IBbox[];
 };
 
+const stepRegExp = /(pages|operators|usedGlyphs|content)\[(\d+)\]/;
 export const calculateLocationInStreamOperator = (location: string) => {
   const path = location.split("/");
-  let pageIndex = -1;
-  let operatorIndex = -1;
-  let glyphIndex = -1;
+  let pageIndex, operatorIndex, glyphIndex, contentIndex;
   path.forEach((step) => {
-    if (step.startsWith('pages')) {
-      pageIndex = parseInt(step.split(/[\[\]]/)[1]);
-    }
-    if (step.startsWith('operators')) {
-      operatorIndex = parseInt(step.split(/[\[\]]/)[1]);
-    }
-    if (step.startsWith('usedGlyphs')) {
-      glyphIndex = parseInt(step.split(/[\[\]]/)[1]);
+    const [, stepName, index] = step.match(stepRegExp) ?? [];
+    switch (stepName) {
+      case 'pages': pageIndex = parseInt(index); break;
+      case 'operators': operatorIndex = parseInt(index); break;
+      case 'usedGlyphs': glyphIndex = parseInt(index); break;
+      case 'content': contentIndex = parseInt(index); break;
     }
   });
-  if (pageIndex === -1 || operatorIndex === -1 || glyphIndex === -1) {
+  if (pageIndex == null || operatorIndex == null || (glyphIndex == null && contentIndex == null)) {
     return null;
   }
   return {
     pageIndex,
     operatorIndex,
     glyphIndex,
+    contentIndex,
   }
 }
 
@@ -560,19 +559,13 @@ function findAllMcid(tagObject: AnyObject) {
   return _.map(mcidMap, (value, key) => [value, _.toNumber(key)]);
 }
 
-export const getBboxForGlyph = (
-  operatorIndex: number,
-  glyphIndex: number,
-  operationsList: number[][][],
+export const getBboxForViewport = (
+  bbox: number[],
   viewport: number[],
   rotateAngle: number,
   leftOffset: number,
   bottomOffset: number,
 ) => {
-  const bbox = operationsList[operatorIndex] ? operationsList[operatorIndex][glyphIndex] : null;
-  if (!bbox) {
-    return [];
-  }
   const coords = [...bbox];
   coords[0] += leftOffset;
   coords[1] += bottomOffset;
