@@ -13,8 +13,7 @@ export declare const createAllBboxes: (bboxesAll: TreeElementBbox[] | undefined,
 export declare const calculateLocationInStreamOperator: (location: string) => {
     pageIndex: never;
     operatorIndex: never;
-    glyphIndex: undefined;
-    contentIndex: undefined;
+    subOperatorIndex: never;
 } | null;
 export declare const getSelectedPageByLocation: (bboxLocation: string) => number;
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
