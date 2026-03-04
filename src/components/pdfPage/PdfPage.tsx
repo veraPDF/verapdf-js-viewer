@@ -180,7 +180,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
               }
               else {
                 const coords = operator[subOperatorIndex];
-                bbox.location = getBboxForViewport(coords, page.view, page.rotate, left, bottom);
+                bbox.location = coords
+                  ? getBboxForViewport(coords, page.view, page.rotate, left, bottom)
+                  : [];
               }
             }
 

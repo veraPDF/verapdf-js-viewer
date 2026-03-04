@@ -1062,7 +1062,9 @@ var PdfPage = function (props) {
                             }
                             else {
                                 var coords = operator[subOperatorIndex];
-                                bbox.location = getBboxForViewport(coords, page.view, page.rotate, left, bottom);
+                                bbox.location = coords
+                                    ? getBboxForViewport(coords, page.view, page.rotate, left, bottom)
+                                    : [];
                             }
                         }
                         return bbox;
