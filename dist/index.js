@@ -315,8 +315,7 @@ var buildBboxMap = function (bboxes, structure) {
                         annotIndex: Number.isNaN(annotIndex_1) ? undefined : annotIndex_1,
                         isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
                         operatorIndex: bboxPosition.operatorIndex,
-                        contentIndex: bboxPosition.contentIndex,
-                        glyphIndex: bboxPosition.glyphIndex,
+                        subOperatorIndex: bboxPosition.subOperatorIndex,
                         bboxTitle: bbox.bboxTitle,
                     }
                 ], false);
@@ -497,10 +496,10 @@ var createAllBboxes = function (bboxesAll, pageMap, refMap, annotations, viewpor
         return (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0;
     });
 };
-var stepRegExp = /(pages|operators|usedGlyphs|content)\[(\d+)\]/;
+var stepRegExp = /(pages|operators|usedGlyphs|content|font)\[(\d+)\]/;
 var calculateLocationInStreamOperator = function (location) {
     var path = location.split("/");
-    var pageIndex, operatorIndex, glyphIndex, contentIndex;
+    var pageIndex, operatorIndex, subOperatorIndex;
     path.forEach(function (step) {
         var _a;
         var _b = (_a = step.match(stepRegExp)) !== null && _a !== void 0 ? _a : [], stepName = _b[1], index = _b[2];
@@ -511,22 +510,22 @@ var calculateLocationInStreamOperator = function (location) {
             case 'operators':
                 operatorIndex = parseInt(index);
                 break;
-            case 'usedGlyphs':
-                glyphIndex = parseInt(index);
-                break;
             case 'content':
-                contentIndex = parseInt(index);
+            case 'usedGlyphs':
+                subOperatorIndex = parseInt(index);
+                break;
+            case 'font':
+                subOperatorIndex = '*';
                 break;
         }
     });
-    if (pageIndex == null || operatorIndex == null || (glyphIndex == null && contentIndex == null)) {
+    if (pageIndex == null || operatorIndex == null || (subOperatorIndex == null)) {
         return null;
     }
     return {
         pageIndex: pageIndex,
         operatorIndex: operatorIndex,
-        glyphIndex: glyphIndex,
-        contentIndex: contentIndex,
+        subOperatorIndex: subOperatorIndex,
     };
 };
 var getSelectedPageByLocation = function (bboxLocation) {
@@ -1012,7 +1011,7 @@ var PdfPage = function (props) {
                     var operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
                     var _b = operatorList.argsArray[operatorList.argsArray.length - 1], positionData = _b[0], noMCIDData = _b[1], refPositionData = _b[2];
                     var annotsFormatted = getFormattedAnnotations(annotations);
-                    var errorBboxes = (bboxList !== null && bboxList !== void 0 ? bboxList : []).map(function (bbox) {
+                    var errorBboxes = (bboxList !== null && bboxList !== void 0 ? bboxList : []).flatMap(function (bbox) {
                         var _a;
                         var _b, _c, _d, _e, _f, _g, _h, _j;
                         var opData = operationData, posData = positionData, nMcidData = noMCIDData;
@@ -1052,10 +1051,21 @@ var PdfPage = function (props) {
                                 bbox.location = [0, 0, 0, 0];
                             }
                         }
-                        if (___default["default"].isFinite(bbox.operatorIndex) && (___default["default"].isFinite(bbox.glyphIndex) || ___default["default"].isFinite(bbox.contentIndex))) {
-                            var operatorIndex = bbox.operatorIndex, glyphIndex = bbox.glyphIndex, contentIndex = bbox.contentIndex;
-                            var coords = opData[operatorIndex] ? opData[operatorIndex][glyphIndex !== null && glyphIndex !== void 0 ? glyphIndex : contentIndex] : null;
-                            bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
+                        if (___default["default"].isFinite(bbox.operatorIndex) && bbox.subOperatorIndex != null) {
+                            var operatorIndex = bbox.operatorIndex, subOperatorIndex = bbox.subOperatorIndex;
+                            var operator = opData[operatorIndex];
+                            if (!Array.isArray(operator)) {
+                                bbox.location = [];
+                            }
+                            else if (subOperatorIndex === '*') {
+                                return operator.map(function (coords) { return (__assign(__assign({}, bbox), { location: getBboxForViewport(coords, page.view, page.rotate, left, bottom) })); });
+                            }
+                            else {
+                                var coords = operator[subOperatorIndex];
+                                bbox.location = coords
+                                    ? getBboxForViewport(coords, page.view, page.rotate, left, bottom)
+                                    : [];
+                            }
                         }
                         return bbox;
                     });

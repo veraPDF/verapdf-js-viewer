@@ -117,7 +117,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           const operationData = operatorList.argsArray[operatorList.argsArray.length - 2];
           const [positionData, noMCIDData, refPositionData] = operatorList.argsArray[operatorList.argsArray.length - 1];
           const annotsFormatted = getFormattedAnnotations(annotations);
-          const errorBboxes = (bboxList ?? []).map((bbox) => {
+          const errorBboxes = (bboxList ?? []).flatMap((bbox) => {
             let opData = operationData,
                 posData = positionData,
                 nMcidData = noMCIDData;
@@ -167,10 +167,23 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
               }
             }
 
-            if (_.isFinite(bbox.operatorIndex) && (_.isFinite(bbox.glyphIndex) || _.isFinite(bbox.contentIndex))) {
-              const { operatorIndex, glyphIndex, contentIndex } = bbox;
-              const coords = opData[operatorIndex!] ? opData[operatorIndex!][glyphIndex ?? contentIndex!] : null;
-              bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
+            if (_.isFinite(bbox.operatorIndex) && bbox.subOperatorIndex != null) {
+              const { operatorIndex, subOperatorIndex } = bbox;
+              const operator = opData[operatorIndex!];
+              if (!Array.isArray(operator)) {
+                bbox.location = [];
+              } else if (subOperatorIndex === '*') {
+                return operator.map((coords) => ({
+                  ...bbox,
+                  location: getBboxForViewport(coords, page.view, page.rotate, left, bottom),
+                }));
+              }
+              else {
+                const coords = operator[subOperatorIndex];
+                bbox.location = coords
+                  ? getBboxForViewport(coords, page.view, page.rotate, left, bottom)
+                  : [];
+              }
             }
 
             return bbox;

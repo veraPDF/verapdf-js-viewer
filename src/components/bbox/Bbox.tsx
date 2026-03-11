@@ -27,11 +27,10 @@ export interface IBbox {
   groupId?: string;
   bboxTitle?: string;
   mcidList?: number[];
-  glyphIndex?: number;
   annotIndex?: number;
-  contentIndex?: number;
   operatorIndex?: number;
   contentItemPath?: number[];
+  subOperatorIndex?: number | '*';
   area?: number,
 }
 

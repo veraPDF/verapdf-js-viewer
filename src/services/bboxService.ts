@@ -101,8 +101,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
             annotIndex: Number.isNaN(annotIndex) ? undefined : annotIndex,
             isVisible: bbox.hasOwnProperty('isVisible') ? bbox.isVisible : true,
             operatorIndex: bboxPosition.operatorIndex,
-            contentIndex: bboxPosition.contentIndex,
-            glyphIndex: bboxPosition.glyphIndex,
+            subOperatorIndex: bboxPosition.subOperatorIndex,
             bboxTitle: bbox.bboxTitle,
           }
         ];
@@ -272,27 +271,27 @@ export const createAllBboxes = (
     ({area: area1}, {area: area2}) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0) as IBbox[];
 };
 
-const stepRegExp = /(pages|operators|usedGlyphs|content)\[(\d+)\]/;
+const stepRegExp = /(pages|operators|usedGlyphs|content|font)\[(\d+)\]/;
 export const calculateLocationInStreamOperator = (location: string) => {
   const path = location.split("/");
-  let pageIndex, operatorIndex, glyphIndex, contentIndex;
+  let pageIndex, operatorIndex, subOperatorIndex;
   path.forEach((step) => {
     const [, stepName, index] = step.match(stepRegExp) ?? [];
     switch (stepName) {
       case 'pages': pageIndex = parseInt(index); break;
       case 'operators': operatorIndex = parseInt(index); break;
-      case 'usedGlyphs': glyphIndex = parseInt(index); break;
-      case 'content': contentIndex = parseInt(index); break;
+      case 'content':
+      case 'usedGlyphs': subOperatorIndex = parseInt(index); break;
+      case 'font': subOperatorIndex = '*'; break;
     }
   });
-  if (pageIndex == null || operatorIndex == null || (glyphIndex == null && contentIndex == null)) {
+  if (pageIndex == null || operatorIndex == null || (subOperatorIndex == null)) {
     return null;
   }
   return {
     pageIndex,
     operatorIndex,
-    glyphIndex,
-    contentIndex,
+    subOperatorIndex,
   }
 }
 
