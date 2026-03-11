@@ -1,6 +1,6 @@
 {
   "name": "@duallab/verapdf-js-viewer",
-  "version": "1.7.43",
+  "version": "1.7.44",
   "description": "Display PDF with an option to highlight a collection of rectangles on top of page rendering. Used by veraPDF web application to visualize locations of validation errors",
   "main": "dist/index.js",
   "scripts": {
@@ -21,19 +21,19 @@
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
     "eslint": "^8.3.0",
-    "eslint-config-prettier": "^7.2.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-config-react": "^1.1.7",
     "eslint-config-react-app": "^7.0.1",
-    "eslint-plugin-prettier": "^3.3.1",
-    "lodash": "^4.17.21",
-    "prettier": "^2.2.1",
+    "eslint-plugin-prettier": "^5.5.6",
+    "lodash": "^4.17.23",
+    "prettier": "^3.9.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "rollup": "^2.37.0",
+    "rollup": "^2.80.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-sass": "1.12.22",
-    "rollup-plugin-typescript2": "^0.31.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-sass": "^1.16.0-rc.1",
+    "rollup-plugin-typescript2": "^0.37.0",
     "typescript": "^4.8.3",
     "typescript-plugin-styled-components": "^2.0.0"
   },
@@ -46,7 +46,7 @@
   ],
   "dependencies": {
     "eventemitter3": "^5.0.4",
-    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.30",
+    "pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.31",
     "react-pdf": "10.3.0",
     "react-use": "^17.1.0",
     "styled-components": "^5.2.1",
@@ -54,8 +54,13 @@
     "use-intersection": "^0.2.1"
   },
   "resolutions": {
-    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.30",
+    "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.31",
+		"@types/minimatch": "^3.0.5",
     "@babel/runtime": "^7.26.10",
-    "brace-expansion": "^1.1.12"
+    "brace-expansion": "^1.1.12",
+    "minimatch": "^3.1.5",
+    "immutable": "^5.1.5",
+    "lodash": "^4.17.23",
+    "tar": "^7.5.4"
   }
 }

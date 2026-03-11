@@ -36986,12 +36986,19 @@ class FileSpec {
     }
     return shadow(this, "description", description);
   }
+  get afRelationship() {
+    let afRelationship = "";
+    const rel = this.root?.get("AFRelationship");
+    if (typeof rel === "string") afRelationship = rel;else if (rel instanceof Name) afRelationship = rel.name;
+    return shadow(this, "afRelationship", afRelationship);
+  }
   get serializable() {
     return {
       rawFilename: this.filename,
       filename: stripPath(this.filename),
       content: this.content,
-      description: this.description
+      description: this.description,
+      afRelationship: this.afRelationship
     };
   }
 }
@@ -39506,7 +39513,8 @@ class Catalog {
     }
     let action = destDict.get("A"),
       url,
-      dest;
+      dest,
+      sDest;
     if (!(action instanceof Dict)) {
       if (destDict.has("Dest")) {
         action = destDict.get("Dest");
@@ -39555,6 +39563,7 @@ class Catalog {
           break;
         case "GoTo":
           dest = action.get("D");
+          sDest = action.get("SD");
           break;
         case "Launch":
         case "GoToR":
@@ -39665,16 +39674,12 @@ class Catalog {
       }
       resultObj.unsafeUrl = url;
     }
-    if (dest) {
-      if (dest instanceof Name) {
-        dest = dest.name;
-      }
-      if (typeof dest === "string") {
-        resultObj.dest = stringToPDFString(dest, true);
-      } else if (isValidExplicitDest(dest)) {
-        resultObj.dest = dest;
-      }
-    }
+    const parseDest = (d, obj, field = "dest") => {
+      if (d instanceof Name) d = d.name;
+      if (typeof d === "string") obj[field] = stringToPDFString(d, true);else if (isValidExplicitDest(d)) obj[field] = d;
+    };
+    if (dest) parseDest(dest, resultObj);
+    if (sDest) parseDest(sDest, resultObj, "sDest");
   }
 }
 class ExtendedCatalog extends Catalog {
@@ -51227,6 +51232,10 @@ class Annotation {
       isEditable: false,
       structParent: -1
     };
+    const name = dict.get("Name");
+    if (name instanceof Name) {
+      this.data.name = stringToPDFString(name.name);
+    }
     if (dict.has("A")) {
       const actionDict = dict.get("A");
       if (actionDict instanceof Dict && actionDict.has("R")) {
