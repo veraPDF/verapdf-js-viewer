@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo, useLayoutEffect } from 'react';
 import { usePrevious } from 'react-use';
 import { Page } from 'react-pdf';
 import { PageCallback } from 'react-pdf/src/shared/types';
@@ -48,8 +48,8 @@ interface IStyledPdfPageProps {
 const bboxBorderHover = 'orangered';
 
 const StyledPdfPage = styled.div`
-  min-height: ${(props: IStyledPdfPageProps) => props.height ? props.height*props.scale + 'px' : 'auto'};
-  min-width: ${(props: IStyledPdfPageProps) => props.width ? props.width*props.scale + 'px' : 'auto'};
+  max-height: ${(props: IStyledPdfPageProps) => props.height ? props.height * props.scale + 'px' : 'min-content'};
+  max-width: ${(props: IStyledPdfPageProps) => props.width ? props.width * props.scale + 'px' : 'min-content'};
   &.pdf-page_selected {
     outline-color: ${(props: IStyledPdfPageProps) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
   }
@@ -60,7 +60,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const { treeElementsBboxes, bboxList, scale = 1 } = props;
   const [page, setPage] = useState<PageCallback | null>(null);
   const prevPageBboxes = usePrevious({ page, treeElementsBboxes });
-  const intersectionRef = useRef(null);
+  const intersectionRef = useRef<HTMLDivElement | null>(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
   const [loaded, setLoaded] = useState(false);
@@ -69,6 +69,26 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
+
+  const [pageBorders, setPageBorders] = useState({ height: 0, width: 0 });
+  useLayoutEffect(() => {
+    if (intersectionRef.current) {
+      const observer = new ResizeObserver((entries) => {
+        window.requestAnimationFrame(() => {
+          const { width, height } = entries[0].contentRect;
+          setPageBorders({ width, height });
+        });
+      });
+      setPageBorders({
+        width: intersectionRef.current.clientWidth,
+        height: intersectionRef.current.clientHeight,
+      });
+      observer.observe(intersectionRef.current);
+      return () => observer.disconnect();
+    }
+    return;
+  }, []);
+
   useIntersection(intersectionRef, {
     threshold: [.2, .4, .5, .6, .8, 1],
   }, (entry) => {
@@ -311,6 +331,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
             <Bbox
               key={index}
               bbox={bbox}
+              pageBorders={pageBorders}
               onClick={onBboxClick(bbox.index, bbox.id)}
               disabled={isBboxDisabled(bbox)}
               structured={isBboxStructured(bbox)}
