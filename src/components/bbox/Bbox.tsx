@@ -70,7 +70,7 @@ interface IBboxProps {
   colorScheme?: IColorScheme;
   selectionMode?: TreeBboxSelectionMode;
   onClick?(e: any): void;
-  pageBorders: { height: number, width: number };
+  pageBorders: { height?: number, width?: number };
 }
 
 export interface IRenderBboxProps {
@@ -140,15 +140,16 @@ const clamp = (
   value: string | number,
   scale: number,
   {
+    max,
     min = 0,
-    max = 0,
     offset = 0,
   }: {
-    min?: number,
     max?: number,
+    min?: number,
     offset?: number,
   } = {}
 ) => {
+  if (max === undefined) return Math.max((offset + +value) * scale, min);
   return Math.min(
     Math.max(
       (offset + +value) * scale,

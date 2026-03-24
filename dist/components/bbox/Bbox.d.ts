@@ -49,8 +49,8 @@ interface IBboxProps {
     selectionMode?: TreeBboxSelectionMode;
     onClick?(e: any): void;
     pageBorders: {
-        height: number;
-        width: number;
+        height?: number;
+        width?: number;
     };
 }
 export interface IRenderBboxProps {

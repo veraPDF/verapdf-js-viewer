@@ -165,7 +165,9 @@ var bboxBgStructured = 'rgba(255,255,255,0)';
 var bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
 var BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-d59wxb" })(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n  mix-blend-mode: normal;\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected_multiple {\n    background-color: ", ";\n  }\n"], ["\n  mix-blend-mode: normal;\n  left: ", ";\n  bottom: ", ";\n  height: ", ";\n  width: ", ";\n  top: ", ";\n  border-color: ", ";\n  background-color: ", ";\n  &:hover {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_related {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured {\n    &:hover {\n      border-color: ", ";\n    }\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected {\n    border-color: ", ";\n    background-color: ", ";\n  }\n  &.pdf-bbox_structured_selected_multiple {\n    background-color: ", ";\n  }\n"])), function (props) { return props.left; }, function (props) { return props.bottom; }, function (props) { return props.height; }, function (props) { return props.width; }, function (props) { return props.top; }, function (props) { return props.colorScheme && props.colorScheme.border || bboxBorder; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundHovered || bboxBg; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected; }, function (props) { return props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated; }, bboxStructuredBorderHover, function (props) { return props.colorScheme && props.colorScheme.borderStructured || bboxStructuredBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundStructured || bboxBgStructured; }, function (props) { return props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder; }, function (props) { return props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured; }, function (props) { return props.colorScheme && props.colorScheme.background || bboxBg; });
 var clamp = function (value, scale, _a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.min, min = _c === void 0 ? 0 : _c, _d = _b.max, max = _d === void 0 ? 0 : _d, _e = _b.offset, offset = _e === void 0 ? 0 : _e;
+    var _b = _a === void 0 ? {} : _a, max = _b.max, _c = _b.min, min = _c === void 0 ? 0 : _c, _d = _b.offset, offset = _d === void 0 ? 0 : _d;
+    if (max === undefined)
+        return Math.max((offset + +value) * scale, min);
     return Math.min(Math.max((offset + +value) * scale, min), max);
 };
 var Bbox = function (props) {
@@ -945,7 +947,7 @@ var WARNING_CODES = {
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page .bbox-wrapper {\n  opacity: 0.75;\n  isolation: isolate;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 var bboxBorderHover = 'orangered';
-var StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  max-height: ", ";\n  max-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  max-height: ", ";\n  max-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'min-content'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'min-content'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
+var StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" })(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  margin-left: auto;\n  margin-right: auto;\n  max-height: ", ";\n  max-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"], ["\n  margin-left: auto;\n  margin-right: auto;\n  max-height: ", ";\n  max-width: ", ";\n  &.pdf-page_selected {\n    outline-color: ", ";\n  }\n"])), function (props) { return props.height ? props.height * props.scale + 'px' : 'min-content'; }, function (props) { return props.width ? props.width * props.scale + 'px' : 'min-content'; }, function (props) { return props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover; });
 var PdfPage = function (props) {
     var scrollInto = React.useContext(ViewerContext).scrollInto;
     var treeElementsBboxes = props.treeElementsBboxes, bboxList = props.bboxList, _a = props.scale, scale = _a === void 0 ? 1 : _a;
@@ -960,7 +962,7 @@ var PdfPage = function (props) {
     var _h = React.useState(false), isRendered = _h[0], setIsRendered = _h[1];
     var _j = React.useState(false), isIntersecting = _j[0], setIsIntersecting = _j[1];
     var _k = React.useState(0), intersectionRatio = _k[0], setIntersectionRatio = _k[1];
-    var _l = React.useState({ height: 0, width: 0 }), pageBorders = _l[0], setPageBorders = _l[1];
+    var _l = React.useState({}), pageBorders = _l[0], setPageBorders = _l[1];
     React.useLayoutEffect(function () {
         if (intersectionRef.current) {
             var observer_1 = new ResizeObserver(function (entries) {
@@ -1182,7 +1184,7 @@ var PdfPage = function (props) {
 var PdfPage$1 = React.memo(PdfPage);
 var templateObject_1;
 
-___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  width: min-content;\n  margin: 0 15px;\n}");
+___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  min-width: min-content;\n  width: 100%;\n  margin: 0 15px;\n}");
 
 reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = new URL(pdfWorkerURL__default["default"], (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('index.js', document.baseURI).href))).toString();
 var PdfDocument = function (props) {
