@@ -147,7 +147,9 @@ const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDi
     background-color: ${(props) => props.colorScheme && props.colorScheme.background || bboxBg};
   }
 `;
-const clamp = (value, scale, { min = 0, max = 0, offset = 0, } = {}) => {
+const clamp = (value, scale, { max, min = 0, offset = 0, } = {}) => {
+    if (max === undefined)
+        return Math.max((offset + +value) * scale, min);
     return Math.min(Math.max((offset + +value) * scale, min), max);
 };
 const Bbox = (props) => {
@@ -913,6 +915,8 @@ ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  marg
 
 const bboxBorderHover = 'orangered';
 const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" }) `
+  margin-left: auto;
+  margin-right: auto;
   max-height: ${(props) => props.height ? props.height * props.scale + 'px' : 'min-content'};
   max-width: ${(props) => props.width ? props.width * props.scale + 'px' : 'min-content'};
   &.pdf-page_selected {
@@ -934,7 +938,7 @@ const PdfPage = (props) => {
     const [isRendered, setIsRendered] = React.useState(false);
     const [isIntersecting, setIsIntersecting] = React.useState(false);
     const [intersectionRatio, setIntersectionRatio] = React.useState(0);
-    const [pageBorders, setPageBorders] = React.useState({ height: 0, width: 0 });
+    const [pageBorders, setPageBorders] = React.useState({});
     React.useLayoutEffect(() => {
         if (intersectionRef.current) {
             const observer = new ResizeObserver((entries) => {
@@ -1160,7 +1164,7 @@ const PdfPage = (props) => {
 };
 var PdfPage$1 = React.memo(PdfPage);
 
-___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  width: min-content;\n  margin: 0 15px;\n}");
+___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  min-width: min-content;\n  width: 100%;\n  margin: 0 15px;\n}");
 
 reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = new URL(pdfWorkerURL__default["default"], (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('index.js', document.baseURI).href))).toString();
 class MapWithEvents extends Map {

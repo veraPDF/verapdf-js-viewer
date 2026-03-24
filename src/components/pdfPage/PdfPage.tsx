@@ -49,6 +49,8 @@ interface IStyledPdfPageProps {
 const bboxBorderHover = 'orangered';
 
 const StyledPdfPage = styled.div`
+  margin-left: auto;
+  margin-right: auto;
   max-height: ${(props: IStyledPdfPageProps) => props.height ? props.height * props.scale + 'px' : 'min-content'};
   max-width: ${(props: IStyledPdfPageProps) => props.width ? props.width * props.scale + 'px' : 'min-content'};
   &.pdf-page_selected {
@@ -71,7 +73,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
 
-  const [pageBorders, setPageBorders] = useState({ height: 0, width: 0 });
+  const [pageBorders, setPageBorders] = useState<{ height?: number, width?: number }>({});
   useLayoutEffect(() => {
     if (intersectionRef.current) {
       const observer = new ResizeObserver((entries) => {

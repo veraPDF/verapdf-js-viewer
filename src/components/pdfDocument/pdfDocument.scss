@@ -1,6 +1,7 @@
 .pdf-document {
   display: flex;
   flex-direction: column;
-  width: min-content;
+  min-width: min-content;
+  width: 100%;
   margin: 0 15px;
 }
