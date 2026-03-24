@@ -70,6 +70,7 @@ interface IBboxProps {
   colorScheme?: IColorScheme;
   selectionMode?: TreeBboxSelectionMode;
   onClick?(e: any): void;
+  pageBorders: { height: number, width: number };
 }
 
 export interface IRenderBboxProps {
@@ -135,6 +136,28 @@ const BboxDiv = styled.div`
   }
 `;
 
+const clamp = (
+  value: string | number,
+  scale: number,
+  {
+    min = 0,
+    max = 0,
+    offset = 0,
+  }: {
+    min?: number,
+    max?: number,
+    offset?: number,
+  } = {}
+) => {
+  return Math.min(
+    Math.max(
+      (offset + +value) * scale,
+      min,
+    ),
+    max,
+  );
+}
+
 const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
   const {
     bbox,
@@ -145,26 +168,24 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
     scale,
     colorScheme,
     selectionMode,
+    pageBorders,
     onClick,
   } = props;
   const { renderBbox } = useContext(ViewerContext);
 
   const [left, bottom, width, height, top] = useMemo(() => {
-    return [
-      (parseFloat(bbox.location[0] as string) * scale) + 'px',
-      (bbox.location[3] === 'bottom'
-          ? '0'
-          : (parseFloat(bbox.location[1] as string) * scale) + 'px'),
-      (parseFloat(bbox.location[2] as string) * scale) + 'px',
-      (bbox.location[3] === 'top'
-          ? 'auto'
-          : (parseFloat(bbox.location[3] as string) * scale) + 'px'),
-      bbox.location[3] === 'top'
-          ? '0' : bbox.location[3] === 'bottom'
-              ? `calc(100% - ${parseFloat(bbox.location[1] as string) * scale}px)`
-              : 'auto',
-    ]
-  }, [bbox.location, scale]);
+    const x0 = clamp(bbox.location[0], scale, { max: pageBorders.width });
+    const y0 = clamp(bbox.location[1], scale, { max: pageBorders.height });
+    const w = clamp(bbox.location[2], scale, { max: pageBorders.width, offset: +bbox.location[0] }) - x0;
+    if (bbox.location[3] === 'bottom') {
+      return [x0, 0, w, 'auto', `calc(100% - ${y0})`].map((v) => typeof v === 'number' ? `${v}px` : v);
+    }
+    if (bbox.location[3] === 'top') {
+      return [x0, y0, w, 'auto', 0].map((v) => typeof v === 'number' ? `${v}px` : v);
+    }
+    const h = clamp(bbox.location[3], scale, { max: pageBorders.height, offset: +bbox.location[1] }) - y0;
+    return [x0, y0, w, h, 'auto'].map((v) => typeof v === 'number' ? `${v}px` : v);
+  }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
 
   const isSelected = useMemo(() => selected ? ' pdf-bbox_selected' : '', [selected]);
   const isRelated = useMemo(() => related ? ' pdf-bbox_related' : '', [related]);
