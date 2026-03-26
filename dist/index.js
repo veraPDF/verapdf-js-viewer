@@ -1371,8 +1371,12 @@ ___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex
 
 var App = function (props) {
     var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, renderBbox = props.renderBbox, pdfProps = __rest(props, ["className", "bboxes", "renderBbox"]);
+    var onViewerClick = React.useCallback(function () {
+        var _a;
+        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, null);
+    }, []);
     return (React__default["default"].createElement(ViewerProvider, { renderBbox: renderBbox },
-        React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className), role: "button", tabIndex: 0 },
+        React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className), role: "button", tabIndex: 0, onClick: onViewerClick },
             React__default["default"].createElement(PdfDocument$1, __assign({}, pdfProps, { bboxes: bboxes })))));
 };
 

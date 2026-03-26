@@ -1,4 +1,4 @@
-import React, { FC, ReactElement } from 'react';
+import React, { FC, ReactElement, useCallback } from 'react';
 
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import ViewerProvider from './components/viewerContext/ViewerContext';
@@ -24,9 +24,13 @@ interface IPdfViewerProps extends IPdfDocumentProps {
 const App: FC<IPdfViewerProps> = (props) => {
   const { className = '', bboxes = [], renderBbox, ...pdfProps } = props;
 
+  const onViewerClick = useCallback(() => {
+    props.onBboxClick?.(null);
+  }, []);
+
   return (
     <ViewerProvider renderBbox={renderBbox}>
-      <div className={`pdf-viewer ${className}`} role="button" tabIndex={0}>
+      <div className={`pdf-viewer ${className}`} role="button" tabIndex={0} onClick={onViewerClick}>
         <PdfDocument {...pdfProps} bboxes={bboxes}/>
       </div>
     </ViewerProvider>
