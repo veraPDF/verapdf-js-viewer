@@ -22,13 +22,13 @@
     "eslint-config-prettier": "^7.2.0",
     "eslint-config-react": "^1.1.7",
     "eslint-plugin-prettier": "^3.3.1",
-    "lodash": "^4.17.23",
+    "lodash": "^4.17.21",
     "prettier": "^2.2.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "rollup": "^2.80.0",
+    "rollup": "^2.37.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-sass": "1.12.22",
     "rollup-plugin-typescript2": "^0.31.0",
     "typescript": "^4.8.3",
@@ -52,10 +52,6 @@
   "resolutions": {
     "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.22",
     "@babel/runtime": "^7.26.10",
-    "brace-expansion": "^1.1.12",
-    "minimatch": "^3.1.5",
-    "immutable": "^5.1.5",
-    "lodash": "^4.17.23",
-    "tar": "^7.5.4"
+    "brace-expansion": "^1.1.12"
   }
 }
