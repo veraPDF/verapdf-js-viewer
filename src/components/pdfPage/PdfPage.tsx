@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo, useLayoutEffect } from 'react';
 import { usePrevious } from 'react-use';
 import { Page } from 'react-pdf';
 import { PageCallback } from 'react-pdf/src/shared/types';
@@ -48,8 +48,10 @@ interface IStyledPdfPageProps {
 const bboxBorderHover = 'orangered';
 
 const StyledPdfPage = styled.div`
-  min-height: ${(props: IStyledPdfPageProps) => props.height ? props.height*props.scale + 'px' : 'auto'};
-  min-width: ${(props: IStyledPdfPageProps) => props.width ? props.width*props.scale + 'px' : 'auto'};
+  margin-left: auto;
+  margin-right: auto;
+  height: ${(props: IStyledPdfPageProps) => props.height ? props.height * props.scale + 'px' : 'fit-content'};
+  width: ${(props: IStyledPdfPageProps) => props.width ? props.width * props.scale + 'px' : 'fit-content'};
   &.pdf-page_selected {
     outline-color: ${(props: IStyledPdfPageProps) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
   }
@@ -60,7 +62,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const { treeElementsBboxes, bboxList, scale = 1 } = props;
   const [page, setPage] = useState<PageCallback | null>(null);
   const prevPageBboxes = usePrevious({ page, treeElementsBboxes });
-  const intersectionRef = useRef(null);
+  const intersectionRef = useRef<HTMLDivElement | null>(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
   const [loaded, setLoaded] = useState(false);
@@ -69,6 +71,26 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const [isRendered, setIsRendered] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [intersectionRatio, setIntersectionRatio] = useState(0);
+
+  const [pageBorders, setPageBorders] = useState<{ height?: number, width?: number }>({});
+  useLayoutEffect(() => {
+    if (intersectionRef.current) {
+      const observer = new ResizeObserver((entries) => {
+        window.requestAnimationFrame(() => {
+          const { width, height } = entries[0].contentRect;
+          setPageBorders({ width, height });
+        });
+      });
+      setPageBorders({
+        width: intersectionRef.current.clientWidth,
+        height: intersectionRef.current.clientHeight,
+      });
+      observer.observe(intersectionRef.current);
+      return () => observer.disconnect();
+    }
+    return;
+  }, []);
+
   useIntersection(intersectionRef, {
     threshold: [.2, .4, .5, .6, .8, 1],
   }, (entry) => {
@@ -274,56 +296,59 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   [activeBboxes]);
 
   return (
-    <StyledPdfPage
-      className={`pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`}
-      data-page={props.page}
-      onClick={onPageClick}
-      height={!isRendered ? props.height || props.defaultHeight : undefined}
-      width={!isRendered ? props.width || props.defaultWidth : undefined}
-      scale={pageScale}
-      ref={intersectionRef}
-      colorScheme={props.colorScheme || {}}
-    >
-      {loaded ? <>
-        <Page
-          pageNumber={props.page}
-          error={props.pageError}
-          height={props.height}
-          width={props.width}
-          loading={props.pageLoading}
-          inputRef={props.inputRef}
-          renderAnnotationLayer={props.renderAnnotationLayer}
-          renderForms={props.renderInteractiveForms}
-          renderTextLayer={props.renderTextLayer}
-          scale={props.scale}
-          onLoadError={props.onPageLoadError}
-          onLoadSuccess={onPageLoadSuccess}
-          onRenderError={props.onPageRenderError}
-          onRenderSuccess={onPageRenderSuccess}
-          onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
-          onGetAnnotationsError={props.onGetAnnotationsError}
-          onGetTextSuccess={props.onGetTextSuccess}
-          onGetTextError={props.onGetTextError}
-          customTextRenderer={props.customTextRenderer}
-        />
-        {isRendered ? <div className="bbox-wrapper">
-          {bboxes.map((bbox: IBbox, index) => (
-            <Bbox
-              key={index}
-              bbox={bbox}
-              onClick={onBboxClick(bbox.index, bbox.id)}
-              disabled={isBboxDisabled(bbox)}
-              structured={isBboxStructured(bbox)}
-              selected={isBboxSelected(bbox)}
-              related={isBboxRelated(bbox)}
-              scale={pageScale}
-              selectionMode={props.treeBboxSelectionMode}
-              colorScheme={props.colorScheme}
-            />
-          ))}
-        </div> : null}
-      </> : null}
-    </StyledPdfPage>
+    <div className="pdf-page-min-margin-wrapper" style={{ margin: '0 15px' }}>
+      <StyledPdfPage
+        className={`pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`}
+        data-page={props.page}
+        onClick={onPageClick}
+        height={!isRendered ? props.height || props.defaultHeight : undefined}
+        width={!isRendered ? props.width || props.defaultWidth : undefined}
+        scale={pageScale}
+        ref={intersectionRef}
+        colorScheme={props.colorScheme || {}}
+      >
+        {loaded ? <>
+          <Page
+            pageNumber={props.page}
+            error={props.pageError}
+            height={props.height}
+            width={props.width}
+            loading={props.pageLoading}
+            inputRef={props.inputRef}
+            renderAnnotationLayer={props.renderAnnotationLayer}
+            renderForms={props.renderInteractiveForms}
+            renderTextLayer={props.renderTextLayer}
+            scale={props.scale}
+            onLoadError={props.onPageLoadError}
+            onLoadSuccess={onPageLoadSuccess}
+            onRenderError={props.onPageRenderError}
+            onRenderSuccess={onPageRenderSuccess}
+            onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
+            onGetAnnotationsError={props.onGetAnnotationsError}
+            onGetTextSuccess={props.onGetTextSuccess}
+            onGetTextError={props.onGetTextError}
+            customTextRenderer={props.customTextRenderer}
+          />
+          {isRendered ? <div className="bbox-wrapper">
+            {bboxes.map((bbox: IBbox, index) => (
+              <Bbox
+                key={index}
+                bbox={bbox}
+                pageBorders={pageBorders}
+                onClick={onBboxClick(bbox.index, bbox.id)}
+                disabled={isBboxDisabled(bbox)}
+                structured={isBboxStructured(bbox)}
+                selected={isBboxSelected(bbox)}
+                related={isBboxRelated(bbox)}
+                scale={pageScale}
+                selectionMode={props.treeBboxSelectionMode}
+                colorScheme={props.colorScheme}
+              />
+            ))}
+          </div> : null}
+        </> : null}
+      </StyledPdfPage>
+    </div>
   );
 }
 
