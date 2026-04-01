@@ -178,14 +178,10 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
     const x0 = clamp(bbox.location[0], scale, { max: pageBorders.width });
     const y0 = clamp(bbox.location[1], scale, { max: pageBorders.height });
     const w = clamp(bbox.location[2], scale, { max: pageBorders.width, offset: +bbox.location[0] }) - x0;
-    if (bbox.location[3] === 'bottom') {
-      return [x0, 0, w, 'auto', `calc(100% - ${y0})`].map((v) => typeof v === 'number' ? `${v}px` : v);
-    }
-    if (bbox.location[3] === 'top') {
-      return [x0, y0, w, 'auto', 0].map((v) => typeof v === 'number' ? `${v}px` : v);
-    }
+    if (bbox.location[3] === 'bottom') return [`${x0}px`, '0', `${w}px`, 'auto', `calc(100% - ${y0}px)`];
+    if (bbox.location[3] === 'top') return [`${x0}px`, `${y0}px`, `${w}px`, 'auto', '0'];
     const h = clamp(bbox.location[3], scale, { max: pageBorders.height, offset: +bbox.location[1] }) - y0;
-    return [x0, y0, w, h, 'auto'].map((v) => typeof v === 'number' ? `${v}px` : v);
+    return [`${x0}px`, `${y0}px`, `${w}px`, `${h}px`, 'auto'];
   }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
 
   const isSelected = useMemo(() => selected ? ' pdf-bbox_selected' : '', [selected]);

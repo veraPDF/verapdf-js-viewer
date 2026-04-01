@@ -159,14 +159,12 @@ const Bbox = (props) => {
         const x0 = clamp(bbox.location[0], scale, { max: pageBorders.width });
         const y0 = clamp(bbox.location[1], scale, { max: pageBorders.height });
         const w = clamp(bbox.location[2], scale, { max: pageBorders.width, offset: +bbox.location[0] }) - x0;
-        if (bbox.location[3] === 'bottom') {
-            return [x0, 0, w, 'auto', `calc(100% - ${y0})`].map((v) => typeof v === 'number' ? `${v}px` : v);
-        }
-        if (bbox.location[3] === 'top') {
-            return [x0, y0, w, 'auto', 0].map((v) => typeof v === 'number' ? `${v}px` : v);
-        }
+        if (bbox.location[3] === 'bottom')
+            return [`${x0}px`, '0', `${w}px`, 'auto', `calc(100% - ${y0}px)`];
+        if (bbox.location[3] === 'top')
+            return [`${x0}px`, `${y0}px`, `${w}px`, 'auto', '0'];
         const h = clamp(bbox.location[3], scale, { max: pageBorders.height, offset: +bbox.location[1] }) - y0;
-        return [x0, y0, w, h, 'auto'].map((v) => typeof v === 'number' ? `${v}px` : v);
+        return [`${x0}px`, `${y0}px`, `${w}px`, `${h}px`, 'auto'];
     }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
     const isSelected = React.useMemo(() => selected ? ' pdf-bbox_selected' : '', [selected]);
     const isRelated = React.useMemo(() => related ? ' pdf-bbox_related' : '', [related]);
@@ -917,8 +915,8 @@ const bboxBorderHover = 'orangered';
 const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" }) `
   margin-left: auto;
   margin-right: auto;
-  max-height: ${(props) => props.height ? props.height * props.scale + 'px' : 'min-content'};
-  max-width: ${(props) => props.width ? props.width * props.scale + 'px' : 'min-content'};
+  height: ${(props) => props.height ? props.height * props.scale + 'px' : 'fit-content'};
+  width: ${(props) => props.width ? props.width * props.scale + 'px' : 'fit-content'};
   &.pdf-page_selected {
     outline-color: ${(props) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
   }
@@ -1158,13 +1156,14 @@ const PdfPage = (props) => {
             (_a = props.onWarning) === null || _a === void 0 ? void 0 : _a.call(props, WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT);
         }
     }, [activeBboxes, scale, props.page]), [activeBboxes]);
-    return (React__default["default"].createElement(StyledPdfPage, { className: `pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`, "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default["default"].createElement(React__default["default"].Fragment, null,
-        React__default["default"].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, customTextRenderer: props.customTextRenderer }),
-        isRendered ? React__default["default"].createElement("div", { className: "bbox-wrapper" }, bboxes.map((bbox, index) => (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, pageBorders: pageBorders, onClick: onBboxClick(bbox.index, bbox.id), disabled: isBboxDisabled(bbox), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isBboxRelated(bbox), scale: pageScale, selectionMode: props.treeBboxSelectionMode, colorScheme: props.colorScheme })))) : null) : null));
+    return (React__default["default"].createElement("div", { className: "pdf-page-min-margin-wrapper", style: { margin: '0 15px' } },
+        React__default["default"].createElement(StyledPdfPage, { className: `pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`, "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default["default"].createElement(React__default["default"].Fragment, null,
+            React__default["default"].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, customTextRenderer: props.customTextRenderer }),
+            isRendered ? React__default["default"].createElement("div", { className: "bbox-wrapper" }, bboxes.map((bbox, index) => (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, pageBorders: pageBorders, onClick: onBboxClick(bbox.index, bbox.id), disabled: isBboxDisabled(bbox), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isBboxRelated(bbox), scale: pageScale, selectionMode: props.treeBboxSelectionMode, colorScheme: props.colorScheme })))) : null) : null)));
 };
 var PdfPage$1 = React.memo(PdfPage);
 
-___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  min-width: min-content;\n  width: 100%;\n  margin: 0 15px;\n}");
+___$insertStyle(".pdf-document {\n  display: flex;\n  flex-direction: column;\n  min-width: fit-content;\n  width: 100%;\n}");
 
 reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = new URL(pdfWorkerURL__default["default"], (typeof document === 'undefined' ? new (require('u' + 'rl').URL)('file:' + __filename).href : (document.currentScript && document.currentScript.tagName.toUpperCase() === 'SCRIPT' && document.currentScript.src || new URL('index.js', document.baseURI).href))).toString();
 class MapWithEvents extends Map {
