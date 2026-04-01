@@ -57,7 +57,7 @@
     "@types/react-pdf/pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.31",
 		"@types/minimatch": "^3.0.5",
     "@babel/runtime": "^7.26.10",
-    "brace-expansion": "^1.1.12",
+    "brace-expansion": "^1.1.13",
     "tar": "^7.5.4"
   }
 }
