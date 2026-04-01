@@ -50,8 +50,8 @@ const bboxBorderHover = 'orangered';
 const StyledPdfPage = styled.div`
   margin-left: auto;
   margin-right: auto;
-  max-height: ${(props: IStyledPdfPageProps) => props.height ? props.height * props.scale + 'px' : 'min-content'};
-  max-width: ${(props: IStyledPdfPageProps) => props.width ? props.width * props.scale + 'px' : 'min-content'};
+  height: ${(props: IStyledPdfPageProps) => props.height ? props.height * props.scale + 'px' : 'fit-content'};
+  width: ${(props: IStyledPdfPageProps) => props.width ? props.width * props.scale + 'px' : 'fit-content'};
   &.pdf-page_selected {
     outline-color: ${(props: IStyledPdfPageProps) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
   }
@@ -296,57 +296,59 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   [activeBboxes]);
 
   return (
-    <StyledPdfPage
-      className={`pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`}
-      data-page={props.page}
-      onClick={onPageClick}
-      height={!isRendered ? props.height || props.defaultHeight : undefined}
-      width={!isRendered ? props.width || props.defaultWidth : undefined}
-      scale={pageScale}
-      ref={intersectionRef}
-      colorScheme={props.colorScheme || {}}
-    >
-      {loaded ? <>
-        <Page
-          pageNumber={props.page}
-          error={props.pageError}
-          height={props.height}
-          width={props.width}
-          loading={props.pageLoading}
-          inputRef={props.inputRef}
-          renderAnnotationLayer={props.renderAnnotationLayer}
-          renderForms={props.renderInteractiveForms}
-          renderTextLayer={props.renderTextLayer}
-          scale={props.scale}
-          onLoadError={props.onPageLoadError}
-          onLoadSuccess={onPageLoadSuccess}
-          onRenderError={props.onPageRenderError}
-          onRenderSuccess={onPageRenderSuccess}
-          onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
-          onGetAnnotationsError={props.onGetAnnotationsError}
-          onGetTextSuccess={props.onGetTextSuccess}
-          onGetTextError={props.onGetTextError}
-          customTextRenderer={props.customTextRenderer}
-        />
-        {isRendered ? <div className="bbox-wrapper">
-          {bboxes.map((bbox: IBbox, index) => (
-            <Bbox
-              key={index}
-              bbox={bbox}
-              pageBorders={pageBorders}
-              onClick={onBboxClick(bbox.index, bbox.id)}
-              disabled={isBboxDisabled(bbox)}
-              structured={isBboxStructured(bbox)}
-              selected={isBboxSelected(bbox)}
-              related={isBboxRelated(bbox)}
-              scale={pageScale}
-              selectionMode={props.treeBboxSelectionMode}
-              colorScheme={props.colorScheme}
-            />
-          ))}
-        </div> : null}
-      </> : null}
-    </StyledPdfPage>
+    <div className="pdf-page-min-margin-wrapper" style={{ margin: '0 15px' }}>
+      <StyledPdfPage
+        className={`pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`}
+        data-page={props.page}
+        onClick={onPageClick}
+        height={!isRendered ? props.height || props.defaultHeight : undefined}
+        width={!isRendered ? props.width || props.defaultWidth : undefined}
+        scale={pageScale}
+        ref={intersectionRef}
+        colorScheme={props.colorScheme || {}}
+      >
+        {loaded ? <>
+          <Page
+            pageNumber={props.page}
+            error={props.pageError}
+            height={props.height}
+            width={props.width}
+            loading={props.pageLoading}
+            inputRef={props.inputRef}
+            renderAnnotationLayer={props.renderAnnotationLayer}
+            renderForms={props.renderInteractiveForms}
+            renderTextLayer={props.renderTextLayer}
+            scale={props.scale}
+            onLoadError={props.onPageLoadError}
+            onLoadSuccess={onPageLoadSuccess}
+            onRenderError={props.onPageRenderError}
+            onRenderSuccess={onPageRenderSuccess}
+            onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
+            onGetAnnotationsError={props.onGetAnnotationsError}
+            onGetTextSuccess={props.onGetTextSuccess}
+            onGetTextError={props.onGetTextError}
+            customTextRenderer={props.customTextRenderer}
+          />
+          {isRendered ? <div className="bbox-wrapper">
+            {bboxes.map((bbox: IBbox, index) => (
+              <Bbox
+                key={index}
+                bbox={bbox}
+                pageBorders={pageBorders}
+                onClick={onBboxClick(bbox.index, bbox.id)}
+                disabled={isBboxDisabled(bbox)}
+                structured={isBboxStructured(bbox)}
+                selected={isBboxSelected(bbox)}
+                related={isBboxRelated(bbox)}
+                scale={pageScale}
+                selectionMode={props.treeBboxSelectionMode}
+                colorScheme={props.colorScheme}
+              />
+            ))}
+          </div> : null}
+        </> : null}
+      </StyledPdfPage>
+    </div>
   );
 }
 
