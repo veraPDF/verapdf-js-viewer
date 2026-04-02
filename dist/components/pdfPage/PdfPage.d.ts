@@ -14,6 +14,7 @@ interface IPdfPageProps extends IPageProps {
     structure?: AnyObject;
     colorScheme?: IColorScheme;
     groupId?: string;
+    onPageRenderSuccess: (ref: HTMLDivElement) => void;
     onPageInViewport?(page: number, data: {
         isIntersecting?: boolean;
         intersectionRatio?: number;
