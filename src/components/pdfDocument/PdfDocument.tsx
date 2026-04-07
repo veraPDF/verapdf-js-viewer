@@ -1,10 +1,12 @@
-import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect } from 'react';
-import { Document, pdfjs } from 'react-pdf';
+import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect, useRef } from 'react';
 import { DocumentCallback, PageCallback } from 'react-pdf/src/shared/types';
+import { useDebounce } from 'react-use';
+import { Document, pdfjs } from 'react-pdf';
+import EventEmitter from 'eventemitter3';
+import _ from 'lodash';
+
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { useDebounce } from 'react-use';
-import _ from 'lodash';
 
 import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
@@ -15,7 +17,6 @@ import { AnyObject, OrNull } from '../../types/generics';
 import { TSelectedBboxData } from '../../types/selectedBboxData';
 import { IBboxLocation } from '../../index';
 import {
-  activeBboxInViewport,
   buildBboxMap,
   parseTree,
   setTreeIds,
@@ -50,16 +51,44 @@ interface IDocumentData extends DocumentCallback {
   parsedTree?: AnyObject;
 }
 
+class MapWithEvents<K, V> extends Map<K, V> {
+  emitter = new EventEmitter();
+
+  addEventListener(type: 'add', callback: (key: K, value: V) => void, once?: boolean) {
+    if (once) {
+      this.emitter.once(type, callback);
+    } else {
+      this.emitter.on(type, callback);
+    }
+  }
+
+  removeEventListener(type: 'add', callback: (key: K, value: V) => void) {
+    this.emitter.off(type, callback);
+  }
+
+  set(key: K, value: V) {
+    super.set(key, value);
+    this.emitter.emit('add', key, value);
+    return this;
+  }
+}
+
+const zoomInScaleRatioThreshold = 0.4;
+const zoomOutScaleRatioThreshold = 0.7;
+
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
-  activeBboxIndex?: number;
-  activeBboxId?: string;
+  activeBboxIndex?: { index: number, zoom: boolean };
+  activeBboxId?: { id: string, zoom: boolean };
   bboxes: IBboxLocation[];
   isTreeBboxesVisible: boolean;
   treeBboxSelectionMode?: TreeBboxSelectionMode;
   colorScheme?: IColorScheme;
   defaultHeight?: number;
   defaultWidth?: number;
+  setScale?(scale: string): void;
+  onPageRenderSuccess: () => void;
+  autoScaleOptions?: { label: string, value: string }[];
   onBboxesParsed?(pages: number[]): void;
   onPageChange?(page: number): void;
   onWarning?(warningCode: string): void;
@@ -67,6 +96,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
+  const renderedPages = useRef(new MapWithEvents<number, HTMLDivElement>());
   const { page, setPage, maxPage, setMaxPage, scrollInto, setScrollIntoPage } = useContext(ViewerContext);
   const { bboxes = [] } = props;
   const [loaded, setLoaded] = useState(false);
@@ -79,9 +109,33 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [defaultHeight, setDefaultHeight] = useState(props.defaultHeight);
   const [defaultWidth, setDefaultWidth] = useState(props.defaultWidth);
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
+
+  const { activeBboxId, activeBboxIndex } = useMemo(() => {
+    const { id: activeBboxId } = props.activeBboxId ?? {};
+    const { index: activeBboxIndex } = props.activeBboxIndex ?? {};
+    return { activeBboxId, activeBboxIndex };
+  }, [props.activeBboxIndex?.index, props.activeBboxId?.id]);
+
+  const autoScaleRatio = useMemo(() => {
+    if (!props.autoScaleOptions) return [];
+    const scales = props.autoScaleOptions.map(({ value }) => +value).sort((a, b) => b - a);
+    const ratioScales: { ratio: number, scale: number }[] = [];
+    for (const s of scales) {
+      if (s > 1) {
+        ratioScales.push({ ratio: zoomInScaleRatioThreshold / s, scale: s });
+      } else if (s === 1) {
+        ratioScales.push({ ratio: zoomOutScaleRatioThreshold, scale: 1 });
+      } else if (zoomOutScaleRatioThreshold / s <= 1) {
+        ratioScales.push({ ratio: zoomOutScaleRatioThreshold / s, scale: s });
+      } else {
+        break;
+      }
+    }
+    return ratioScales;
+  }, [props.autoScaleOptions])
   const activeBbox = useMemo(() => {
-    return props.activeBboxIndex !== undefined ? bboxes[props.activeBboxIndex] : null
-  }, [props.activeBboxIndex, bboxes]);
+    return activeBboxIndex != null ? bboxes[activeBboxIndex] : null
+  }, [activeBboxIndex, bboxes]);
   const shownPages: number[] = useMemo(() => {
     if (props.showAllPages) {
       return Array.from(
@@ -103,16 +157,76 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setTreeElementsBboxes(createBboxMap(mcidList));
   }, [parsedTree]);
 
+  const handleZoomOnActive = useCallback(async (page: number, controller: AbortController) => {
+    const { setScale } = props;
+    if (!setScale || !autoScaleRatio.length) {
+      return;
+    }
+
+    if (!renderedPages.current.has(page)) {
+      await new Promise<void>((resolve, reject) => {
+        const callback = (v: number) => {
+          if (v === page) {
+            renderedPages.current.removeEventListener('add', callback);
+            resolve();
+          }
+        };
+        renderedPages.current.addEventListener('add', callback);
+        controller.signal.onabort = () => {
+          renderedPages.current.removeEventListener('add', callback);
+          reject(new Error('Aborted'));
+        };
+      });
+    }
+    const pageEl = renderedPages.current.get(page);
+    if (!pageEl) return;
+    const { clientWidth: pageWidth, clientHeight: pageHeight } = pageEl;
+    const selectedBboxes = document.querySelectorAll('.pdf-bbox_selected');
+
+    let [x0, y0, x1, y1] = [
+      Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY,
+    ];
+    selectedBboxes.forEach((b) => {
+      const { x, y, width, height } = b.getBoundingClientRect();
+      x0 = Math.min(x0, x);
+      y0 = Math.min(y0, y);
+      x1 = Math.max(x1, x + width);
+      y1 = Math.max(y1, y + height);
+    });
+
+    let newScale = 1;
+    const w = (x1 - x0), h = (y1 - y0);
+    if (Number.isFinite(w)) {
+      const wRatio = w / pageWidth;
+      newScale = autoScaleRatio
+        .find(({ ratio }, i, { length }) => wRatio < ratio || i + 1 === length)
+        ?.scale ?? 1;
+    }
+    if (Number.isFinite(h)) {
+      const hRatio = h / pageHeight;
+      const tempScale = autoScaleRatio
+        .find(({ ratio }, i, { length }) => hRatio < ratio || i + 1 === length)
+        ?.scale ?? 1;
+      newScale = Math.min(newScale, tempScale);
+    }
+    if (newScale !== (props.scale ?? 1)) {
+      renderedPages.current.clear();
+      setScale(newScale.toString());
+    }
+  }, [props.setScale, props.scale, autoScaleRatio]);
+
   useEffect(() => {
-    const isBboxMode = !_.isNil(props.activeBboxIndex);
-    const id = isBboxMode ? props.activeBboxIndex : props.activeBboxId;
+    const isBboxMode = !_.isNil(activeBboxIndex);
+    const id = isBboxMode ? activeBboxIndex : activeBboxId;
     if ((id ?? false) === false) {
       return;
     }
+    const autoZoom = isBboxMode ? props.activeBboxIndex!.zoom : props.activeBboxId!.zoom;
     const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
     const finder = isBboxMode 
-        ? (value: AnyObject[]) => _.find(value, { index: props.activeBboxIndex })
-        : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === props.activeBboxId);
+        ? (value: AnyObject[]) => _.find(value, { index: activeBboxIndex })
+        : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === activeBboxId);
     let bboxPage = 0;
     for (const [key, value] of entries) {
       if (finder(value as AnyObject[] & [AnyObject[], string])) {
@@ -120,12 +234,50 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
         break;
       }
     }
-    if (bboxPage > 0 && !activeBboxInViewport()) {
-      setScrollIntoPage(bboxPage);
-      // To be sure that page is loaded before scrolling to the active bbox
-      setTimeout(() => scrollToActiveBbox(), 100);
+    if (bboxPage > 0) {
+      if (autoZoom) {
+      const controller = new AbortController();
+        const forceScrollToActiveBbox = (p: number) => {
+          if (bboxPage === p) {
+            renderedPages.current.removeEventListener('add', forceScrollToActiveBbox);
+            scrollToActiveBbox(true);
+          }
+        }
+        handleZoomOnActive(bboxPage, controller)
+          .then(() => {
+            if (renderedPages.current.has(bboxPage)) scrollToActiveBbox();
+            else {
+              setScrollIntoPage(bboxPage);
+              renderedPages.current.addEventListener('add', forceScrollToActiveBbox);
+            }
+          })
+          .catch(() => {});
+        return () => {
+          controller.abort();
+          renderedPages.current.removeEventListener('add', forceScrollToActiveBbox);
+        }
+      } else {
+        if (renderedPages.current.has(bboxPage)) scrollToActiveBbox();
+        else {
+          setScrollIntoPage(bboxPage);
+          const scrollOnRender = (p: number) => {
+            if (bboxPage === p) {
+              renderedPages.current.removeEventListener('add', scrollOnRender);
+              scrollToActiveBbox();
+            }
+          }
+          renderedPages.current.addEventListener('add', scrollOnRender);
+          return () => {
+            renderedPages.current.removeEventListener('add', scrollOnRender);
+          }
+        }
+      }
     }
-  }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes])
+    return;
+  }, [
+    props.activeBboxIndex, props.activeBboxId,
+    bboxMap, treeElementsBboxes,
+  ]);
 
   useEffect(() => {
     if (activeBbox) {
@@ -226,6 +378,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [props.page, props.showAllPages]);
 
   useEffect(() => {
+    renderedPages.current.clear();
     setLoaded(false);
     setPagesByViewport([]);
     setRatioArray([]);
@@ -238,10 +391,10 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   useEffect(() => {
     function handlekeydownEvent(event: any) {
       if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
-        props.onSelectBbox((_.isNil(props.activeBboxIndex) || props.activeBboxIndex === -1 || props.activeBboxIndex === 0) ? 0 : props.activeBboxIndex - 1);
+        props.onSelectBbox((_.isNil(activeBboxIndex) || activeBboxIndex === -1 || activeBboxIndex === 0) ? 0 : activeBboxIndex - 1);
       } else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
-        props.onSelectBbox((props.activeBboxIndex === -1 || _.isNil(props.activeBboxIndex)) ? 0 :
-            (props.activeBboxIndex + 1 === bboxes.length) ? props.activeBboxIndex : props.activeBboxIndex + 1);
+        props.onSelectBbox((activeBboxIndex === -1 || _.isNil(activeBboxIndex)) ? 0 :
+            (activeBboxIndex + 1 === bboxes.length) ? activeBboxIndex : activeBboxIndex + 1);
       } else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
         props.onPageChange?.(props.page - 1);
       } else if (event.key === 'ArrowRight' && props.page !== maxPage) {
@@ -253,7 +406,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return () => {
       document.removeEventListener('keydown', handlekeydownEvent)
     }
-  }, [props.activeBboxIndex, props.page, maxPage]);
+  }, [activeBboxIndex, props.page, maxPage]);
 
   return (
     <Document
@@ -285,7 +438,10 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           onPageLoadError={props.onPageLoadError}
           onPageLoadSuccess={onPageLoadSuccess}
           onPageRenderError={props.onPageRenderError}
-          onPageRenderSuccess={props.onPageRenderSuccess}
+          onPageRenderSuccess={(ref) => {
+            renderedPages.current.set(page, ref);
+            props.onPageRenderSuccess?.();
+          }}
           onGetAnnotationsSuccess={props.onGetAnnotationsSuccess}
           onGetAnnotationsError={props.onGetAnnotationsError}
           onGetTextSuccess={props.onGetTextSuccess}
@@ -294,7 +450,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           bboxList={bboxMap[page]}
           treeElementsBboxes={treeElementsBboxes[page]}
           treeBboxSelectionMode={props.treeBboxSelectionMode}
-          groupId={bboxes[props.activeBboxIndex as number]?.groupId}
+          groupId={activeBbox?.groupId}
           activeBboxIndex={props.activeBboxIndex}
           activeBboxId={props.activeBboxId}
           isTreeBboxesVisible={props.isTreeBboxesVisible}

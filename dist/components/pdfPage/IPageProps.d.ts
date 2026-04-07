@@ -14,12 +14,18 @@ export interface IPageProps {
     renderInteractiveForms?: boolean;
     renderTextLayer?: boolean;
     scale?: number;
-    activeBboxIndex?: number;
-    activeBboxId?: string;
+    activeBboxIndex?: {
+        index: number;
+        zoom: boolean;
+    };
+    activeBboxId?: {
+        id: string;
+        zoom: boolean;
+    };
     onPageLoadError?(error: Error): void;
     onPageLoadSuccess?(page: PageCallback): void;
     onPageRenderError?(error: Error): void;
-    onPageRenderSuccess?(): void;
+    onPageRenderSuccess: (ref?: HTMLDivElement) => void;
     onGetAnnotationsSuccess?(annotations: any): void;
     onGetAnnotationsError?(error: Error): void;
     onGetTextSuccess?(textContent: TextContent): void;

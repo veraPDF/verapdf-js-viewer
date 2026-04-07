@@ -33,6 +33,7 @@ interface IPdfPageProps extends IPageProps {
   structure?: AnyObject;
   colorScheme?: IColorScheme;
   groupId?: string;
+  onPageRenderSuccess: (ref: HTMLDivElement) => void;
   onPageInViewport?(page: number, data: { isIntersecting?: boolean, intersectionRatio?: number }): void;
   isPageSelected?: boolean;
   onWarning?(warningCode: string): void;
@@ -60,7 +61,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const { treeElementsBboxes, bboxList, scale = 1 } = props;
   const [page, setPage] = useState<PageCallback | null>(null);
   const prevPageBboxes = usePrevious({ page, treeElementsBboxes });
-  const intersectionRef = useRef(null);
+  const intersectionRef = useRef<HTMLDivElement | null>(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
   const [loaded, setLoaded] = useState(false);
@@ -80,6 +81,12 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     }
   });
 
+  const { activeBboxId, activeBboxIndex } = useMemo(() => {
+    const { id: activeBboxId } = props.activeBboxId ?? {};
+    const { index: activeBboxIndex } = props.activeBboxIndex ?? {};
+    return { activeBboxId, activeBboxIndex };
+  }, [props.activeBboxIndex?.index, props.activeBboxId?.id]);
+
   const onPageClick = useCallback(() => {
     props.onBboxClick?.(null);
   }, []);
@@ -89,7 +96,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, [props.onBboxClick]);
   const onPageRenderSuccess = useCallback(() => {
     setIsRendered(true);
-    props.onPageRenderSuccess?.();
+    props.onPageRenderSuccess?.(intersectionRef.current!);
     document.querySelectorAll('.pdf-page_rendered img')?.forEach((img: any) => {
       if (img.alt.includes('Annotation')) {
         const index = img.src.lastIndexOf('/') + 1;
@@ -97,7 +104,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
         img.src = require(`pdfjs-dist/web/images/${name}`) || img.src;
       }
     });
-  }, []);
+  }, [props.onPageRenderSuccess]);
   const onPageLoadSuccess = useCallback((page: PageCallback) => {
     setPage(page);
     setIsRendered(true);
@@ -221,19 +228,19 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, [pageViewport, scale, props.width, props.height]);
 
   const isBboxSelected = useCallback((bbox: IBbox) => {
-    const isBboxMode = !_.isNil(props.activeBboxIndex);
-    const isErrorBboxSelected = bbox.index === props.activeBboxIndex;
+    if (!_.isNil(activeBboxIndex)) return bbox.index === activeBboxIndex;
+    if (_.isNil(activeBboxId)) return false;
     let isStructureBboxSelected;
     switch (props.treeBboxSelectionMode) {
       case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
-        isStructureBboxSelected = bbox?.id === props?.activeBboxId || bbox?.id?.startsWith(`${props?.activeBboxId}:`);
+        isStructureBboxSelected = bbox?.id === activeBboxId || bbox?.id?.startsWith(`${activeBboxId}:`);
         break;
       }
       case TreeBboxSelectionMode.SELECTED:
-      default: isStructureBboxSelected = bbox?.id === props?.activeBboxId;
+      default: isStructureBboxSelected = bbox?.id === activeBboxId;
     }
-    return isBboxMode ? isErrorBboxSelected : isStructureBboxSelected;
-  }, [props.activeBboxIndex, props.activeBboxId]);
+    return isStructureBboxSelected;
+  }, [activeBboxIndex, activeBboxId]);
   const isBboxRelated = useCallback((bbox: IBbox) => {
     const [, , activeId] = props?.groupId?.split('-') || [];
     const [, , bboxId] = bbox?.groupId?.split('-') || [];
@@ -261,9 +268,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     }) as IBbox[];
   }, [bboxesErrors, bboxesAll]);
   const activeBboxes = useMemo(() => bboxes.filter((bbox) => {
-    const isBboxMode = !_.isNil(props.activeBboxIndex);
-    return isBboxMode ? bbox.index === props.activeBboxIndex : bbox?.id === props?.activeBboxId
-  }), [props.activeBboxIndex, props.activeBboxId]);
+    const isBboxMode = !_.isNil(activeBboxIndex);
+    return isBboxMode ? bbox.index === activeBboxIndex : bbox?.id === activeBboxId;
+  }), [activeBboxIndex, activeBboxId]);
 
   useEffect(
     useCallback(() => {
