@@ -115,10 +115,6 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     const { index: activeBboxIndex } = props.activeBboxIndex ?? {};
     return { activeBboxId, activeBboxIndex };
   }, [props.activeBboxIndex?.index, props.activeBboxId?.id]);
-  const groupId = useMemo(
-    () => activeBboxIndex != null ? bboxes[activeBboxIndex]?.groupId : undefined,
-    [activeBboxIndex],
-  )
 
   const autoScaleRatio = useMemo(() => {
     if (!props.autoScaleOptions) return [];
@@ -138,7 +134,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return ratioScales;
   }, [props.autoScaleOptions])
   const activeBbox = useMemo(() => {
-    return activeBboxIndex !== undefined ? bboxes[activeBboxIndex] : null
+    return activeBboxIndex != null ? bboxes[activeBboxIndex] : null
   }, [activeBboxIndex, bboxes]);
   const shownPages: number[] = useMemo(() => {
     if (props.showAllPages) {
@@ -454,7 +450,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           bboxList={bboxMap[page]}
           treeElementsBboxes={treeElementsBboxes[page]}
           treeBboxSelectionMode={props.treeBboxSelectionMode}
-          groupId={groupId}
+          groupId={activeBbox?.groupId}
           activeBboxIndex={props.activeBboxIndex}
           activeBboxId={props.activeBboxId}
           isTreeBboxesVisible={props.isTreeBboxesVisible}
