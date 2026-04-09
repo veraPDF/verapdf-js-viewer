@@ -969,10 +969,11 @@ var PdfPage = function (props) {
             setIntersectionRatio(entry.intersectionRatio);
         }
     });
-    var onPageClick = React.useCallback(function () {
+    var onPageClick = React.useCallback(function (e) {
         var _a;
+        e.stopPropagation();
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, null);
-    }, []);
+    }, [props.onBboxClick]);
     var onBboxClick = React.useCallback(function (index, id) { return function (e) {
         var _a;
         e.stopPropagation();
@@ -1276,7 +1277,7 @@ var PdfDocument = function (props) {
     var onBboxClick = React.useCallback(function (data) {
         var _a;
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, data);
-    }, []);
+    }, [props.onBboxClick]);
     var setPageByViewport = React.useMemo(function () { return function (newPage, intersection) {
         var isIntersecting = intersection.isIntersecting, intersectionRatio = intersection.intersectionRatio;
         if (isIntersecting) {
@@ -1371,10 +1372,11 @@ ___$insertStyle(".pdf-viewer {\n  width: 100%;\n  height: 100%;\n  display: flex
 
 var App = function (props) {
     var _a = props.className, className = _a === void 0 ? '' : _a, _b = props.bboxes, bboxes = _b === void 0 ? [] : _b, renderBbox = props.renderBbox, pdfProps = __rest(props, ["className", "bboxes", "renderBbox"]);
-    var onViewerClick = React.useCallback(function () {
+    var onViewerClick = React.useCallback(function (e) {
         var _a;
+        e.stopPropagation();
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, null);
-    }, []);
+    }, [props.onBboxClick]);
     return (React__default["default"].createElement(ViewerProvider, { renderBbox: renderBbox },
         React__default["default"].createElement("div", { className: "pdf-viewer ".concat(className), role: "button", tabIndex: 0, onClick: onViewerClick },
             React__default["default"].createElement(PdfDocument$1, __assign({}, pdfProps, { bboxes: bboxes })))));

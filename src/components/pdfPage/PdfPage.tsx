@@ -80,9 +80,10 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     }
   });
 
-  const onPageClick = useCallback(() => {
+  const onPageClick = useCallback((e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
     props.onBboxClick?.(null);
-  }, []);
+  }, [props.onBboxClick]);
   const onBboxClick = useCallback((index: any, id: any) => (e: Event) => {
     e.stopPropagation();
     props.onBboxClick?.({ index, id });

@@ -24,9 +24,10 @@ interface IPdfViewerProps extends IPdfDocumentProps {
 const App: FC<IPdfViewerProps> = (props) => {
   const { className = '', bboxes = [], renderBbox, ...pdfProps } = props;
 
-  const onViewerClick = useCallback(() => {
+  const onViewerClick = useCallback((e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
     props.onBboxClick?.(null);
-  }, []);
+  }, [props.onBboxClick]);
 
   return (
     <ViewerProvider renderBbox={renderBbox}>
