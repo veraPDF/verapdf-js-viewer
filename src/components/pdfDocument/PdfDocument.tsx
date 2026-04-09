@@ -169,8 +169,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     }
   }, [maxPage, props.showAllPages]);
   const onBboxClick = useCallback((data: OrNull<TSelectedBboxData>) => {
-      props.onBboxClick?.(data);
-  }, []);
+    props.onBboxClick?.(data);
+  }, [props.onBboxClick]);
 
   const setPageByViewport = useMemo(() => (newPage: number, intersection: { isIntersecting: boolean, intersectionRatio: number }) => {
     const { isIntersecting, intersectionRatio } = intersection;
