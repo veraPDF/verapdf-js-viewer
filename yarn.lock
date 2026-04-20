@@ -1828,10 +1828,10 @@ rollup-plugin-copy@^3.4.0:
     globby "10.0.1"
     is-plain-object "^3.0.0"
 
-rollup-plugin-sass@1.12.22:
-  version "1.12.22"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-sass/-/rollup-plugin-sass-1.12.22.tgz#033d188c71cba084f0849e737c2dd646e871b3df"
-  integrity sha512-bwlXqkmRDc1rVjkbN+wxXFh1jfnMEi3vHr5TufM+loUFYKd6RskGMx5Xz4sIVdxIu1oAilZkM4Px8P3QlmwfUA==
+rollup-plugin-sass@1.15.3:
+  version "1.15.3"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-sass/-/rollup-plugin-sass-1.15.3.tgz#798667792f3b760aa771af313b119df25ff5f32e"
+  integrity sha512-HPRjdUR/Ymu/v/H9qaPytqBAAYVN/5Agmu9RH+PMpTS22lcAvz3FWzqjs1cUaWh5ln1VvtwIcNykBOQkWkpUig==
   dependencies:
     "@rollup/pluginutils" "^3 || ^4 || ^5"
     resolve "^1.5.0"
