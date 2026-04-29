@@ -55826,6 +55826,14 @@ class CipherTransformFactory {
       this.eff = dict.get("EFF") || this.stmf;
     }
   }
+  getEncryptionDictionary() {
+    const encryptionDict = {};
+    ["V", "R", "O", "U", "OE", "UE", "P"].forEach(key => {
+      const value = this.dict.get(key);
+      if (value != null) encryptionDict[key] = value;
+    });
+    return encryptionDict;
+  }
   createCipherTransform(num, gen) {
     if (this.algorithm === 4 || this.algorithm === 5) {
       return new CipherTransform(this.#buildCipherConstructor(this.cf, this.strf, num, gen, this.encryptionKey), this.#buildCipherConstructor(this.cf, this.stmf, num, gen, this.encryptionKey));
@@ -55942,6 +55950,9 @@ class XRef {
       throw new XRefParseException();
     }
     throw new InvalidPDFException("Invalid Root reference.");
+  }
+  getEncryptionDictionary() {
+    return this.encrypt?.getEncryptionDictionary();
   }
   processXRefTable(parser) {
     if (!("tableState" in this)) {
@@ -58052,6 +58063,9 @@ class ExtendedPDFDocument extends PDFDocument {
   constructor(pdfManager, arg) {
     super(pdfManager, arg);
   }
+  get encryptionDictionary() {
+    return shadow(this, "encryptionDictionary", this.xref.getEncryptionDictionary());
+  }
   get structureTree() {
     return shadow(this, "structureTree", this.catalog.structureTree);
   }
@@ -59235,12 +59249,13 @@ class WorkerMessageHandler {
         await pdfManager.ensureDoc("loadXfaResources", [handler, task]);
         finishWorkerTask(task);
       }
-      const [numPages, fingerprints, structureTree, fonts] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints"), pdfManager.ensureDoc("structureTree"), pdfManager.ensureDoc("fonts")]);
+      const [numPages, fingerprints, encryptionDictionary, structureTree, fonts] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints"), pdfManager.ensureDoc("encryptionDictionary"), pdfManager.ensureDoc("structureTree"), pdfManager.ensureDoc("fonts")]);
       const htmlForXfa = isPureXfa ? await pdfManager.ensureDoc("htmlForXfa") : null;
       return {
         numPages,
         fingerprints,
         htmlForXfa,
+        encryptionDictionary,
         structureTree,
         fonts
       };
