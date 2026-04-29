@@ -39839,6 +39839,164 @@ class ExtendedCatalog extends Catalog {
     }
     return shadow(this, "structureTree", structureTree);
   }
+  getFieldValueStr(fontObj, key) {
+    const value = fontObj.get(key);
+    if (value instanceof Name) {
+      return value.name;
+    }
+    if (typeof value === "string") {
+      return value;
+    }
+    return null;
+  }
+  resolveFontInfo(fontObj, fontName) {
+    let actualFont = fontObj;
+    let cidFontType = null;
+    let normalizedSubtype = null;
+    let baseFont = null;
+    let encoding = null;
+    let isEmbedded = false;
+    let isComposite = false;
+    let isSubset = false;
+    try {
+      const subtype = this.getFieldValueStr(fontObj, "Subtype");
+      if (subtype === "Type0") {
+        isComposite = true;
+        const descendantFonts = fontObj.get("DescendantFonts");
+        if (Array.isArray(descendantFonts) && descendantFonts.length > 0) {
+          const cidFont = this.xref.fetchIfRef(descendantFonts[0]);
+          if (cidFont instanceof Dict) {
+            actualFont = cidFont;
+            const cidSubtype = this.getFieldValueStr(cidFont, "Subtype");
+            if (cidSubtype) {
+              cidFontType = cidSubtype;
+              if (cidFontType === "CIDFontType0") {
+                normalizedSubtype = "Type1 (CID)";
+              } else if (cidFontType === "CIDFontType2") {
+                normalizedSubtype = "TrueType (CID)";
+              } else {
+                normalizedSubtype = cidFontType;
+              }
+            }
+          }
+        }
+        if (!normalizedSubtype) {
+          normalizedSubtype = subtype;
+        }
+      } else if (subtype) {
+        normalizedSubtype = subtype;
+      }
+      let descriptor = actualFont.get("FontDescriptor");
+      if (!(descriptor instanceof Dict) && !isComposite) {
+        descriptor = fontObj.get("FontDescriptor");
+      }
+      if (fontObj.has("BaseFont")) {
+        baseFont = this.getFieldValueStr(fontObj, "BaseFont");
+      }
+      if (fontObj.has("Encoding")) {
+        encoding = this.getFieldValueStr(fontObj, "Encoding");
+      }
+      if (descriptor instanceof Dict) {
+        const fontFile = descriptor.get("FontFile") || descriptor.get("FontFile2") || descriptor.get("FontFile3");
+        isEmbedded = !!fontFile;
+      }
+      isSubset = baseFont ? /^[A-Z0-9]{1,6}\+/.test(baseFont) : false;
+      return {
+        cidFontType,
+        normalizedSubtype,
+        baseFont,
+        encoding,
+        isComposite,
+        isSubset,
+        isEmbedded
+      };
+    } catch (e) {
+      console.error(`Error resolving font info for ${fontName}: ${e.message}`);
+      return {
+        cidFontType: null,
+        normalizedSubtype: null,
+        baseFont: null,
+        encoding: null,
+        isComposite: false,
+        isSubset: false,
+        isEmbedded: false
+      };
+    }
+  }
+  collectFonts() {
+    const fontsList = [];
+    const seenRefs = new Set();
+    try {
+      for (let pageIndex = 0; pageIndex < this.pages.length; pageIndex++) {
+        const pageRef = this.pages[pageIndex];
+        const pageObj = this.xref.fetch(pageRef);
+        if (!(pageObj instanceof Dict)) {
+          continue;
+        }
+        let resources = pageObj.get("Resources");
+        if (!resources) {
+          let parent = pageObj.get("Parent");
+          while (parent instanceof Dict && !resources) {
+            resources = parent.get("Resources");
+            parent = parent.get("Parent");
+          }
+        }
+        if (!(resources instanceof Dict)) {
+          continue;
+        }
+        const fontDict = resources.get("Font");
+        if (!(fontDict instanceof Dict)) {
+          continue;
+        }
+        for (const [fontName, fontVal] of fontDict) {
+          try {
+            const fontRef = fontDict.getRaw(fontName);
+            const refKey = fontRef instanceof Ref ? fontRef.toString() : fontName;
+            if (seenRefs.has(refKey)) {
+              continue;
+            }
+            seenRefs.add(refKey);
+            const fontObj = this.xref.fetchIfRef(fontVal);
+            if (!(fontObj instanceof Dict)) {
+              continue;
+            }
+            const {
+              cidFontType,
+              normalizedSubtype,
+              baseFont,
+              encoding,
+              isComposite,
+              isSubset,
+              isEmbedded
+            } = this.resolveFontInfo(fontObj, fontName);
+            const fontInfo = {
+              name: fontName,
+              ref: fontRef instanceof Ref ? fontRef : null,
+              type: isComposite ? "Type0" : normalizedSubtype,
+              subtype: normalizedSubtype,
+              pageIndex,
+              cidFontType,
+              baseFont,
+              encoding,
+              isSubset,
+              isEmbedded,
+              isComposite
+            };
+            fontsList.push(fontInfo);
+          } catch {
+            continue;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(`Failed to collect fonts: ${e.message}`);
+    }
+    return fontsList;
+  }
+  get fonts() {
+    const fonts = this.collectFonts();
+    return shadow(this, "fonts", fonts && fonts.length > 0 ? fonts : null);
+  }
 }
 
 ;// ./src/core/object_loader.js
@@ -57897,6 +58055,9 @@ class ExtendedPDFDocument extends PDFDocument {
   get structureTree() {
     return shadow(this, "structureTree", this.catalog.structureTree);
   }
+  get fonts() {
+    return shadow(this, "fonts", this.catalog.fonts);
+  }
 }
 
 ;// ./src/core/pdf_manager.js
@@ -59074,13 +59235,14 @@ class WorkerMessageHandler {
         await pdfManager.ensureDoc("loadXfaResources", [handler, task]);
         finishWorkerTask(task);
       }
-      const [numPages, fingerprints, structureTree] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints"), pdfManager.ensureDoc("structureTree")]);
+      const [numPages, fingerprints, structureTree, fonts] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints"), pdfManager.ensureDoc("structureTree"), pdfManager.ensureDoc("fonts")]);
       const htmlForXfa = isPureXfa ? await pdfManager.ensureDoc("htmlForXfa") : null;
       return {
         numPages,
         fingerprints,
         htmlForXfa,
-        structureTree
+        structureTree,
+        fonts
       };
     }
     async function getPdfManager({
