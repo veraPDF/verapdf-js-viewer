@@ -48,6 +48,10 @@ interface IBboxProps {
     colorScheme?: IColorScheme;
     selectionMode?: TreeBboxSelectionMode;
     onClick?(e: any): void;
+    pageBorders: {
+        height?: number;
+        width?: number;
+    };
 }
 export interface IRenderBboxProps {
     left: string;
