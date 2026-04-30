@@ -668,7 +668,7 @@ export const activeBboxInViewport = (): boolean => {
   let isInView = false;
   const bboxes = document.querySelectorAll('.pdf-bbox_selected');
   for (let index = 0; index < bboxes.length; index++) {
-    isInView = elementInViewport(bboxes[index]);
+    isInView = elementInViewport(bboxes[index] as HTMLDivElement);
     if (isInView) {
       break;
     }
@@ -677,42 +677,37 @@ export const activeBboxInViewport = (): boolean => {
   return isInView;
 }
 
-export const scrollToActiveBbox = (): void => {
-  if (activeBboxInViewport()) {
-    return;
-  }
-  const el: any = document.querySelector('.pdf-bbox_selected');
-  if (!el) return;
-  el.scrollIntoView();
-  (document.querySelector('.pdf-viewer') as any).scrollTop -= 150;
-  if (!activeBboxInViewport()) {
-    el.scrollIntoView();
-  }
+export const scrollToActiveBbox = (force?: boolean): void => {
+  setTimeout(() => {
+    if (!force && activeBboxInViewport()) return;
+    const el = document.querySelector('.pdf-bbox_selected');
+    if (el) el.scrollIntoView({ block: 'center', inline: 'center' });
+  }, 100);
 }
 
-function elementInViewport (el: any): boolean {
+function elementInViewport (el: HTMLDivElement): boolean {
   let top = el.offsetTop;
   let left = el.offsetLeft;
   const width = el.offsetWidth;
   const height = el.offsetHeight;
   const elementArea = width * height;
   while(el.offsetParent && !el.offsetParent.className.includes('pdf-viewer')) {
-    el = el.offsetParent;
+    el = el.offsetParent as HTMLDivElement;
     top += el.offsetTop;
     left += el.offsetLeft;
   }
-  const parent = (document.querySelector('.pdf-viewer') as any);
-  const parentArea = parent.offsetWidth * parent.offsetHeight;
-  const parentScrollTop = parent.scrollTop as unknown as number;
-  const parentScrollLeft = parent.scrollLeft as unknown as number;
+  const parent = document.querySelector('.pdf-viewer')!;
+  const parentArea = parent.clientWidth * parent.clientHeight;
+  const parentScrollTop = parent.scrollTop;
+  const parentScrollLeft = parent.scrollLeft;
   if (elementArea >= parentArea) {
     return true;
   }
   return (
     top >= parentScrollTop &&
     left >= parentScrollLeft &&
-    (top + height) <= (parentScrollTop + parent.offsetHeight) &&
-    (left + width) <= (parentScrollLeft + parent.offsetWidth)
+    (top + height) <= (parentScrollTop + parent.clientHeight) &&
+    (left + width) <= (parentScrollLeft + parent.clientWidth)
   );
 }
 

@@ -24,4 +24,4 @@ export declare const rotateViewport: (rotateAngle: number, viewport: number[]) =
 export declare const rotateCoordinates: (coords: number[], rotateAngle: number, viewport: number[]) => number[];
 export declare const rotatePoint: (rotateAngle: number, point: number[], viewport: number[]) => number[];
 export declare const activeBboxInViewport: () => boolean;
-export declare const scrollToActiveBbox: () => void;
+export declare const scrollToActiveBbox: (force?: boolean) => void;
