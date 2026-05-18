@@ -12,12 +12,13 @@ import { ViewerContext } from '../viewerContext/ViewerContext';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
 import {
+  CustomBBox,
   cleanArray,
   parseMcidToBbox,
   createAllBboxes,
   getBboxForViewport,
   checkIsBboxOutOfThePage,
-  getFormattedAnnotations
+  getFormattedAnnotations,
 } from '../../services/bboxService';
 import { WARNING_CODES } from '../../services/constants';
 
@@ -27,6 +28,7 @@ interface IPdfPageProps extends IPageProps {
   bboxList?: IBbox[];
   treeElementsBboxes?: TreeElementBbox[];
   treeBboxSelectionMode?: TreeBboxSelectionMode;
+  customBbox?: CustomBBox;
   isTreeBboxesVisible: boolean;
   defaultHeight?: number;
   defaultWidth?: number;
@@ -60,9 +62,9 @@ const StyledPdfPage = styled.div`
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
   const { scrollInto } = useContext(ViewerContext);
-  const { treeElementsBboxes, bboxList, scale = 1 } = props;
+  const { treeElementsBboxes, customBbox, bboxList, scale = 1 } = props;
   const [page, setPage] = useState<PageCallback | null>(null);
-  const prevPageBboxes = usePrevious({ page, treeElementsBboxes });
+  const prevPageBboxes = usePrevious({ page, treeElementsBboxes, customBbox });
   const intersectionRef = useRef<HTMLDivElement | null>(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
@@ -138,6 +140,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   useEffect(() => {
     const triggeredByBboxList = prevPageBboxes
       && prevPageBboxes.page === page
+      && prevPageBboxes.customBbox === customBbox
       && prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
     if (page) {
       if (triggeredByBboxList && !bboxList?.length) setBboxesErrors([]);
@@ -220,13 +223,21 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
           });
           if (!triggeredByBboxList) {
             const allBboxes = createAllBboxes(treeElementsBboxes, positionData, refPositionData, annotsFormatted, page.view, page.rotate);
+            if (customBbox) {
+              allBboxes.push({
+                isVisible: true,
+                id: customBbox.id,
+                location: customBbox.rect,
+                area: customBbox.rect[2] * customBbox.rect[3]
+              });
+            }
             setBboxesAll(allBboxes);
           }
           setBboxesErrors(errorBboxes);
         });
       }
     }
-  }, [page, bboxList, treeElementsBboxes]);
+  }, [page, bboxList, treeElementsBboxes, customBbox]);
   useEffect(() => {
     if (!loaded && isIntersecting) {
       setLoaded(true);

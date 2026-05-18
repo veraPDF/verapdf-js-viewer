@@ -3,11 +3,13 @@ import { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
+import { CustomBBox } from '../../services/bboxService';
 import './pdfPage.scss';
 interface IPdfPageProps extends IPageProps {
     bboxList?: IBbox[];
     treeElementsBboxes?: TreeElementBbox[];
     treeBboxSelectionMode?: TreeBboxSelectionMode;
+    customBbox?: CustomBBox;
     isTreeBboxesVisible: boolean;
     defaultHeight?: number;
     defaultWidth?: number;
