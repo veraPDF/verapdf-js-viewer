@@ -1004,7 +1004,7 @@ const PdfPage = (props) => {
     React.useEffect(() => {
         const triggeredByBboxList = prevPageBboxes
             && prevPageBboxes.page === page
-            && prevPageBboxes.customBbox === customBbox
+            && ___default["default"].isEqual(prevPageBboxes.customBbox, customBbox)
             && prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
         if (page) {
             if (triggeredByBboxList && !(bboxList === null || bboxList === void 0 ? void 0 : bboxList.length))
@@ -1205,7 +1205,7 @@ const PdfDocument = (props) => {
     var _a, _b;
     const renderedPages = React.useRef(new MapWithEvents());
     const { page, setPage, maxPage, setMaxPage, scrollInto, setScrollIntoPage } = React.useContext(ViewerContext);
-    const { bboxes = [], customBbox = {} } = props;
+    const { bboxes = [], customBbox } = props;
     const [loaded, setLoaded] = React.useState(false);
     const [structureTree, setStructureTree] = React.useState({});
     const [parsedTree, setParsedTree] = React.useState({});
@@ -1324,7 +1324,7 @@ const PdfDocument = (props) => {
         }
         let bboxPage = 0;
         const autoZoom = isBboxMode ? props.activeBboxIndex.zoom : props.activeBboxId.zoom;
-        if (!isBboxMode && customBbox.id === activeBboxId)
+        if (!isBboxMode && customBbox && customBbox.id === activeBboxId)
             bboxPage = customBbox.page;
         else {
             const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
@@ -1522,7 +1522,7 @@ const PdfDocument = (props) => {
             var _a;
             renderedPages.current.set(page, ref);
             (_a = props.onPageRenderSuccess) === null || _a === void 0 ? void 0 : _a.call(props);
-        }, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: treeElementsBboxes[page], treeBboxSelectionMode: props.treeBboxSelectionMode, groupId: activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.groupId, customBbox: customBbox.page === page ? customBbox : undefined, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning })) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])));
+        }, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: treeElementsBboxes[page], treeBboxSelectionMode: props.treeBboxSelectionMode, groupId: activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.groupId, customBbox: (customBbox === null || customBbox === void 0 ? void 0 : customBbox.page) === page ? customBbox : undefined, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning })) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 

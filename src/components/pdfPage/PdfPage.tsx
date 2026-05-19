@@ -140,7 +140,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   useEffect(() => {
     const triggeredByBboxList = prevPageBboxes
       && prevPageBboxes.page === page
-      && prevPageBboxes.customBbox === customBbox
+      && _.isEqual(prevPageBboxes.customBbox, customBbox)
       && prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
     if (page) {
       if (triggeredByBboxList && !bboxList?.length) setBboxesErrors([]);
