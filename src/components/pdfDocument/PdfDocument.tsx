@@ -17,6 +17,7 @@ import { AnyObject, OrNull } from '../../types/generics';
 import { TSelectedBboxData } from '../../types/selectedBboxData';
 import { IBboxLocation } from '../../index';
 import {
+  CustomBBox,
   buildBboxMap,
   parseTree,
   setTreeIds,
@@ -25,7 +26,7 @@ import {
   createBboxMap,
   getSelectedPageByLocation,
   getBboxPages,
-  scrollToActiveBbox
+  scrollToActiveBbox,
 } from '../../services/bboxService';
 import { IColorScheme } from '../bbox/Bbox';
 // @ts-ignore
@@ -78,6 +79,7 @@ const zoomOutScaleRatioThreshold = 0.7;
 
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
+  customBbox?: CustomBBox;
   activeBboxIndex?: { index: number, zoom: boolean };
   activeBboxId?: { id: string, zoom: boolean };
   bboxes: IBboxLocation[];
@@ -98,7 +100,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const renderedPages = useRef(new MapWithEvents<number, HTMLDivElement>());
   const { page, setPage, maxPage, setMaxPage, scrollInto, setScrollIntoPage } = useContext(ViewerContext);
-  const { bboxes = [] } = props;
+  const { bboxes = [], customBbox } = props;
   const [loaded, setLoaded] = useState(false);
   const [structureTree, setStructureTree] = useState({});
   const [parsedTree, setParsedTree] = useState({});
@@ -222,18 +224,22 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     if ((id ?? false) === false) {
       return;
     }
-    const autoZoom = isBboxMode ? props.activeBboxIndex!.zoom : props.activeBboxId!.zoom;
-    const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
-    const finder = isBboxMode 
-        ? (value: AnyObject[]) => _.find(value, { index: activeBboxIndex })
-        : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === activeBboxId);
     let bboxPage = 0;
-    for (const [key, value] of entries) {
-      if (finder(value as AnyObject[] & [AnyObject[], string])) {
-        bboxPage = parseInt(key);
-        break;
+    const autoZoom = isBboxMode ? props.activeBboxIndex!.zoom : props.activeBboxId!.zoom;
+    if (!isBboxMode && customBbox && customBbox.id === activeBboxId) bboxPage = customBbox.page;
+    else {
+      const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
+      const finder = isBboxMode 
+          ? (value: AnyObject[]) => _.find(value, { index: activeBboxIndex })
+          : (value: [AnyObject[], string]) => _.find(value, arr => arr[1] === activeBboxId);
+      for (const [key, value] of entries) {
+        if (finder(value as AnyObject[] & [AnyObject[], string])) {
+          bboxPage = parseInt(key);
+          break;
+        }
       }
     }
+
     if (bboxPage > 0) {
       if (autoZoom) {
       const controller = new AbortController();
@@ -276,7 +282,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return;
   }, [
     props.activeBboxIndex, props.activeBboxId,
-    bboxMap, treeElementsBboxes,
+    bboxMap, treeElementsBboxes, customBbox,
   ]);
 
   useEffect(() => {
@@ -295,8 +301,11 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     setStructureTree(data._pdfInfo.structureTree);
     const parsedTree = parseTree(_.cloneDeep(data._pdfInfo.structureTree));
     const treeWithData = structurizeTree(parsedTree);
-    const [treeWithIds, annotMap] = setTreeIds(treeWithData ?? {});
-    if (!_.isNil(treeWithIds)) treeWithIds.annotMap = annotMap;
+    const [treeWithIds, annotMap, refToIdMap] = setTreeIds(treeWithData ?? {});
+    if (!_.isNil(treeWithIds)) {
+      treeWithIds.annotMap = annotMap;
+      treeWithIds.refToIdMap = refToIdMap;
+    }
     setParsedTree(treeWithIds ?? {});
     data.parsedTree = treeWithIds ?? {};
     const pageData = await data.getPage(1);
@@ -451,6 +460,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
           treeElementsBboxes={treeElementsBboxes[page]}
           treeBboxSelectionMode={props.treeBboxSelectionMode}
           groupId={activeBbox?.groupId}
+          customBbox={customBbox?.page === page ? customBbox : undefined}
           activeBboxIndex={props.activeBboxIndex}
           activeBboxId={props.activeBboxId}
           isTreeBboxesVisible={props.isTreeBboxesVisible}

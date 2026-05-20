@@ -4,6 +4,8 @@ import { IBboxLocation } from '../index';
 import { AnyObject, OrNull } from '../types/generics';
 import { IBbox, IMcidItem, IAnnotItem, TreeElementBbox} from '../components/bbox/Bbox';
 
+export type CustomBBox = { id: string, page: number, rect: number[] };
+
 const groupChildren = (children: AnyObject[]): AnyObject[][] => {
   if (_.isNil(children)) children = [];
   const group = _.groupBy(cleanArray(children), (child) => {
@@ -189,9 +191,15 @@ export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
   return node;
 };
 
-export const setTreeIds = (node: AnyObject, annotMap: AnyObject = {}, id: string = '0'): [OrNull<AnyObject>, AnyObject] => {
-  if (_.isNil(node)) return [null, annotMap];
+export const setTreeIds = (
+  node: AnyObject,
+  id: string = '0',
+  annotMap: AnyObject = {},
+  refToIdMap: Map<number, string> = new Map(),
+): [OrNull<AnyObject>, AnyObject, Map<number, string>] => {
+  if (_.isNil(node)) return [null, annotMap, refToIdMap];
   node.id = id;
+  if (node.ref) refToIdMap.set(node.ref.num, id);
   if (node?.hasOwnProperty('annotList')) {
     node.annotList.forEach((annot: IAnnotItem) => {
       const index = `${annot.pageIndex}:${annot.annotIndex}`;
@@ -201,11 +209,11 @@ export const setTreeIds = (node: AnyObject, annotMap: AnyObject = {}, id: string
   if (_.isNil(node?.children)) node.children = [];
   if (!node?.children.length) {
     node.final = true;
-    return [node, annotMap];
+    return [node, annotMap, refToIdMap];
   }
-  if (!(node.children instanceof Array)) node.children = [setTreeIds(node.children, annotMap, `${id}:0`)[0]];
-  else node.children = _.map(node.children, (child, index) => setTreeIds(child, annotMap, `${id}:${index}`)[0]);
-  return [node, annotMap];
+  if (!(node.children instanceof Array)) node.children = [setTreeIds(node.children, `${id}:0`, annotMap, refToIdMap)[0]];
+  else node.children = _.map(node.children, (child, index) => setTreeIds(child, `${id}:${index}`, annotMap, refToIdMap)[0]);
+  return [node, annotMap, refToIdMap];
 };
 
 export const getMcidList = (node: AnyObject, mcidList: TreeElementBbox[] = []): TreeElementBbox[] => {

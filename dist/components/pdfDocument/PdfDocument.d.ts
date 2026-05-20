@@ -5,10 +5,12 @@ import { IDocumentProps } from './IDocumentProps';
 import { IPageProps } from '../pdfPage/IPageProps';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { IBboxLocation } from '../../index';
+import { CustomBBox } from '../../services/bboxService';
 import { IColorScheme } from '../bbox/Bbox';
 import './pdfDocument.scss';
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     showAllPages?: boolean;
+    customBbox?: CustomBBox;
     activeBboxIndex?: {
         index: number;
         zoom: boolean;

@@ -38111,16 +38111,16 @@ class StructTreePage {
   }
   parse(pageRef) {
     if (!this.root || !this.rootDict || !(pageRef instanceof Ref)) {
-      return;
+      return {};
     }
     const parentTree = this.rootDict.get("ParentTree");
     if (!parentTree) {
-      return;
+      return {};
     }
     const id = this.pageDict.get("StructParents");
     const ids = this.root.structParentIds?.get(pageRef);
     if (!Number.isInteger(id) && !ids) {
-      return;
+      return {};
     }
     const map = new Map();
     const numberTree = new NumberTree(parentTree, this.xref);
@@ -38135,10 +38135,12 @@ class StructTreePage {
       }
     }
     if (!ids) {
-      return;
+      return {};
     }
+    const structParentToObjIdMap = {};
     for (const [elemId, type] of ids) {
       const obj = numberTree.get(elemId);
+      structParentToObjIdMap[elemId] = +(obj.objId.match(/^\d+/) ?? [-1])[0];
       if (obj) {
         const elem = this.addNode(this.xref.fetchIfRef(obj), map);
         if (elem?.kids?.length === 1 && elem.kids[0].type === StructElementType.OBJECT) {
@@ -38146,6 +38148,7 @@ class StructTreePage {
         }
       }
     }
+    return structParentToObjIdMap;
   }
   addNode(dict, map, level = 0) {
     if (level > MAX_DEPTH) {
@@ -39715,13 +39718,16 @@ class ExtendedCatalog extends Catalog {
       if (el instanceof Dict && el.has("K")) {
         const name = el.has("S") ? el.get("S").name : null;
         const roleName = this.getRoleName(el, name);
-        return {
+        const treeElement = {
           name: name ? stringToUTF8String(name) : null,
           roleName: roleName ? stringToUTF8String(roleName) : null,
           children: this.getTreeElement(el.get("K"), page, el.getRaw("K")),
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null
         };
+        const alt = el.has("Alt") ? el.get("Alt") : null;
+        if (alt) treeElement.alt = stringToUTF8String(alt);
+        return treeElement;
       }
       if (el instanceof Dict && el.has("Obj")) {
         const obj = el.get("Obj");
@@ -39781,13 +39787,16 @@ class ExtendedCatalog extends Catalog {
       if (el instanceof Dict && el.has("S")) {
         const name = el.get("S").name;
         const roleName = this.getRoleName(el, name);
-        return {
+        const treeElement = {
           name: name ? stringToUTF8String(name) : null,
           roleName: roleName ? stringToUTF8String(roleName) : null,
           children: [],
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null
         };
+        const alt = el.has("Alt") ? el.get("Alt") : null;
+        if (alt) treeElement.alt = stringToUTF8String(alt);
+        return treeElement;
       }
     } catch (e) {
       console.error(`Failed to parse structure tree element: ${e.message}`);
@@ -51185,6 +51194,22 @@ class Annotation {
       isEditable: false,
       structParent: -1
     };
+    if (dict.has("A")) {
+      const actionDict = dict.get("A");
+      if (actionDict instanceof Dict && actionDict.has("R")) {
+        const renditionDict = actionDict.get("R");
+        if (renditionDict instanceof Dict && renditionDict.has("C")) {
+          const mediaClipDict = renditionDict.get("C");
+          if (mediaClipDict instanceof Dict) {
+            const CT = mediaClipDict.get("CT");
+            this.data.mediaClip = {
+              contentType: CT && this._parseStringHelper(CT),
+              alt: mediaClipDict.getArray("Alt")
+            };
+          }
+        }
+      }
+    }
     if (annotationGlobals.structTreeRoot) {
       let structParent = dict.get("StructParent");
       this.data.structParent = structParent = Number.isInteger(structParent) && structParent >= 0 ? structParent : -1;
@@ -57049,8 +57074,9 @@ class Page {
     }
     await this._parsedAnnotations;
     try {
-      const structTree = await this.pdfManager.ensure(this, "_parseStructTree", [structTreeRoot]);
+      const [structTree, structParentToObjIdMap] = await this.pdfManager.ensure(this, "_parseStructTree", [structTreeRoot]);
       const data = await this.pdfManager.ensure(structTree, "serializable");
+      data.structParentToObjIdMap = structParentToObjIdMap;
       return data;
     } catch (ex) {
       warn(`getStructTree: "${ex}".`);
@@ -57059,11 +57085,11 @@ class Page {
   }
   _parseStructTree(structTreeRoot) {
     const tree = new StructTreePage(structTreeRoot, this.pageDict);
-    tree.parse(this.ref);
-    return tree;
+    const structParentToObjIdMap = tree.parse(this.ref);
+    return [tree, structParentToObjIdMap];
   }
-  async getAnnotationsData(handler, task, intent) {
-    const annotations = await this._parsedAnnotations;
+  async getAnnotationsData(handler, task, intent, noSorting = false) {
+    const annotations = await (noSorting ? this._parsedAnnotationsUnsorted : this._parsedAnnotations);
     if (annotations.length === 0) {
       return annotations;
     }
@@ -57154,6 +57180,27 @@ class Page {
     });
     this.#areAnnotationsCached = true;
     return shadow(this, "_parsedAnnotations", promise);
+  }
+  get _parsedAnnotationsUnsorted() {
+    const promise = this.pdfManager.ensure(this, "annotations").then(async annots => {
+      if (annots.length === 0) {
+        return annots;
+      }
+      const [annotationGlobals, fieldObjects] = await Promise.all([this.pdfManager.ensureDoc("annotationGlobals"), this.pdfManager.ensureDoc("fieldObjects")]);
+      if (!annotationGlobals) {
+        return [];
+      }
+      const orphanFields = fieldObjects?.orphanFields;
+      const annotationPromises = [];
+      for (const annotationRef of annots) {
+        annotationPromises.push(AnnotationFactory.create(this.xref, annotationRef, annotationGlobals, this._localIdFactory, false, orphanFields, null, this.ref).catch(function (reason) {
+          warn(`_parsedAnnotationsUnsorted: "${reason}".`);
+          return null;
+        }));
+      }
+      return await Promise.all(annotationPromises);
+    });
+    return shadow(this, "_parsedAnnotationsUnsorted", promise);
   }
   get jsActions() {
     const actions = collectActions(this.xref, this.pageDict, PageActionEventType);
@@ -59517,12 +59564,13 @@ class WorkerMessageHandler {
     });
     handler.on("GetAnnotations", function ({
       pageIndex,
-      intent
+      intent,
+      noSorting
     }) {
       return pdfManager.getPage(pageIndex).then(function (page) {
         const task = new WorkerTask(`GetAnnotations: page ${pageIndex}`);
         startWorkerTask(task);
-        return page.getAnnotationsData(handler, task, intent).then(data => {
+        return page.getAnnotationsData(handler, task, intent, noSorting).then(data => {
           finishWorkerTask(task);
           return data;
         }, reason => {
