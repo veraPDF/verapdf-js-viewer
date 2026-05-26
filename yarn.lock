@@ -1637,9 +1637,9 @@ path2d@^0.2.0:
   resolved "https://registry.yarnpkg.com/path2d/-/path2d-0.2.2.tgz#cc85d61ed7827e7863a2ee36713d4b5315a3d85d"
   integrity sha512-+vnG6S4dYcYxZd+CZxzXCNKdELYZSKfohrk98yajCo1PtRoDgCTrrwOvK1GT0UoAdVszagDVllQc0U1vaX4NUQ==
 
-pdfjs-dist@5.4.296, "pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.25":
+pdfjs-dist@5.4.296, "pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.26":
   version "5.4.296"
-  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/421edb4698964e11ff68c5a19f3ff61f34959ac0"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/65c63e908f3152c9f2d30a703727a044fbd2a843"
   optionalDependencies:
     canvas "^2.11.2"
     path2d "^0.2.0"
