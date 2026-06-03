@@ -1644,6 +1644,13 @@ pdfjs-dist@5.4.296, "pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1
     canvas "^2.11.2"
     path2d "^0.2.0"
 
+"pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.27":
+  version "5.4.296"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/a76a0133c3e56fa91b42136be8f0c368ea40a512"
+  optionalDependencies:
+    canvas "^2.11.2"
+    path2d "^0.2.0"
+
 picocolors@^1.0.0, picocolors@^1.1.0, picocolors@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.1.1.tgz#3d321af3eab939b083c8f929a1d12cda81c26b6b"
