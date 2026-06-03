@@ -30198,7 +30198,7 @@ class BoundingBoxesCalculator {
     if (this.ignoreCalculations) {
       return;
     }
-    if (fn !== OPS.markPoint && fn !== OPS.markPointProps && fn !== OPS.beginMarkedContent && fn !== OPS.beginMarkedContentProps) {
+    if (fn !== OPS.markPoint && fn !== OPS.markPointProps && fn !== OPS.beginMarkedContent && fn !== OPS.beginMarkedContentProps && fn !== OPS.endMarkedContent) {
       this.boundingBoxesStack.inc();
     }
     switch (fn | 0) {
@@ -39719,14 +39719,19 @@ class ExtendedCatalog extends Catalog {
         const name = el.has("S") ? el.get("S").name : null;
         const roleName = this.getRoleName(el, name);
         const treeElement = {
-          name: name ? stringToUTF8String(name) : null,
-          roleName: roleName ? stringToUTF8String(roleName) : null,
+          name: name ? stringToPDFString(name) : null,
+          roleName: roleName ? stringToPDFString(roleName) : null,
           children: this.getTreeElement(el.get("K"), page, el.getRaw("K")),
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null
         };
-        const alt = el.has("Alt") ? el.get("Alt") : null;
-        if (alt) treeElement.alt = stringToUTF8String(alt);
+        let alt = el.has("Alt") ? el.get("Alt") : null;
+        if (typeof alt !== "string") {
+          alt = el.has("ActualText") ? el.get("ActualText") : null;
+        }
+        if (typeof alt === "string") {
+          treeElement.alt = stringToPDFString(alt);
+        }
         return treeElement;
       }
       if (el instanceof Dict && el.has("Obj")) {
@@ -39788,14 +39793,19 @@ class ExtendedCatalog extends Catalog {
         const name = el.get("S").name;
         const roleName = this.getRoleName(el, name);
         const treeElement = {
-          name: name ? stringToUTF8String(name) : null,
-          roleName: roleName ? stringToUTF8String(roleName) : null,
+          name: name ? stringToPDFString(name) : null,
+          roleName: roleName ? stringToPDFString(roleName) : null,
           children: [],
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null
         };
-        const alt = el.has("Alt") ? el.get("Alt") : null;
-        if (alt) treeElement.alt = stringToUTF8String(alt);
+        let alt = el.has("Alt") ? el.get("Alt") : null;
+        if (typeof alt !== "string") {
+          alt = el.has("ActualText") ? el.get("ActualText") : null;
+        }
+        if (typeof alt === "string") {
+          treeElement.alt = stringToPDFString(alt);
+        }
         return treeElement;
       }
     } catch (e) {
