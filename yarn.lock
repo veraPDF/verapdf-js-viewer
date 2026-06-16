@@ -1637,16 +1637,16 @@ path2d@^0.2.0:
   resolved "https://registry.yarnpkg.com/path2d/-/path2d-0.2.2.tgz#cc85d61ed7827e7863a2ee36713d4b5315a3d85d"
   integrity sha512-+vnG6S4dYcYxZd+CZxzXCNKdELYZSKfohrk98yajCo1PtRoDgCTrrwOvK1GT0UoAdVszagDVllQc0U1vaX4NUQ==
 
-pdfjs-dist@5.4.296, "pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.26":
+pdfjs-dist@5.4.296, "pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.27":
   version "5.4.296"
-  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/65c63e908f3152c9f2d30a703727a044fbd2a843"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/a76a0133c3e56fa91b42136be8f0c368ea40a512"
   optionalDependencies:
     canvas "^2.11.2"
     path2d "^0.2.0"
 
-"pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.27":
+"pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.28":
   version "5.4.296"
-  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/a76a0133c3e56fa91b42136be8f0c368ea40a512"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/3834541662d02bd317de94fb559cc8fcfec551a6"
   optionalDependencies:
     canvas "^2.11.2"
     path2d "^0.2.0"
