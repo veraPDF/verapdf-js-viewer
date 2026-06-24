@@ -30192,13 +30192,12 @@ class BoundingBoxesCalculator {
     state.y = Math.min(y0, y1, y2, y3);
     state.w = Math.max(x0, x1, x2, x3) - state.x;
     state.h = Math.max(y0, y1, y2, y3) - state.y;
-    this.operationArray[this.operationIndex] = [[state.x, state.y, state.w, state.h]];
   }
   parseOperator(fn, args) {
     if (this.ignoreCalculations) {
       return;
     }
-    if (fn !== OPS.markPoint && fn !== OPS.markPointProps && fn !== OPS.beginMarkedContent && fn !== OPS.beginMarkedContentProps && fn !== OPS.endMarkedContent) {
+    if (fn !== OPS.markPoint && fn !== OPS.markPointProps && fn !== OPS.beginMarkedContent && fn !== OPS.beginMarkedContentProps) {
       this.boundingBoxesStack.inc();
     }
     switch (fn | 0) {
@@ -30330,32 +30329,9 @@ class BoundingBoxesCalculator {
         }
         break;
       case OPS.paintXObject:
-        const [type, bboxes] = args;
-        if (type === "Image") {
+        if (args[0] === "Image") {
           this.getImageBoundingBox();
           this.saveGraphicsBoundingBox();
-        } else if (type === "Form" && typeof bboxes === "object") {
-          const opArr = Object.values(bboxes).map(b => {
-            let {
-              contentItems,
-              contentItem
-            } = b;
-            while (contentItems?.length) {
-              [{
-                contentItems,
-                contentItem
-              }] = contentItems;
-            }
-            if (contentItem?.x == null) return [];
-            const {
-              x,
-              y,
-              w,
-              h
-            } = contentItem;
-            return [x, y, w, h];
-          });
-          this.operationArray[this.operationIndex] = opArr;
         }
         break;
       case OPS.showText:
@@ -33454,9 +33430,8 @@ class PartialEvaluator {
                 boundingBoxCalculator.saveState();
                 self.buildFormXObject(resources, xobj, null, operatorList, task, stateManager.state.clone({
                   newPath: true
-                }), localColorSpaceCache, seenRefs, intent, boundingBoxCalculator.textState, boundingBoxCalculator.graphicsState).then(function ([boundingBoxesByMCID, _, boundingBoxesWithoutMCID]) {
+                }), localColorSpaceCache, seenRefs, intent, boundingBoxCalculator.textState, boundingBoxCalculator.graphicsState).then(function ([boundingBoxesByMCID]) {
                   boundingBoxCalculator.addRefBoundingBoxes(xobj.dict.objId, boundingBoxesByMCID);
-                  boundingBoxCalculator.parseOperator(OPS.paintXObject, [type.name, boundingBoxesWithoutMCID]);
                   stateManager.restore();
                   boundingBoxCalculator.restoreState();
                   resolveXObject();
@@ -36986,19 +36961,12 @@ class FileSpec {
     }
     return shadow(this, "description", description);
   }
-  get afRelationship() {
-    let afRelationship = "";
-    const rel = this.root?.get("AFRelationship");
-    if (typeof rel === "string") afRelationship = rel;else if (rel instanceof Name) afRelationship = rel.name;
-    return shadow(this, "afRelationship", afRelationship);
-  }
   get serializable() {
     return {
       rawFilename: this.filename,
       filename: stripPath(this.filename),
       content: this.content,
-      description: this.description,
-      afRelationship: this.afRelationship
+      description: this.description
     };
   }
 }
@@ -38118,16 +38086,16 @@ class StructTreePage {
   }
   parse(pageRef) {
     if (!this.root || !this.rootDict || !(pageRef instanceof Ref)) {
-      return {};
+      return;
     }
     const parentTree = this.rootDict.get("ParentTree");
     if (!parentTree) {
-      return {};
+      return;
     }
     const id = this.pageDict.get("StructParents");
     const ids = this.root.structParentIds?.get(pageRef);
     if (!Number.isInteger(id) && !ids) {
-      return {};
+      return;
     }
     const map = new Map();
     const numberTree = new NumberTree(parentTree, this.xref);
@@ -38142,12 +38110,10 @@ class StructTreePage {
       }
     }
     if (!ids) {
-      return {};
+      return;
     }
-    const structParentToObjIdMap = {};
     for (const [elemId, type] of ids) {
       const obj = numberTree.get(elemId);
-      structParentToObjIdMap[elemId] = +(obj.objId.match(/^\d+/) ?? [-1])[0];
       if (obj) {
         const elem = this.addNode(this.xref.fetchIfRef(obj), map);
         if (elem?.kids?.length === 1 && elem.kids[0].type === StructElementType.OBJECT) {
@@ -38155,7 +38121,6 @@ class StructTreePage {
         }
       }
     }
-    return structParentToObjIdMap;
   }
   addNode(dict, map, level = 0) {
     if (level > MAX_DEPTH) {
@@ -39513,8 +39478,7 @@ class Catalog {
     }
     let action = destDict.get("A"),
       url,
-      dest,
-      sDest;
+      dest;
     if (!(action instanceof Dict)) {
       if (destDict.has("Dest")) {
         action = destDict.get("Dest");
@@ -39563,7 +39527,6 @@ class Catalog {
           break;
         case "GoTo":
           dest = action.get("D");
-          sDest = action.get("SD");
           break;
         case "Launch":
         case "GoToR":
@@ -39674,12 +39637,16 @@ class Catalog {
       }
       resultObj.unsafeUrl = url;
     }
-    const parseDest = (d, obj, field = "dest") => {
-      if (d instanceof Name) d = d.name;
-      if (typeof d === "string") obj[field] = stringToPDFString(d, true);else if (isValidExplicitDest(d)) obj[field] = d;
-    };
-    if (dest) parseDest(dest, resultObj);
-    if (sDest) parseDest(sDest, resultObj, "sDest");
+    if (dest) {
+      if (dest instanceof Name) {
+        dest = dest.name;
+      }
+      if (typeof dest === "string") {
+        resultObj.dest = stringToPDFString(dest, true);
+      } else if (isValidExplicitDest(dest)) {
+        resultObj.dest = dest;
+      }
+    }
   }
 }
 class ExtendedCatalog extends Catalog {
@@ -39710,13 +39677,6 @@ class ExtendedCatalog extends Catalog {
     }
     return shadow(this, "structTreeRootObject", structTreeRoot);
   }
-  convertString(str, type) {
-    try {
-      return stringToUTF8String(str);
-    } catch (e) {
-      return stringToPDFString(str);
-    }
-  }
   getTreeElement(el, page, ref) {
     try {
       if (el instanceof Dict && el.has("Pg")) {
@@ -39730,21 +39690,13 @@ class ExtendedCatalog extends Catalog {
       if (el instanceof Dict && el.has("K")) {
         const name = el.has("S") ? el.get("S").name : null;
         const roleName = this.getRoleName(el, name);
-        const treeElement = {
-          name: name ? this.convertString(name, "Name") : null,
-          roleName: roleName ? this.convertString(roleName, "Role name") : null,
+        return {
+          name: name ? stringToUTF8String(name) : null,
+          roleName: roleName ? stringToUTF8String(roleName) : null,
           children: this.getTreeElement(el.get("K"), page, el.getRaw("K")),
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null
         };
-        let alt = el.has("Alt") ? el.get("Alt") : null;
-        if (typeof alt !== "string") {
-          alt = el.has("ActualText") ? el.get("ActualText") : null;
-        }
-        if (typeof alt === "string") {
-          treeElement.alt = this.convertString(alt, "Alt");
-        }
-        return treeElement;
       }
       if (el instanceof Dict && el.has("Obj")) {
         const obj = el.get("Obj");
@@ -39804,21 +39756,13 @@ class ExtendedCatalog extends Catalog {
       if (el instanceof Dict && el.has("S")) {
         const name = el.get("S").name;
         const roleName = this.getRoleName(el, name);
-        const treeElement = {
-          name: name ? this.convertString(name, "Name") : null,
-          roleName: roleName ? this.convertString(roleName, "Role name") : null,
+        return {
+          name: name ? stringToUTF8String(name) : null,
+          roleName: roleName ? stringToUTF8String(roleName) : null,
           children: [],
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null
         };
-        let alt = el.has("Alt") ? el.get("Alt") : null;
-        if (typeof alt !== "string") {
-          alt = el.has("ActualText") ? el.get("ActualText") : null;
-        }
-        if (typeof alt === "string") {
-          treeElement.alt = this.convertString(alt, "Alt");
-        }
-        return treeElement;
       }
     } catch (e) {
       console.error(`Failed to parse structure tree element: ${e.message}`);
@@ -39869,180 +39813,6 @@ class ExtendedCatalog extends Catalog {
       structureTree = this.getTreeElement(this.structTreeRootObject.get("K"), null, this.structTreeRootObject.getRaw("K"));
     }
     return shadow(this, "structureTree", structureTree);
-  }
-  getFieldValueStr(fontObj, key) {
-    const value = fontObj.get(key);
-    if (value instanceof Name) {
-      return value.name;
-    }
-    if (typeof value === "string") {
-      return value;
-    }
-    return null;
-  }
-  resolveFontInfo(fontObj, fontName) {
-    let actualFont = fontObj;
-    let cidFontType = null;
-    let normalizedSubtype = null;
-    let baseFont = null;
-    let cidBaseFont = null;
-    let encoding = null;
-    let isEmbedded = false;
-    let isComposite = false;
-    let isSubset = false;
-    try {
-      const subtype = this.getFieldValueStr(fontObj, "Subtype");
-      if (subtype === "Type0") {
-        isComposite = true;
-        const descendantFonts = fontObj.get("DescendantFonts");
-        if (Array.isArray(descendantFonts) && descendantFonts.length > 0) {
-          const cidFont = this.xref.fetchIfRef(descendantFonts[0]);
-          if (cidFont instanceof Dict) {
-            actualFont = cidFont;
-            cidBaseFont = this.getFieldValueStr(cidFont, "BaseFont");
-            const cidSubtype = this.getFieldValueStr(cidFont, "Subtype");
-            if (cidSubtype) {
-              cidFontType = cidSubtype;
-              if (cidFontType === "CIDFontType0") {
-                normalizedSubtype = "Type1 (CID)";
-              } else if (cidFontType === "CIDFontType2") {
-                normalizedSubtype = "TrueType (CID)";
-              } else {
-                normalizedSubtype = cidFontType;
-              }
-            }
-          }
-        }
-        if (!normalizedSubtype) {
-          normalizedSubtype = subtype;
-        }
-      } else if (subtype) {
-        normalizedSubtype = subtype;
-      }
-      let descriptor = actualFont.get("FontDescriptor");
-      if (!(descriptor instanceof Dict) && !isComposite) {
-        descriptor = fontObj.get("FontDescriptor");
-      }
-      if (fontObj.has("BaseFont")) {
-        baseFont = this.getFieldValueStr(fontObj, "BaseFont");
-      }
-      if (fontObj.has("Encoding")) {
-        encoding = this.getFieldValueStr(fontObj, "Encoding");
-      }
-      if (normalizedSubtype === "Type3") {
-        isEmbedded = true;
-      } else if (descriptor instanceof Dict) {
-        const fontFile = descriptor.get("FontFile") || descriptor.get("FontFile2") || descriptor.get("FontFile3");
-        isEmbedded = !!fontFile;
-      }
-      isSubset = baseFont ? /^[A-Z0-9]{1,6}\+/.test(baseFont) : false;
-      return {
-        cidFontType,
-        normalizedSubtype,
-        baseFont,
-        cidBaseFont,
-        encoding,
-        isComposite,
-        isSubset,
-        isEmbedded
-      };
-    } catch (e) {
-      console.error(`Error resolving font info for ${fontName}: ${e.message}`);
-      return {
-        cidFontType: null,
-        normalizedSubtype: null,
-        baseFont: null,
-        cidBaseFont: null,
-        encoding: null,
-        isComposite: false,
-        isSubset: false,
-        isEmbedded: false
-      };
-    }
-  }
-  collectFonts() {
-    const seenFonts = new Map();
-    try {
-      for (let pageIndex = 0; pageIndex < this.pages.length; pageIndex++) {
-        const pageRef = this.pages[pageIndex];
-        const pageObj = this.xref.fetch(pageRef);
-        if (!(pageObj instanceof Dict)) {
-          continue;
-        }
-        let resources = pageObj.get("Resources");
-        if (!resources) {
-          let parent = pageObj.get("Parent");
-          while (parent instanceof Dict && !resources) {
-            resources = parent.get("Resources");
-            parent = parent.get("Parent");
-          }
-        }
-        if (!(resources instanceof Dict)) {
-          continue;
-        }
-        const fontDict = resources.get("Font");
-        if (!(fontDict instanceof Dict)) {
-          continue;
-        }
-        for (const [fontName, fontVal] of fontDict) {
-          try {
-            const fontRef = fontDict.getRaw(fontName);
-            const fontObj = this.xref.fetchIfRef(fontVal);
-            if (!(fontObj instanceof Dict)) {
-              continue;
-            }
-            const {
-              cidFontType,
-              normalizedSubtype,
-              baseFont,
-              encoding,
-              isComposite,
-              isSubset,
-              isEmbedded,
-              cidBaseFont
-            } = this.resolveFontInfo(fontObj, fontName);
-            const fontIdentity = [baseFont, cidBaseFont, cidFontType, encoding].join(":");
-            if (seenFonts.has(fontIdentity)) {
-              const existing = seenFonts.get(fontIdentity);
-              if (!existing.refs.some(r => r && fontRef && r.num === fontRef.num && r.gen === fontRef.gen)) {
-                existing.refs.push(fontRef instanceof Ref ? fontRef : null);
-              }
-              if (!existing.pageIndices.includes(pageIndex)) {
-                existing.pageIndices.push(pageIndex);
-              }
-              if (!existing.names.includes(fontName)) {
-                existing.names.push(fontName);
-              }
-              continue;
-            }
-            const fontInfo = {
-              names: [fontName],
-              refs: [fontRef instanceof Ref ? fontRef : null],
-              type: isComposite ? "Type0" : normalizedSubtype,
-              subtype: normalizedSubtype,
-              pageIndices: [pageIndex],
-              cidFontType,
-              baseFont,
-              cidBaseFont,
-              encoding,
-              isSubset,
-              isEmbedded,
-              isComposite
-            };
-            seenFonts.set(fontIdentity, fontInfo);
-          } catch {
-            continue;
-          }
-        }
-      }
-    } catch (e) {
-      console.error(`Failed to collect fonts: ${e.message}`);
-    }
-    return Array.from(seenFonts.values());
-  }
-  get fonts() {
-    const fonts = this.collectFonts();
-    return shadow(this, "fonts", fonts && fonts.length > 0 ? fonts : null);
   }
 }
 
@@ -51232,26 +51002,6 @@ class Annotation {
       isEditable: false,
       structParent: -1
     };
-    const name = dict.get("Name");
-    if (name instanceof Name) {
-      this.data.name = stringToPDFString(name.name);
-    }
-    if (dict.has("A")) {
-      const actionDict = dict.get("A");
-      if (actionDict instanceof Dict && actionDict.has("R")) {
-        const renditionDict = actionDict.get("R");
-        if (renditionDict instanceof Dict && renditionDict.has("C")) {
-          const mediaClipDict = renditionDict.get("C");
-          if (mediaClipDict instanceof Dict) {
-            const CT = mediaClipDict.get("CT");
-            this.data.mediaClip = {
-              contentType: CT && this._parseStringHelper(CT),
-              alt: mediaClipDict.getArray("Alt")
-            };
-          }
-        }
-      }
-    }
     if (annotationGlobals.structTreeRoot) {
       let structParent = dict.get("StructParent");
       this.data.structParent = structParent = Number.isInteger(structParent) && structParent >= 0 ? structParent : -1;
@@ -55893,14 +55643,6 @@ class CipherTransformFactory {
       this.eff = dict.get("EFF") || this.stmf;
     }
   }
-  getEncryptionDictionary() {
-    const encryptionDict = {};
-    ["V", "R", "O", "U", "OE", "UE", "P"].forEach(key => {
-      const value = this.dict.get(key);
-      if (value != null) encryptionDict[key] = value;
-    });
-    return encryptionDict;
-  }
   createCipherTransform(num, gen) {
     if (this.algorithm === 4 || this.algorithm === 5) {
       return new CipherTransform(this.#buildCipherConstructor(this.cf, this.strf, num, gen, this.encryptionKey), this.#buildCipherConstructor(this.cf, this.stmf, num, gen, this.encryptionKey));
@@ -56017,9 +55759,6 @@ class XRef {
       throw new XRefParseException();
     }
     throw new InvalidPDFException("Invalid Root reference.");
-  }
-  getEncryptionDictionary() {
-    return this.encrypt?.getEncryptionDictionary();
   }
   processXRefTable(parser) {
     if (!("tableState" in this)) {
@@ -57116,9 +56855,8 @@ class Page {
     }
     await this._parsedAnnotations;
     try {
-      const [structTree, structParentToObjIdMap] = await this.pdfManager.ensure(this, "_parseStructTree", [structTreeRoot]);
+      const structTree = await this.pdfManager.ensure(this, "_parseStructTree", [structTreeRoot]);
       const data = await this.pdfManager.ensure(structTree, "serializable");
-      data.structParentToObjIdMap = structParentToObjIdMap;
       return data;
     } catch (ex) {
       warn(`getStructTree: "${ex}".`);
@@ -57127,11 +56865,11 @@ class Page {
   }
   _parseStructTree(structTreeRoot) {
     const tree = new StructTreePage(structTreeRoot, this.pageDict);
-    const structParentToObjIdMap = tree.parse(this.ref);
-    return [tree, structParentToObjIdMap];
+    tree.parse(this.ref);
+    return tree;
   }
-  async getAnnotationsData(handler, task, intent, noSorting = false) {
-    const annotations = await (noSorting ? this._parsedAnnotationsUnsorted : this._parsedAnnotations);
+  async getAnnotationsData(handler, task, intent) {
+    const annotations = await this._parsedAnnotations;
     if (annotations.length === 0) {
       return annotations;
     }
@@ -57222,27 +56960,6 @@ class Page {
     });
     this.#areAnnotationsCached = true;
     return shadow(this, "_parsedAnnotations", promise);
-  }
-  get _parsedAnnotationsUnsorted() {
-    const promise = this.pdfManager.ensure(this, "annotations").then(async annots => {
-      if (annots.length === 0) {
-        return annots;
-      }
-      const [annotationGlobals, fieldObjects] = await Promise.all([this.pdfManager.ensureDoc("annotationGlobals"), this.pdfManager.ensureDoc("fieldObjects")]);
-      if (!annotationGlobals) {
-        return [];
-      }
-      const orphanFields = fieldObjects?.orphanFields;
-      const annotationPromises = [];
-      for (const annotationRef of annots) {
-        annotationPromises.push(AnnotationFactory.create(this.xref, annotationRef, annotationGlobals, this._localIdFactory, false, orphanFields, null, this.ref).catch(function (reason) {
-          warn(`_parsedAnnotationsUnsorted: "${reason}".`);
-          return null;
-        }));
-      }
-      return await Promise.all(annotationPromises);
-    });
-    return shadow(this, "_parsedAnnotationsUnsorted", promise);
   }
   get jsActions() {
     const actions = collectActions(this.xref, this.pageDict, PageActionEventType);
@@ -58152,14 +57869,8 @@ class ExtendedPDFDocument extends PDFDocument {
   constructor(pdfManager, arg) {
     super(pdfManager, arg);
   }
-  get encryptionDictionary() {
-    return shadow(this, "encryptionDictionary", this.xref.getEncryptionDictionary());
-  }
   get structureTree() {
     return shadow(this, "structureTree", this.catalog.structureTree);
-  }
-  get fonts() {
-    return shadow(this, "fonts", this.catalog.fonts);
   }
 }
 
@@ -59338,15 +59049,13 @@ class WorkerMessageHandler {
         await pdfManager.ensureDoc("loadXfaResources", [handler, task]);
         finishWorkerTask(task);
       }
-      const [numPages, fingerprints, encryptionDictionary, structureTree, fonts] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints"), pdfManager.ensureDoc("encryptionDictionary"), pdfManager.ensureDoc("structureTree"), pdfManager.ensureDoc("fonts")]);
+      const [numPages, fingerprints, structureTree] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints"), pdfManager.ensureDoc("structureTree")]);
       const htmlForXfa = isPureXfa ? await pdfManager.ensureDoc("htmlForXfa") : null;
       return {
         numPages,
         fingerprints,
         htmlForXfa,
-        encryptionDictionary,
-        structureTree,
-        fonts
+        structureTree
       };
     }
     async function getPdfManager({
@@ -59606,13 +59315,12 @@ class WorkerMessageHandler {
     });
     handler.on("GetAnnotations", function ({
       pageIndex,
-      intent,
-      noSorting
+      intent
     }) {
       return pdfManager.getPage(pageIndex).then(function (page) {
         const task = new WorkerTask(`GetAnnotations: page ${pageIndex}`);
         startWorkerTask(task);
-        return page.getAnnotationsData(handler, task, intent, noSorting).then(data => {
+        return page.getAnnotationsData(handler, task, intent).then(data => {
           finishWorkerTask(task);
           return data;
         }, reason => {

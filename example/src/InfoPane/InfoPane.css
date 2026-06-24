@@ -1,0 +1,20 @@
+.info-pane {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    z-index: 9;
+    background-color: white;
+    padding: 16px;
+    box-shadow: 0px 1px 1px -1px RGB(0, 0, 0, 0.12), 0px 1px 1px 0px RGB(0, 0, 0, 0.14), 0px 1px 3px 0px RGB(0, 0, 0, 0.12);
+    max-width: 300px;
+    color: rgba(0,0,0,0.75);
+}
+
+.info-pane .info-item {
+    margin: 8px 0;
+}
+
+.info-pane .info-item .label {
+    font-weight: bold;
+    margin-bottom: 2px;
+}

@@ -1,0 +1,26 @@
+.app-container {
+  display: grid;
+  grid-template-rows: 60px calc(100vh - 120px) 60px;
+}
+
+header, footer {
+  background: white;
+  padding: 0 1rem;
+  color: #593040;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+}
+
+header {
+  box-shadow: 0 1px 2px rgba(0,0,0,.07);
+}
+
+footer {
+  box-shadow: 0 -1px 2px rgba(0,0,0,.07);
+  justify-content: center;
+}
+
+.pdf-container-wrapper {
+  background-color: #f9f8f8;
+}

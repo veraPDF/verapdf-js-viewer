@@ -7,3 +7,5 @@ yarn-error.log*
 
 ## Directory-based project format:
 .idea/
+
+/example/node_modules
