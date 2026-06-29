@@ -1405,7 +1405,6 @@ const PdfDocument = (props) => {
     }, [activeBbox]);
     const onDocumentLoadSuccess = React.useCallback((data) => __awaiter(void 0, void 0, void 0, function* () {
         var _h;
-        console.log('documentLoaded');
         setStructureTree(data._pdfInfo.structureTree);
         const parsedTree = parseTree(___default["default"].cloneDeep(data._pdfInfo.structureTree));
         const treeWithData = structurizeTree(parsedTree);
