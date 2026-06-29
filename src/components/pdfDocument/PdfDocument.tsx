@@ -138,6 +138,15 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const activeBbox = useMemo(() => {
     return activeBboxIndex != null ? bboxes[activeBboxIndex] : null
   }, [activeBboxIndex, bboxes]);
+  const visibleBboxIndexes = useMemo(() => (
+    bboxes.reduce<number[]>((visibleIndexes, bbox, index) => {
+      if (bbox.isVisible !== false) {
+        visibleIndexes.push(index);
+      }
+      return visibleIndexes;
+    }, [])
+  ), [bboxes]);
+
   const shownPages: number[] = useMemo(() => {
     if (props.showAllPages) {
       return Array.from(
@@ -399,11 +408,31 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
 
   useEffect(() => {
     function handlekeydownEvent(event: any) {
+      const getVisibleBboxIndex = (direction: 'up' | 'down') => {
+        if (!visibleBboxIndexes.length) {
+          return undefined;
+        }
+
+        if (_.isNil(activeBboxIndex) || activeBboxIndex === -1) {
+          return visibleBboxIndexes[0];
+        }
+
+        const currentPosition = visibleBboxIndexes.indexOf(activeBboxIndex);
+        if (currentPosition === -1) {
+          return visibleBboxIndexes[0];
+        }
+
+        if (direction === 'up') {
+          return currentPosition > 0 ? visibleBboxIndexes[currentPosition - 1] : activeBboxIndex;
+        }
+
+        return currentPosition < visibleBboxIndexes.length - 1 ? visibleBboxIndexes[currentPosition + 1] : activeBboxIndex;
+      };
+
       if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
-        props.onSelectBbox((_.isNil(activeBboxIndex) || activeBboxIndex === -1 || activeBboxIndex === 0) ? 0 : activeBboxIndex - 1);
+        props.onSelectBbox(getVisibleBboxIndex('up'));
       } else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
-        props.onSelectBbox((activeBboxIndex === -1 || _.isNil(activeBboxIndex)) ? 0 :
-            (activeBboxIndex + 1 === bboxes.length) ? activeBboxIndex : activeBboxIndex + 1);
+        props.onSelectBbox(getVisibleBboxIndex('down'));
       } else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
         props.onPageChange?.(props.page - 1);
       } else if (event.key === 'ArrowRight' && props.page !== maxPage) {
@@ -415,7 +444,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     return () => {
       document.removeEventListener('keydown', handlekeydownEvent)
     }
-  }, [activeBboxIndex, props.page, maxPage]);
+  }, [activeBboxIndex, props.page, maxPage, visibleBboxIndexes]);
 
   return (
     <Document

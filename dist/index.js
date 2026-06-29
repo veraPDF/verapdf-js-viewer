@@ -111,7 +111,7 @@ const bboxBgSelected = 'rgba(255,69,0,0.5)';
 const bboxBgRelated = 'rgba(255,176,0,0.3)';
 const bboxBgStructured = 'rgba(255,255,255,0)';
 const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
-const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1fg2vj0" }) `
+const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1jqx3qg" }) `
   mix-blend-mode: normal;
   left: ${(props) => props.left};
   bottom: ${(props) => props.bottom};
@@ -914,7 +914,7 @@ const WARNING_CODES = {
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page .bbox-wrapper {\n  opacity: 0.75;\n  isolation: isolate;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 const bboxBorderHover = 'orangered';
-const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-akx7mn" }) `
+const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1r5bcob" }) `
   margin-left: auto;
   margin-right: auto;
   height: ${(props) => props.height ? props.height * props.scale + 'px' : 'fit-content'};
@@ -1246,6 +1246,12 @@ const PdfDocument = (props) => {
     const activeBbox = React.useMemo(() => {
         return activeBboxIndex != null ? bboxes[activeBboxIndex] : null;
     }, [activeBboxIndex, bboxes]);
+    const visibleBboxIndexes = React.useMemo(() => (bboxes.reduce((visibleIndexes, bbox, index) => {
+        if (bbox.isVisible !== false) {
+            visibleIndexes.push(index);
+        }
+        return visibleIndexes;
+    }, [])), [bboxes]);
     const shownPages = React.useMemo(() => {
         if (props.showAllPages) {
             return Array.from(new Array(maxPage), (_el, index) => index + 1);
@@ -1499,12 +1505,27 @@ const PdfDocument = (props) => {
     React.useEffect(() => {
         function handlekeydownEvent(event) {
             var _a, _b;
+            const getVisibleBboxIndex = (direction) => {
+                if (!visibleBboxIndexes.length) {
+                    return undefined;
+                }
+                if (___default["default"].isNil(activeBboxIndex) || activeBboxIndex === -1) {
+                    return visibleBboxIndexes[0];
+                }
+                const currentPosition = visibleBboxIndexes.indexOf(activeBboxIndex);
+                if (currentPosition === -1) {
+                    return visibleBboxIndexes[0];
+                }
+                if (direction === 'up') {
+                    return currentPosition > 0 ? visibleBboxIndexes[currentPosition - 1] : activeBboxIndex;
+                }
+                return currentPosition < visibleBboxIndexes.length - 1 ? visibleBboxIndexes[currentPosition + 1] : activeBboxIndex;
+            };
             if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
-                props.onSelectBbox((___default["default"].isNil(activeBboxIndex) || activeBboxIndex === -1 || activeBboxIndex === 0) ? 0 : activeBboxIndex - 1);
+                props.onSelectBbox(getVisibleBboxIndex('up'));
             }
             else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
-                props.onSelectBbox((activeBboxIndex === -1 || ___default["default"].isNil(activeBboxIndex)) ? 0 :
-                    (activeBboxIndex + 1 === bboxes.length) ? activeBboxIndex : activeBboxIndex + 1);
+                props.onSelectBbox(getVisibleBboxIndex('down'));
             }
             else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
                 (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, props.page - 1);
@@ -1517,7 +1538,7 @@ const PdfDocument = (props) => {
         return () => {
             document.removeEventListener('keydown', handlekeydownEvent);
         };
-    }, [activeBboxIndex, props.page, maxPage]);
+    }, [activeBboxIndex, props.page, maxPage, visibleBboxIndexes]);
     return (React__default["default"].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, React.useMemo(() => loaded ? shownPages.map((page) => React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: (ref) => {
             var _a;
             renderedPages.current.set(page, ref);
