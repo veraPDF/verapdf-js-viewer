@@ -16,8 +16,8 @@ export interface IPageProps {
   renderInteractiveForms?: boolean;
   renderTextLayer?: boolean;
   scale?: number;
-  activeBboxIndex?: { index: number, zoom: boolean };
-  activeBboxId?: { id: string, zoom: boolean };
+  activeBboxIndex?: { index: number; zoom: boolean };
+  activeBboxId?: { id: string; zoom: boolean };
   onPageLoadError?(error: Error): void;
   onPageLoadSuccess?(page: PageCallback): void;
   onPageRenderError?(error: Error): void;

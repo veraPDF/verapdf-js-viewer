@@ -81,7 +81,7 @@ var TreeBboxSelectionMode;
 })(TreeBboxSelectionMode || (TreeBboxSelectionMode = {}));
 
 const ViewerContext = React.createContext({});
-const ViewerProvider = ({ renderBbox, children }) => {
+const ViewerProvider = ({ renderBbox, children, }) => {
     const [page, setPage] = React.useState(1);
     const [maxPage, setMaxPage] = React.useState(0);
     const [scrollInto, setScrollInto] = React.useState({ page: 0 });
@@ -118,33 +118,33 @@ const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDi
   height: ${(props) => props.height};
   width: ${(props) => props.width};
   top: ${(props) => props.top};
-  border-color: ${(props) => props.colorScheme && props.colorScheme.border || bboxBorder};
-  background-color: ${(props) => props.colorScheme && props.colorScheme.background || bboxBg};
+  border-color: ${(props) => (props.colorScheme && props.colorScheme.border) || bboxBorder};
+  background-color: ${(props) => (props.colorScheme && props.colorScheme.background) || bboxBg};
   &:hover {
-    border-color: ${(props) => props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover$1};
-    background-color: ${(props) => props.colorScheme && props.colorScheme.backgroundHovered || bboxBg};
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderHovered) || bboxBorderHover$1};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundHovered) || bboxBg};
   }
   &.pdf-bbox_selected {
-    border-color: ${(props) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover$1};
-    background-color: ${(props) => props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected};
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelected) || bboxBorderHover$1};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundSelected) || bboxBgSelected};
   }
   &.pdf-bbox_related {
-    border-color: ${(props) => props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder};
-    background-color: ${(props) => props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated};
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderRelated) || bboxRelatedBorder};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundRelated) || bboxBgRelated};
   }
   &.pdf-bbox_structured {
     &:hover {
       border-color: ${bboxStructuredBorderHover};
     }
-    border-color: ${(props) => props.colorScheme && props.colorScheme.borderStructured || bboxStructuredBorder};
-    background-color: ${(props) => props.colorScheme && props.colorScheme.backgroundStructured || bboxBgStructured};
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderStructured) || bboxStructuredBorder};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundStructured) || bboxBgStructured};
   }
   &.pdf-bbox_structured_selected {
-    border-color: ${(props) => props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder};
-    background-color: ${(props) => props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured};
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelectedStructured) || bboxSelectedStructuredBorder};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundSelectedStructured) || bboxBgSelectedStructured};
   }
   &.pdf-bbox_structured_selected_multiple {
-    background-color: ${(props) => props.colorScheme && props.colorScheme.background || bboxBg};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.background) || bboxBg};
   }
 `;
 const clamp = (value, scale, { max, min = 0, offset = 0, } = {}) => {
@@ -153,7 +153,7 @@ const clamp = (value, scale, { max, min = 0, offset = 0, } = {}) => {
     return Math.min(Math.max((offset + +value) * scale, min), max);
 };
 const Bbox = (props) => {
-    const { bbox, disabled, selected, related, structured, scale, colorScheme, selectionMode, pageBorders, onClick, } = props;
+    const { bbox, disabled, selected, related, structured, scale, colorScheme, selectionMode, pageBorders, onClick } = props;
     const { renderBbox } = React.useContext(ViewerContext);
     const [left, bottom, width, height, top] = React.useMemo(() => {
         const x0 = clamp(bbox.location[0], scale, { max: pageBorders.width });
@@ -166,11 +166,11 @@ const Bbox = (props) => {
         const h = clamp(bbox.location[3], scale, { max: pageBorders.height, offset: +bbox.location[1] }) - y0;
         return [`${x0}px`, `${y0}px`, `${w}px`, `${h}px`, 'auto'];
     }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
-    const isSelected = React.useMemo(() => selected ? ' pdf-bbox_selected' : '', [selected]);
-    const isRelated = React.useMemo(() => related ? ' pdf-bbox_related' : '', [related]);
-    const isDisabled = React.useMemo(() => disabled ? ' pdf-bbox_disabled' : '', [disabled]);
-    const isStructured = React.useMemo(() => structured ? ' pdf-bbox_structured' : '', [structured]);
-    const isStructuredSelected = React.useMemo(() => structured && selected ? ' pdf-bbox_structured_selected' : '', [structured, selected]);
+    const isSelected = React.useMemo(() => (selected ? ' pdf-bbox_selected' : ''), [selected]);
+    const isRelated = React.useMemo(() => (related ? ' pdf-bbox_related' : ''), [related]);
+    const isDisabled = React.useMemo(() => (disabled ? ' pdf-bbox_disabled' : ''), [disabled]);
+    const isStructured = React.useMemo(() => (structured ? ' pdf-bbox_structured' : ''), [structured]);
+    const isStructuredSelected = React.useMemo(() => (structured && selected ? ' pdf-bbox_structured_selected' : ''), [structured, selected]);
     const isStructuredSelectedMultiple = React.useMemo(() => {
         if (structured && selected && selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS)
             return ' pdf-bbox_structured_selected_multiple';
@@ -193,7 +193,7 @@ const Bbox = (props) => {
             onClick,
         });
     }
-    return React__default["default"].createElement(BboxDiv, { className: `pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`, left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: colorScheme || {}, title: bbox.bboxTitle, "aria-describedby": bbox.bboxTitle, onClick: onClick });
+    return (React__default["default"].createElement(BboxDiv, { className: `pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`, left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: colorScheme || {}, title: bbox.bboxTitle, "aria-describedby": bbox.bboxTitle, onClick: onClick }));
 };
 var Bbox$1 = React.memo(Bbox);
 
@@ -210,16 +210,12 @@ const groupChildren = (children) => {
             return 'annotList';
         return null;
     });
-    return [
-        (_a = group.nodeList) !== null && _a !== void 0 ? _a : [],
-        (_b = group.mcidList) !== null && _b !== void 0 ? _b : [],
-        (_c = group.annotList) !== null && _c !== void 0 ? _c : [],
-    ];
+    return [(_a = group.nodeList) !== null && _a !== void 0 ? _a : [], (_b = group.mcidList) !== null && _b !== void 0 ? _b : [], (_c = group.annotList) !== null && _c !== void 0 ? _c : []];
 };
 const getMultiBboxPagesObj = (mcidList) => {
     const mcidListPages = [];
     const multiBbox = {};
-    mcidList.forEach(obj => {
+    mcidList.forEach((obj) => {
         if (!___default["default"].isNil(obj))
             mcidListPages.push(obj.pageIndex);
     });
@@ -249,7 +245,7 @@ const updateMcidList = (oldMcidList, children) => {
         children = [];
     return [
         ...oldMcidList,
-        ...___default["default"].flatMap(cleanArray(children), child => {
+        ...___default["default"].flatMap(cleanArray(children), (child) => {
             if (child.hasOwnProperty('mcidList') && !___default["default"].isNil(child.mcidList)) {
                 return child.mcidList;
             }
@@ -259,18 +255,18 @@ const updateMcidList = (oldMcidList, children) => {
 const cleanArray = (arr) => {
     if (___default["default"].isNil(arr))
         return [];
-    return arr.filter(el => !___default["default"].isNil(el));
+    return arr.filter((el) => !___default["default"].isNil(el));
 };
 const getFormattedAnnotations = (annots) => {
     const formattedAnnots = [];
     ___default["default"].forEach(annots, (annot) => {
-        if (annot.hasOwnProperty('parentId')
-            && annot.hasOwnProperty('parentRect')
-            && annot.hasOwnProperty('parentType')
-            && annot.parentType === 'Highlight') {
+        if (annot.hasOwnProperty('parentId') &&
+            annot.hasOwnProperty('parentRect') &&
+            annot.hasOwnProperty('parentType') &&
+            annot.parentType === 'Highlight') {
             formattedAnnots.push({
-                ['id']: annot.parentId,
-                ['rect']: annot.parentRect,
+                id: annot.parentId,
+                rect: annot.parentRect,
             });
         }
         formattedAnnots.push(annot);
@@ -286,6 +282,7 @@ const buildBboxMap = (bboxes, structure) => {
             if (___default["default"].isNil(bbox.location))
                 return;
             const match = bbox.location.match(annotIndexRegExp);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
             const annotIndex = parseInt((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.annotIndex, 10);
             if (bbox.location.includes('contentStream') && bbox.location.includes('operators')) {
                 const bboxPosition = calculateLocationInStreamOperator(bbox.location);
@@ -301,10 +298,12 @@ const buildBboxMap = (bboxes, structure) => {
                         operatorIndex: bboxPosition.operatorIndex,
                         subOperatorIndex: bboxPosition.subOperatorIndex,
                         bboxTitle: bbox.bboxTitle,
-                    }
+                    },
                 ];
             }
-            else if (bbox.location.includes('StructTreeRoot') || bbox.location.includes('root/doc') || bbox.location === 'root') {
+            else if (bbox.location.includes('StructTreeRoot') ||
+                bbox.location.includes('root/doc') ||
+                bbox.location === 'root') {
                 const mcidData = getTagsFromErrorPlace(bbox.location, structure);
                 mcidData.forEach(([mcidList, pageIndex, contentItemPath]) => {
                     bboxMap[pageIndex + 1] = [
@@ -322,7 +321,9 @@ const buildBboxMap = (bboxes, structure) => {
                 });
             }
             else {
-                const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
+                const bboxesFromLocation = bbox.location.includes('pages[')
+                    ? calculateLocation(bbox.location)
+                    : calculateLocationJSON(bbox.location);
                 bboxesFromLocation.forEach((bboxWithLocation) => {
                     bboxMap[bboxWithLocation.page] = [
                         ...(bboxMap[bboxWithLocation.page] || []),
@@ -381,7 +382,7 @@ const structurizeTree = (node) => {
         const [nodeList, mcidList, annotList] = groupChildren(node.children);
         ___default["default"].forEach(node.children, (child) => mcidListChildren.push(...extractMcidFromNode(child)));
         node.mcidListChildren = mcidListChildren;
-        node.children = ___default["default"].map(nodeList, child => structurizeTree(child));
+        node.children = ___default["default"].map(nodeList, (child) => structurizeTree(child));
         node.mcidList = updateMcidList(mcidList, node.children);
         if (annotList.length) {
             node.annotList = annotList;
@@ -424,7 +425,7 @@ const getMcidList = (node, mcidList = []) => {
     if (!(node.children instanceof Array))
         mcidList.push([node.children.mcidList, node.children.id]);
     else
-        ___default["default"].map(node.children, child => (mcidList = getMcidList(child, mcidList)));
+        ___default["default"].map(node.children, (child) => (mcidList = getMcidList(child, mcidList)));
     return mcidList;
 };
 const createBboxMap = (mcidList) => {
@@ -432,9 +433,9 @@ const createBboxMap = (mcidList) => {
     const bboxMap = {};
     const getPages = (list) => {
         const cleanedList = list.filter((obj) => !___default["default"].isNil(obj) && !___default["default"].isNil(obj.pageIndex));
-        return Array.from(new Set(cleanedList.map(obj => obj === null || obj === void 0 ? void 0 : obj.pageIndex)));
+        return Array.from(new Set(cleanedList.map((obj) => obj === null || obj === void 0 ? void 0 : obj.pageIndex)));
     };
-    mcidList.forEach(arr => {
+    mcidList.forEach((arr) => {
         const list = arr[0];
         const pages = getPages(list);
         mcidListPages.push(pages.length === 1 ? pages[0] : pages);
@@ -449,7 +450,7 @@ const createBboxMap = (mcidList) => {
         else {
             const [mcid, id] = mcidList[index];
             const multiBboxPagesObj = getMultiBboxPagesObj(mcid);
-            page.forEach(pageIndex => bboxMap[pageIndex + 1].push([multiBboxPagesObj[pageIndex + 1], id]));
+            page.forEach((pageIndex) => bboxMap[pageIndex + 1].push([multiBboxPagesObj[pageIndex + 1], id]));
         }
     });
     return bboxMap;
@@ -471,11 +472,11 @@ const createAllBboxes = (bboxesAll, pageMap, refMap, annotations, viewport, rota
             area: width * height,
         };
     });
-    return cleanArray(unfilteredBboxes).sort(({ area: area1 }, { area: area2 }) => (area1 < area2) ? 1 : (area1 > area2) ? -1 : 0);
+    return cleanArray(unfilteredBboxes).sort(({ area: area1 }, { area: area2 }) => area1 < area2 ? 1 : area1 > area2 ? -1 : 0);
 };
 const stepRegExp = /(pages|operators|usedGlyphs|content|font)\[(\d+)\]/;
 const calculateLocationInStreamOperator = (location) => {
-    const path = location.split("/");
+    const path = location.split('/');
     let pageIndex, operatorIndex, subOperatorIndex;
     path.forEach((step) => {
         var _a;
@@ -496,7 +497,7 @@ const calculateLocationInStreamOperator = (location) => {
                 break;
         }
     });
-    if (pageIndex == null || operatorIndex == null || (subOperatorIndex == null)) {
+    if (pageIndex == null || operatorIndex == null || subOperatorIndex == null) {
         return null;
     }
     return {
@@ -510,7 +511,7 @@ const getSelectedPageByLocation = (bboxLocation) => {
     const path = location.split('/');
     let pageNumber = -1;
     if ((location === null || location === void 0 ? void 0 : location.includes('pages')) && path[path.length - 1].startsWith('pages')) {
-        location.split('/').forEach(nodeString => {
+        location.split('/').forEach((nodeString) => {
             if (nodeString.includes('pages')) {
                 pageNumber = parseInt(nodeString.split(/[[\]]/)[1], 10) + 1;
             }
@@ -527,7 +528,9 @@ const getBboxPages = (bboxes, structure) => {
                 return pageIndex + 1;
             }
             else {
-                const bboxesFromLocation = bbox.location.includes('pages[') ? calculateLocation(bbox.location) : calculateLocationJSON(bbox.location);
+                const bboxesFromLocation = bbox.location.includes('pages[')
+                    ? calculateLocation(bbox.location)
+                    : calculateLocationJSON(bbox.location);
                 return bboxesFromLocation.length ? bboxesFromLocation[0].page : 0;
             }
         }
@@ -544,10 +547,10 @@ const checkIsBboxOutOfThePage = (bbox, scale, page) => {
     const top = parseFloat(bbox.location[1]) * scale;
     const width = parseFloat(bbox.location[2]) * scale;
     const height = parseFloat(bbox.location[3]) * scale;
-    return (top <= 0 && (top + height) <= 1 ||
-        left <= 0 && (left + width) <= 1 ||
-        parentHeight - top <= 1 && (top + height) >= parentHeight ||
-        parentWidth - left <= 1 && (left + width) >= parentWidth);
+    return ((top <= 0 && top + height <= 1) ||
+        (left <= 0 && left + width <= 1) ||
+        (parentHeight - top <= 1 && top + height >= parentHeight) ||
+        (parentWidth - left <= 1 && left + width >= parentWidth));
 };
 const calculateLocation = (location) => {
     const bboxes = [];
@@ -604,7 +607,7 @@ const calculateLocationJSON = (location) => {
 };
 const getTagsFromErrorPlace = (context, structure) => {
     const defaultValue = [[[], -1, undefined]];
-    let selectedTag = convertContextToPath(context);
+    const selectedTag = convertContextToPath(context);
     if (___default["default"].isEmpty(selectedTag)) {
         return defaultValue;
     }
@@ -616,11 +619,9 @@ const getTagsFromErrorPlace = (context, structure) => {
         return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
     }
     else if (selectedTag.hasOwnProperty('contentItems')) {
-        return [[undefined, selectedTag.pageIndex, [
-                    selectedTag.contentStream,
-                    selectedTag.content,
-                    ...selectedTag.contentItems
-                ]]];
+        return [
+            [undefined, selectedTag.pageIndex, [selectedTag.contentStream, selectedTag.content, ...selectedTag.contentItems]],
+        ];
     }
     else if (selectedTag instanceof Array) {
         let objectOfErrors = Object.assign({}, structure);
@@ -672,11 +673,14 @@ const convertContextToPath = (errorContext = '') => {
             const result = contextString.match(/pages\[(?<pages>\d+)\](\(.+\))?\/(annots\[(?<annots>\d+)\](\(.+\))?\/appearance\[\d\](\(.+\))?\/)?contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](\{mcid:\d+\})?(?<contentItems>((\(.+\))?\/contentItem\[(\d+)\](\{mcid:\d+\})?)+)/);
             if (result) {
                 try {
-                    let path = {};
+                    const path = {};
                     path.pageIndex = parseInt(result.groups.pages, 10);
                     path.contentStream = parseInt(result.groups.contentStream, 10);
                     path.content = parseInt(result.groups.content, 10);
-                    path.contentItems = result.groups.contentItems.split('/').filter((ci) => ci.includes('contentItem')).map((ci) => {
+                    path.contentItems = result.groups.contentItems
+                        .split('/')
+                        .filter((ci) => ci.includes('contentItem'))
+                        .map((ci) => {
                         var _a;
                         const contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/);
                         return parseInt(((_a = contentItemIndex === null || contentItemIndex === void 0 ? void 0 : contentItemIndex.groups) === null || _a === void 0 ? void 0 : _a.contentItem) || '-1', 10);
@@ -688,8 +692,8 @@ const convertContextToPath = (errorContext = '') => {
                     console.log('NoMCIDContentItemPathParseError:', err.message || err);
                 }
             }
-            let path = {};
-            contextString.split('/').forEach(nodeString => {
+            const path = {};
+            contextString.split('/').forEach((nodeString) => {
                 if (nodeString.includes('page')) {
                     path.pageIndex = parseInt(nodeString.split(/[[\]]/)[1], 10);
                 }
@@ -700,8 +704,8 @@ const convertContextToPath = (errorContext = '') => {
             return path;
         }
         else if (contextString.includes('annots')) {
-            let path = {};
-            contextString.split('/').forEach(nodeString => {
+            const path = {};
+            contextString.split('/').forEach((nodeString) => {
                 if (nodeString.includes('page')) {
                     path.pageIndex = parseInt(nodeString.split(/[[\]]/)[1], 10);
                 }
@@ -712,12 +716,9 @@ const convertContextToPath = (errorContext = '') => {
             return path;
         }
         contextString = contextString.split('PDStructTreeRoot)/')[1].split('/'); // cut path before start of Document
-        contextString.forEach(nodeString => {
+        contextString.forEach((nodeString) => {
             const nextIndex = parseInt(nodeString.split('](')[0].split('K[')[1], 10);
-            let nextTag = nodeString
-                .split('(')[1]
-                .split(')')[0]
-                .split(' ');
+            let nextTag = nodeString.split('(')[1].split(')')[0].split(' ');
             nextTag = nextTag[nextTag.length - 1];
             arrayOfNodes = [...arrayOfNodes, [nextIndex, nextTag]];
         });
@@ -751,7 +752,7 @@ function findAllMcid(tagObject) {
             func(obj.children);
         }
         else {
-            [...obj.children].forEach(child => func(child));
+            [...obj.children].forEach((child) => func(child));
         }
     }
     func(tagObject);
@@ -771,7 +772,7 @@ const parseMcidToBbox = (listOfMcid, pageMap, refMap, annotations, viewport, rot
     let leftOffset = left;
     let bottomOffset = bottom;
     if (listOfMcid instanceof Array) {
-        listOfMcid.forEach(mcid => {
+        listOfMcid.forEach((mcid) => {
             var _a;
             let currentBbox;
             if (mcid instanceof Object) {
@@ -804,12 +805,7 @@ const parseMcidToBbox = (listOfMcid, pageMap, refMap, annotations, viewport, rot
     }
     if (!coords || ___default["default"].isEmpty(coords))
         return [];
-    const coordsArray = rotateCoordinates([
-        coords.x + leftOffset,
-        coords.y + bottomOffset,
-        coords.width,
-        coords.height,
-    ], rotateAngle, viewport);
+    const coordsArray = rotateCoordinates([coords.x + leftOffset, coords.y + bottomOffset, coords.width, coords.height], rotateAngle, viewport);
     const rotatedViewport = rotateViewport(rotateAngle, viewport);
     return [coordsArray[0] - rotatedViewport[0], coordsArray[1] - rotatedViewport[1], coordsArray[2], coordsArray[3]];
 };
@@ -884,8 +880,8 @@ function elementInViewport(el) {
     }
     return (top >= parentScrollTop &&
         left >= parentScrollLeft &&
-        (top + height) <= (parentScrollTop + parent.clientHeight) &&
-        (left + width) <= (parentScrollLeft + parent.clientWidth));
+        top + height <= parentScrollTop + parent.clientHeight &&
+        left + width <= parentScrollLeft + parent.clientWidth);
 }
 function concatBoundingBoxes(newBoundingBox, oldBoundingBox) {
     if (___default["default"].isNil(oldBoundingBox) && ___default["default"].isNil(newBoundingBox)) {
@@ -906,6 +902,56 @@ function concatBoundingBoxes(newBoundingBox, oldBoundingBox) {
             Math.min(newBoundingBox.y, oldBoundingBox.y),
     };
 }
+const getLocationByContentItemPath = (contentItemPath, nMcidData, left, bottom) => {
+    let contentItemsBBoxes = nMcidData[contentItemPath[1]];
+    const contentItemsPath = contentItemPath.slice(2);
+    try {
+        contentItemsPath.forEach((ci, i) => {
+            if (contentItemsPath.length > i + 1 || !contentItemsBBoxes.final) {
+                contentItemsBBoxes = contentItemsBBoxes.contentItems[0];
+            }
+            contentItemsBBoxes = contentItemsBBoxes.contentItems[ci];
+        });
+        if (contentItemsBBoxes.contentItem) {
+            return [
+                contentItemsBBoxes.contentItem.x + left,
+                contentItemsBBoxes.contentItem.y + bottom,
+                contentItemsBBoxes.contentItem.w,
+                contentItemsBBoxes.contentItem.h,
+            ];
+        }
+        if (contentItemsBBoxes.contentItems.length) {
+            const contentItems = [];
+            const contentItemsBBoxesStack = [{ contentItems: contentItemsBBoxes.contentItems }];
+            while ((contentItemsBBoxes = contentItemsBBoxesStack.shift())) {
+                if (!contentItemsBBoxes.final) {
+                    contentItemsBBoxes = contentItemsBBoxes.contentItems[0];
+                }
+                if (contentItemsBBoxes.final) {
+                    contentItems.push(contentItemsBBoxes.contentItems[0].contentItem);
+                }
+                else {
+                    contentItemsBBoxesStack.push(...contentItemsBBoxes.contentItems);
+                }
+            }
+            if (contentItems.length) {
+                let x0 = Number.POSITIVE_INFINITY, y0 = Number.POSITIVE_INFINITY, x1 = 0, y1 = 0;
+                for (const { x, y, w, h } of contentItems) {
+                    x0 = Math.min(x, x0);
+                    y0 = Math.min(y, y0);
+                    x1 = Math.max(x + w, x1);
+                    y1 = Math.max(y + h, y1);
+                }
+                return [x0 + left, y0 + bottom, x1 - x0, y1 - y0];
+            }
+        }
+        return [0, 0, 0, 0];
+    }
+    catch (err) {
+        console.log('NoMCIDDataParseError:', err.message || err);
+        return [0, 0, 0, 0];
+    }
+};
 
 const WARNING_CODES = {
     BBOX_OUT_OF_THE_PAGE_VIEWPORT: 'BBOX_OUT_OF_THE_PAGE_VIEWPORT',
@@ -917,10 +963,10 @@ const bboxBorderHover = 'orangered';
 const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" }) `
   margin-left: auto;
   margin-right: auto;
-  height: ${(props) => props.height ? props.height * props.scale + 'px' : 'fit-content'};
-  width: ${(props) => props.width ? props.width * props.scale + 'px' : 'fit-content'};
+  height: ${(props) => (props.height ? props.height * props.scale + 'px' : 'fit-content')};
+  width: ${(props) => (props.width ? props.width * props.scale + 'px' : 'fit-content')};
   &.pdf-page_selected {
-    outline-color: ${(props) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
+    outline-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelected) || bboxBorderHover};
   }
 `;
 const PdfPage = (props) => {
@@ -957,7 +1003,7 @@ const PdfPage = (props) => {
         return;
     }, []);
     useIntersection.useIntersection(intersectionRef, {
-        threshold: [.2, .4, .5, .6, .8, 1],
+        threshold: [0.2, 0.4, 0.5, 0.6, 0.8, 1],
     }, (entry) => {
         if (isIntersecting !== entry.isIntersecting) {
             setIsIntersecting(entry.isIntersecting);
@@ -1002,10 +1048,10 @@ const PdfPage = (props) => {
         (_a = props.onPageLoadSuccess) === null || _a === void 0 ? void 0 : _a.call(props, page);
     }, [props.onPageLoadSuccess]);
     React.useEffect(() => {
-        const triggeredByBboxList = prevPageBboxes
-            && prevPageBboxes.page === page
-            && ___default["default"].isEqual(prevPageBboxes.customBbox, customBbox)
-            && prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
+        const triggeredByBboxList = prevPageBboxes &&
+            prevPageBboxes.page === page &&
+            ___default["default"].isEqual(prevPageBboxes.customBbox, customBbox) &&
+            prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
         if (page) {
             if (triggeredByBboxList && !(bboxList === null || bboxList === void 0 ? void 0 : bboxList.length))
                 setBboxesErrors([]);
@@ -1033,26 +1079,7 @@ const PdfPage = (props) => {
                             }
                         }
                         else if (bbox.contentItemPath) {
-                            const contentItemsPath = bbox.contentItemPath.slice(2);
-                            let contentItemsBBoxes = nMcidData[bbox.contentItemPath[1]];
-                            try {
-                                contentItemsPath.forEach((ci, i) => {
-                                    if (contentItemsPath.length > i + 1 || !contentItemsBBoxes.final) {
-                                        contentItemsBBoxes = contentItemsBBoxes.contentItems[0];
-                                    }
-                                    contentItemsBBoxes = contentItemsBBoxes.contentItems[ci];
-                                });
-                                bbox.location = [
-                                    contentItemsBBoxes.contentItem.x + left,
-                                    contentItemsBBoxes.contentItem.y + bottom,
-                                    contentItemsBBoxes.contentItem.w,
-                                    contentItemsBBoxes.contentItem.h
-                                ];
-                            }
-                            catch (err) {
-                                console.log('NoMCIDDataParseError:', err.message || err);
-                                bbox.location = [0, 0, 0, 0];
-                            }
+                            bbox.location = getLocationByContentItemPath(bbox.contentItemPath, nMcidData, left, bottom);
                         }
                         if (___default["default"].isFinite(bbox.operatorIndex) && bbox.subOperatorIndex != null) {
                             const { operatorIndex, subOperatorIndex } = bbox;
@@ -1065,9 +1092,7 @@ const PdfPage = (props) => {
                             }
                             else {
                                 const coords = operator[subOperatorIndex];
-                                bbox.location = coords
-                                    ? getBboxForViewport(coords, page.view, page.rotate, left, bottom)
-                                    : [];
+                                bbox.location = coords ? getBboxForViewport(coords, page.view, page.rotate, left, bottom) : [];
                             }
                         }
                         return bbox;
@@ -1079,7 +1104,7 @@ const PdfPage = (props) => {
                                 isVisible: true,
                                 id: customBbox.id,
                                 location: customBbox.rect,
-                                area: customBbox.rect[2] * customBbox.rect[3]
+                                area: customBbox.rect[2] * customBbox.rect[3],
                             });
                         }
                         setBboxesAll(allBboxes);
@@ -1126,7 +1151,8 @@ const PdfPage = (props) => {
                 break;
             }
             case TreeBboxSelectionMode.SELECTED:
-            default: isStructureBboxSelected = (bbox === null || bbox === void 0 ? void 0 : bbox.id) === activeBboxId;
+            default:
+                isStructureBboxSelected = (bbox === null || bbox === void 0 ? void 0 : bbox.id) === activeBboxId;
         }
         return isStructureBboxSelected;
     }, [activeBboxIndex, activeBboxId]);
@@ -1154,7 +1180,7 @@ const PdfPage = (props) => {
             const getArea = (arr) => ___default["default"].round(+arr[2], 4) * ___default["default"].round(+arr[3], 4);
             const areaAll = locationAll ? getArea(locationAll) : 0;
             const areaError = locationError ? getArea(locationError) : 0;
-            return areaAll < areaError ? 1 : (areaAll > areaError ? -1 : 0);
+            return areaAll < areaError ? 1 : areaAll > areaError ? -1 : 0;
         });
     }, [bboxesErrors, bboxesAll]);
     const activeBboxes = React.useMemo(() => bboxes.filter((bbox) => {
@@ -1163,14 +1189,16 @@ const PdfPage = (props) => {
     }), [activeBboxIndex, activeBboxId]);
     React.useEffect(React.useCallback(() => {
         var _a;
-        if (activeBboxes && activeBboxes.length && activeBboxes.every((activeBbox) => checkIsBboxOutOfThePage(activeBbox, scale, props.page))) {
+        if (activeBboxes &&
+            activeBboxes.length &&
+            activeBboxes.every((activeBbox) => checkIsBboxOutOfThePage(activeBbox, scale, props.page))) {
             (_a = props.onWarning) === null || _a === void 0 ? void 0 : _a.call(props, WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT);
         }
     }, [activeBboxes, scale, props.page]), [activeBboxes]);
     return (React__default["default"].createElement("div", { className: "pdf-page-min-margin-wrapper", style: { margin: '0 15px' } },
-        React__default["default"].createElement(StyledPdfPage, { className: `pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`, "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? React__default["default"].createElement(React__default["default"].Fragment, null,
+        React__default["default"].createElement(StyledPdfPage, { className: `pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`, "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {} }, loaded ? (React__default["default"].createElement(React__default["default"].Fragment, null,
             React__default["default"].createElement(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, customTextRenderer: props.customTextRenderer }),
-            isRendered ? React__default["default"].createElement("div", { className: "bbox-wrapper" }, bboxes.map((bbox, index) => (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, pageBorders: pageBorders, onClick: onBboxClick(bbox.index, bbox.id), disabled: isBboxDisabled(bbox), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isBboxRelated(bbox), scale: pageScale, selectionMode: props.treeBboxSelectionMode, colorScheme: props.colorScheme })))) : null) : null)));
+            isRendered ? (React__default["default"].createElement("div", { className: "bbox-wrapper" }, bboxes.map((bbox, index) => (React__default["default"].createElement(Bbox$1, { key: index, bbox: bbox, pageBorders: pageBorders, onClick: onBboxClick(bbox.index, bbox.id), disabled: isBboxDisabled(bbox), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isBboxRelated(bbox), scale: pageScale, selectionMode: props.treeBboxSelectionMode, colorScheme: props.colorScheme }))))) : null)) : null)));
 };
 var PdfPage$1 = React.memo(PdfPage);
 
@@ -1246,12 +1274,12 @@ const PdfDocument = (props) => {
     const activeBbox = React.useMemo(() => {
         return activeBboxIndex != null ? bboxes[activeBboxIndex] : null;
     }, [activeBboxIndex, bboxes]);
-    const visibleBboxIndexes = React.useMemo(() => (bboxes.reduce((visibleIndexes, bbox, index) => {
+    const visibleBboxIndexes = React.useMemo(() => bboxes.reduce((visibleIndexes, bbox, index) => {
         if (bbox.isVisible !== false) {
             visibleIndexes.push(index);
         }
         return visibleIndexes;
-    }, [])), [bboxes]);
+    }, []), [bboxes]);
     const shownPages = React.useMemo(() => {
         if (props.showAllPages) {
             return Array.from(new Array(maxPage), (_el, index) => index + 1);
@@ -1294,8 +1322,10 @@ const PdfDocument = (props) => {
         const { clientWidth: pageWidth, clientHeight: pageHeight } = pageEl;
         const selectedBboxes = document.querySelectorAll('.pdf-bbox_selected');
         let [x0, y0, x1, y1] = [
-            Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY,
-            Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY,
+            Number.POSITIVE_INFINITY,
+            Number.POSITIVE_INFINITY,
+            Number.NEGATIVE_INFINITY,
+            Number.NEGATIVE_INFINITY,
         ];
         selectedBboxes.forEach((b) => {
             const { x, y, width, height } = b.getBoundingClientRect();
@@ -1305,16 +1335,14 @@ const PdfDocument = (props) => {
             y1 = Math.max(y1, y + height);
         });
         let newScale = 1;
-        const w = (x1 - x0), h = (y1 - y0);
+        const w = x1 - x0, h = y1 - y0;
         if (Number.isFinite(w)) {
             const wRatio = w / pageWidth;
-            newScale = (_d = (_c = autoScaleRatio
-                .find(({ ratio }, i, { length }) => wRatio < ratio || i + 1 === length)) === null || _c === void 0 ? void 0 : _c.scale) !== null && _d !== void 0 ? _d : 1;
+            newScale = (_d = (_c = autoScaleRatio.find(({ ratio }, i, { length }) => wRatio < ratio || i + 1 === length)) === null || _c === void 0 ? void 0 : _c.scale) !== null && _d !== void 0 ? _d : 1;
         }
         if (Number.isFinite(h)) {
             const hRatio = h / pageHeight;
-            const tempScale = (_f = (_e = autoScaleRatio
-                .find(({ ratio }, i, { length }) => hRatio < ratio || i + 1 === length)) === null || _e === void 0 ? void 0 : _e.scale) !== null && _f !== void 0 ? _f : 1;
+            const tempScale = (_f = (_e = autoScaleRatio.find(({ ratio }, i, { length }) => hRatio < ratio || i + 1 === length)) === null || _e === void 0 ? void 0 : _e.scale) !== null && _f !== void 0 ? _f : 1;
             newScale = Math.min(newScale, tempScale);
         }
         if (newScale !== ((_g = props.scale) !== null && _g !== void 0 ? _g : 1)) {
@@ -1336,7 +1364,7 @@ const PdfDocument = (props) => {
             const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
             const finder = isBboxMode
                 ? (value) => ___default["default"].find(value, { index: activeBboxIndex })
-                : (value) => ___default["default"].find(value, arr => arr[1] === activeBboxId);
+                : (value) => ___default["default"].find(value, (arr) => arr[1] === activeBboxId);
             for (const [key, value] of entries) {
                 if (finder(value)) {
                     bboxPage = parseInt(key);
@@ -1387,10 +1415,7 @@ const PdfDocument = (props) => {
             }
         }
         return;
-    }, [
-        props.activeBboxIndex, props.activeBboxId,
-        bboxMap, treeElementsBboxes, customBbox,
-    ]);
+    }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes, customBbox]);
     React.useEffect(() => {
         if (activeBbox) {
             const selectedPage = getSelectedPageByLocation(activeBbox.location);
@@ -1519,7 +1544,9 @@ const PdfDocument = (props) => {
                 if (direction === 'up') {
                     return currentPosition > 0 ? visibleBboxIndexes[currentPosition - 1] : activeBboxIndex;
                 }
-                return currentPosition < visibleBboxIndexes.length - 1 ? visibleBboxIndexes[currentPosition + 1] : activeBboxIndex;
+                return currentPosition < visibleBboxIndexes.length - 1
+                    ? visibleBboxIndexes[currentPosition + 1]
+                    : activeBboxIndex;
             };
             if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowUp') {
                 props.onSelectBbox(getVisibleBboxIndex('up'));
@@ -1527,7 +1554,7 @@ const PdfDocument = (props) => {
             else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowDown') {
                 props.onSelectBbox(getVisibleBboxIndex('down'));
             }
-            else if (event.key === 'ArrowLeft' && (props.page - 1 > 0)) {
+            else if (event.key === 'ArrowLeft' && props.page - 1 > 0) {
                 (_a = props.onPageChange) === null || _a === void 0 ? void 0 : _a.call(props, props.page - 1);
             }
             else if (event.key === 'ArrowRight' && props.page !== maxPage) {
@@ -1539,11 +1566,13 @@ const PdfDocument = (props) => {
             document.removeEventListener('keydown', handlekeydownEvent);
         };
     }, [activeBboxIndex, props.page, maxPage, visibleBboxIndexes]);
-    return (React__default["default"].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, React.useMemo(() => loaded ? shownPages.map((page) => React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: (ref) => {
-            var _a;
-            renderedPages.current.set(page, ref);
-            (_a = props.onPageRenderSuccess) === null || _a === void 0 ? void 0 : _a.call(props);
-        }, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: treeElementsBboxes[page], treeBboxSelectionMode: props.treeBboxSelectionMode, groupId: activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.groupId, customBbox: (customBbox === null || customBbox === void 0 ? void 0 : customBbox.page) === page ? customBbox : undefined, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning })) : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])));
+    return (React__default["default"].createElement(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate }, React.useMemo(() => loaded
+        ? shownPages.map((page) => (React__default["default"].createElement(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, key: page, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: (ref) => {
+                var _a;
+                renderedPages.current.set(page, ref);
+                (_a = props.onPageRenderSuccess) === null || _a === void 0 ? void 0 : _a.call(props);
+            }, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: treeElementsBboxes[page], treeBboxSelectionMode: props.treeBboxSelectionMode, groupId: activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.groupId, customBbox: (customBbox === null || customBbox === void 0 ? void 0 : customBbox.page) === page ? customBbox : undefined, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning })))
+        : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage])));
 };
 var PdfDocument$1 = React.memo(PdfDocument);
 
