@@ -931,12 +931,12 @@ function clearPrimitiveCaches() {
   NameCache = Object.create(null);
   RefCache = Object.create(null);
 }
-class primitives_Name {
+class Name {
   constructor(name) {
     this.name = name;
   }
   static get(name) {
-    return NameCache[name] ||= new primitives_Name(name);
+    return NameCache[name] ||= new Name(name);
   }
 }
 class Cmd {
@@ -1045,8 +1045,8 @@ class Dict {
   }
   setIfName(key, value) {
     if (typeof value === "string") {
-      this.set(key, primitives_Name.get(value));
-    } else if (value instanceof primitives_Name) {
+      this.set(key, Name.get(value));
+    } else if (value instanceof Name) {
       this.set(key, value);
     }
   }
@@ -1200,7 +1200,7 @@ class RefSetCache {
   }
 }
 function isName(v, name) {
-  return v instanceof primitives_Name && (name === undefined || v.name === name);
+  return v instanceof Name && (name === undefined || v.name === name);
 }
 function isCmd(v, cmd) {
   return v instanceof Cmd && (cmd === undefined || v.cmd === cmd);
@@ -3982,7 +3982,7 @@ class ColorSpaceUtils {
       }
       cs = xref.fetch(cs);
     }
-    if (cs instanceof primitives_Name) {
+    if (cs instanceof Name) {
       csName = cs.name;
       const cachedCS = localColorSpaceCache.getByName(csName);
       if (cachedCS) {
@@ -4031,7 +4031,7 @@ class ColorSpaceUtils {
       globalColorSpaceCache
     } = options;
     cs = xref.fetchIfRef(cs);
-    if (cs instanceof primitives_Name) {
+    if (cs instanceof Name) {
       switch (cs.name) {
         case "G":
         case "DeviceGray":
@@ -4052,7 +4052,7 @@ class ColorSpaceUtils {
             if (colorSpaces instanceof Dict) {
               const resourcesCS = colorSpaces.get(cs.name);
               if (resourcesCS) {
-                if (resourcesCS instanceof primitives_Name) {
+                if (resourcesCS instanceof Name) {
                   return this.#parse(resourcesCS, options);
                 }
                 cs = resourcesCS;
@@ -10530,7 +10530,7 @@ class Parser {
         case "<<":
           const dict = new Dict(this.xref);
           while (!isCmd(this.buf1, ">>") && this.buf1 !== EOF) {
-            if (!(this.buf1 instanceof primitives_Name)) {
+            if (!(this.buf1 instanceof Name)) {
               info("Malformed dictionary: key must be a name object");
               this.shift();
               continue;
@@ -10815,7 +10815,7 @@ class Parser {
     const dictMap = Object.create(null);
     let dictLength;
     while (!isCmd(this.buf1, "ID") && this.buf1 !== EOF) {
-      if (!(this.buf1 instanceof primitives_Name)) {
+      if (!(this.buf1 instanceof Name)) {
         throw new FormatError("Dictionary key must be a name object");
       }
       const key = this.buf1.name;
@@ -10830,11 +10830,11 @@ class Parser {
     }
     const filter = this.xref.fetchIfRef(dictMap.F || dictMap.Filter);
     let filterName;
-    if (filter instanceof primitives_Name) {
+    if (filter instanceof Name) {
       filterName = filter.name;
     } else if (Array.isArray(filter)) {
       const filterZero = this.xref.fetchIfRef(filter[0]);
-      if (filterZero instanceof primitives_Name) {
+      if (filterZero instanceof Name) {
         filterName = filterZero.name;
       }
     }
@@ -10978,7 +10978,7 @@ class Parser {
   filter(stream, dict, length) {
     let filter = dict.get("F", "Filter");
     let params = dict.get("DP", "DecodeParms");
-    if (filter instanceof primitives_Name) {
+    if (filter instanceof Name) {
       if (Array.isArray(params)) {
         warn("/DecodeParms should not be an Array, when /Filter is a Name.");
       }
@@ -10990,7 +10990,7 @@ class Parser {
       const paramsArray = params;
       for (let i = 0, ii = filterArray.length; i < ii; ++i) {
         filter = this.xref.fetchIfRef(filterArray[i]);
-        if (!(filter instanceof primitives_Name)) {
+        if (!(filter instanceof Name)) {
           throw new FormatError(`Bad filter name "${filter}"`);
         }
         params = null;
@@ -11292,7 +11292,7 @@ class Lexer {
     if (strBuf.length > 127) {
       warn(`Name token is longer than allowed by the spec: ${strBuf.length}`);
     }
-    return primitives_Name.get(strBuf.join(""));
+    return Name.get(strBuf.join(""));
   }
   _hexStringWarn(ch) {
     const MAX_HEX_STRING_NUM_WARN = 5;
@@ -11835,7 +11835,7 @@ function parseWMode(cMap, lexer) {
 }
 function parseCMapName(cMap, lexer) {
   const obj = lexer.getObj();
-  if (obj instanceof primitives_Name) {
+  if (obj instanceof Name) {
     cMap.name = obj.name;
   }
 }
@@ -11846,7 +11846,7 @@ async function parseCMap(cMap, lexer, fetchBuiltInCMap, useCMap) {
       const obj = lexer.getObj();
       if (obj === EOF) {
         break;
-      } else if (obj instanceof primitives_Name) {
+      } else if (obj instanceof Name) {
         if (obj.name === "WMode") {
           parseWMode(cMap, lexer);
         } else if (obj.name === "CMapName") {
@@ -11858,7 +11858,7 @@ async function parseCMap(cMap, lexer, fetchBuiltInCMap, useCMap) {
           case "endcmap":
             break objLoop;
           case "usecmap":
-            if (previous instanceof primitives_Name) {
+            if (previous instanceof Name) {
               embeddedUseCMap = previous.name;
             }
             break;
@@ -11940,7 +11940,7 @@ class CMapFactory {
     fetchBuiltInCMap,
     useCMap
   }) {
-    if (encoding instanceof primitives_Name) {
+    if (encoding instanceof Name) {
       return createBuiltInCMap(encoding.name, fetchBuiltInCMap);
     } else if (encoding instanceof BaseStream) {
       const parsedCMap = await parseCMap(new CMap(), new Lexer(encoding), fetchBuiltInCMap, useCMap);
@@ -28292,11 +28292,11 @@ function getXfaFontWidths(name) {
 function getXfaFontDict(name) {
   const widths = getXfaFontWidths(name);
   const dict = new Dict(null);
-  dict.set("BaseFont", primitives_Name.get(name));
-  dict.set("Type", primitives_Name.get("Font"));
-  dict.set("Subtype", primitives_Name.get("CIDFontType2"));
-  dict.set("Encoding", primitives_Name.get("Identity-H"));
-  dict.set("CIDToGIDMap", primitives_Name.get("Identity"));
+  dict.set("BaseFont", Name.get(name));
+  dict.set("Type", Name.get("Font"));
+  dict.set("Subtype", Name.get("CIDFontType2"));
+  dict.set("Encoding", Name.get("Identity-H"));
+  dict.set("CIDToGIDMap", Name.get("Identity"));
   dict.set("W", widths);
   dict.set("FirstChar", widths[0]);
   dict.set("LastChar", widths.at(-2) + widths.at(-1).length - 1);
@@ -31408,11 +31408,11 @@ class PDFImage {
     const dict = image.dict;
     const filter = dict.get("F", "Filter");
     let filterName;
-    if (filter instanceof primitives_Name) {
+    if (filter instanceof Name) {
       filterName = filter.name;
     } else if (Array.isArray(filter)) {
       const filterZero = xref.fetchIfRef(filter[0]);
-      if (filterZero instanceof primitives_Name) {
+      if (filterZero instanceof Name) {
         filterName = filterZero.name;
       }
     }
@@ -31487,24 +31487,24 @@ class PDFImage {
       const hasColorSpace = !!colorSpace;
       if (!hasColorSpace) {
         if (this.jpxDecoderOptions) {
-          colorSpace = primitives_Name.get("DeviceRGBA");
+          colorSpace = Name.get("DeviceRGBA");
         } else {
           switch (image.numComps) {
             case 1:
-              colorSpace = primitives_Name.get("DeviceGray");
+              colorSpace = Name.get("DeviceGray");
               break;
             case 3:
-              colorSpace = primitives_Name.get("DeviceRGB");
+              colorSpace = Name.get("DeviceRGB");
               break;
             case 4:
-              colorSpace = primitives_Name.get("DeviceCMYK");
+              colorSpace = Name.get("DeviceCMYK");
               break;
             default:
               throw new Error(`Images with ${image.numComps} color components not supported.`);
           }
         }
       } else if (this.jpxDecoderOptions?.smaskInData) {
-        colorSpace = primitives_Name.get("DeviceRGBA");
+        colorSpace = Name.get("DeviceRGBA");
       }
       this.colorSpace = ColorSpaceUtils.parse({
         cs: colorSpace,
@@ -32209,7 +32209,7 @@ function normalizeBlendMode(value, parsingArray = false) {
     warn(`Unsupported blend mode Array: ${value}`);
     return "source-over";
   }
-  if (!(value instanceof primitives_Name)) {
+  if (!(value instanceof Name)) {
     if (parsingArray) {
       return null;
     }
@@ -32370,7 +32370,7 @@ class PartialEvaluator {
             processed.put(graphicState.objId);
           }
           const bm = graphicState.get("BM");
-          if (bm instanceof primitives_Name) {
+          if (bm instanceof Name) {
             if (bm.name !== "Normal") {
               return true;
             }
@@ -32378,7 +32378,7 @@ class PartialEvaluator {
           }
           if (bm !== undefined && Array.isArray(bm)) {
             for (const element of bm) {
-              if (element instanceof primitives_Name && element.name !== "Normal") {
+              if (element instanceof Name && element.name !== "Normal") {
                 return true;
               }
             }
@@ -32842,7 +32842,7 @@ class PartialEvaluator {
     });
   }
   async handleSetFont(resources, fontArgs, fontRef, operatorList, task, state, fallbackFontDict = null, cssFontInfo = null) {
-    const fontName = fontArgs?.[0] instanceof primitives_Name ? fontArgs[0].name : null;
+    const fontName = fontArgs?.[0] instanceof Name ? fontArgs[0].name : null;
     const translated = await this.loadFont(fontName, fontRef, resources, task, fallbackFontDict, cssFontInfo);
     if (translated.font.isType3Font) {
       operatorList.addDependencies(translated.type3Dependencies);
@@ -33215,7 +33215,7 @@ class PartialEvaluator {
   }
   handleColorN(operatorList, fn, args, cs, patterns, resources, task, localColorSpaceCache, localTilingPatternCache, localShadingPatternCache) {
     const patternName = args.pop();
-    if (patternName instanceof primitives_Name) {
+    if (patternName instanceof Name) {
       const rawPattern = patterns.getRaw(patternName.name);
       const localTilingPattern = rawPattern instanceof Ref && localTilingPatternCache.getByRef(rawPattern);
       if (localTilingPattern) {
@@ -33260,7 +33260,7 @@ class PartialEvaluator {
     }
     const length = array.length;
     const operator = this.xref.fetchIfRef(array[0]);
-    if (length < 2 || !(operator instanceof primitives_Name)) {
+    if (length < 2 || !(operator instanceof Name)) {
       warn("Invalid visibility expression");
       return;
     }
@@ -33288,7 +33288,7 @@ class PartialEvaluator {
   }
   async parseMarkedContentProps(contentProperties, resources) {
     let optionalContent;
-    if (contentProperties instanceof primitives_Name) {
+    if (contentProperties instanceof Name) {
       const properties = resources.get("Properties");
       optionalContent = properties.get(contentProperties.name);
     } else if (contentProperties instanceof Dict) {
@@ -33327,7 +33327,7 @@ class PartialEvaluator {
         return {
           type: optionalContentType,
           ids: groupIds,
-          policy: optionalContent.get("P") instanceof primitives_Name ? optionalContent.get("P").name : null,
+          policy: optionalContent.get("P") instanceof Name ? optionalContent.get("P").name : null,
           expression: null
         };
       } else if (optionalContentGroups instanceof Ref) {
@@ -33416,7 +33416,7 @@ class PartialEvaluator {
         prevStreamPos = stream.pos;
         switch (fn | 0) {
           case OPS.paintXObject:
-            isValidName = args[0] instanceof primitives_Name;
+            isValidName = args[0] instanceof Name;
             name = args[0].name;
             if (isValidName) {
               const localImage = localImageCache.getByName(name);
@@ -33446,7 +33446,7 @@ class PartialEvaluator {
                 throw new FormatError("XObject should be a stream");
               }
               const type = xobj.dict.get("Subtype");
-              if (!(type instanceof primitives_Name)) {
+              if (!(type instanceof Name)) {
                 throw new FormatError("XObject should have a Name subtype");
               }
               if (type.name === "Form") {
@@ -33706,7 +33706,7 @@ class PartialEvaluator {
             fn = OPS.shadingFill;
             break;
           case OPS.setGState:
-            isValidName = args[0] instanceof primitives_Name;
+            isValidName = args[0] instanceof Name;
             name = args[0].name;
             if (isValidName) {
               const localGStateObj = localGStateCache.getByName(name);
@@ -33830,12 +33830,12 @@ class PartialEvaluator {
           case OPS.endCompat:
             continue;
           case OPS.beginMarkedContentProps:
-            if (args[1] instanceof primitives_Name) {
+            if (args[1] instanceof Name) {
               const reference = resources.get("Properties").get(args[1].name);
               args = [args[0], reference];
             }
             boundingBoxCalculator.parseOperator(fn, args);
-            if (!(args[0] instanceof primitives_Name)) {
+            if (!(args[0] instanceof Name)) {
               warn(`Expected name for beginMarkedContentProps arg0=${args[0]}`);
               operatorList.addOp(OPS.beginMarkedContentProps, ["OC", null]);
               continue;
@@ -34537,7 +34537,7 @@ class PartialEvaluator {
           case OPS.paintXObject:
             flushTextContentItem();
             xobjs ??= resources.get("XObject") || Dict.empty;
-            isValidName = args[0] instanceof primitives_Name;
+            isValidName = args[0] instanceof Name;
             name = args[0].name;
             if (isValidName && emptyXObjectCache.getByName(name)) {
               break;
@@ -34566,7 +34566,7 @@ class PartialEvaluator {
                 dict
               } = xobj;
               const type = dict.get("Subtype");
-              if (!(type instanceof primitives_Name)) {
+              if (!(type instanceof Name)) {
                 throw new FormatError("XObject should have a Name subtype");
               }
               if (type.name !== "Form") {
@@ -34627,7 +34627,7 @@ class PartialEvaluator {
             }));
             return;
           case OPS.setGState:
-            isValidName = args[0] instanceof primitives_Name;
+            isValidName = args[0] instanceof Name;
             name = args[0].name;
             if (isValidName && emptyGStateCache.getByName(name)) {
               break;
@@ -34671,7 +34671,7 @@ class PartialEvaluator {
               markedContentData.level++;
               textContent.items.push({
                 type: "beginMarkedContent",
-                tag: args[0] instanceof primitives_Name ? args[0].name : null
+                tag: args[0] instanceof Name ? args[0].name : null
               });
             }
             break;
@@ -34686,7 +34686,7 @@ class PartialEvaluator {
               textContent.items.push({
                 type: "beginMarkedContentProps",
                 id: Number.isInteger(mcid) ? `${self.idFactory.getPageObjId()}_mc${mcid}` : null,
-                tag: args[0] instanceof primitives_Name ? args[0].name : null
+                tag: args[0] instanceof Name ? args[0].name : null
               });
             }
             break;
@@ -34765,7 +34765,7 @@ class PartialEvaluator {
       encoding = dict.get("Encoding");
       if (encoding instanceof Dict) {
         baseEncodingName = encoding.get("BaseEncoding");
-        baseEncodingName = baseEncodingName instanceof primitives_Name ? baseEncodingName.name : null;
+        baseEncodingName = baseEncodingName instanceof Name ? baseEncodingName.name : null;
         if (encoding.has("Differences")) {
           const diffEncoding = encoding.get("Differences");
           let index = 0;
@@ -34773,14 +34773,14 @@ class PartialEvaluator {
             const data = xref.fetchIfRef(entry);
             if (typeof data === "number") {
               index = data;
-            } else if (data instanceof primitives_Name) {
+            } else if (data instanceof Name) {
               differences[index++] = data.name;
             } else {
               throw new FormatError(`Invalid entry in 'Differences' array: ${data}`);
             }
           }
         }
-      } else if (encoding instanceof primitives_Name) {
+      } else if (encoding instanceof Name) {
         baseEncodingName = encoding.name;
       } else {
         const msg = "Encoding is not a Name nor a Dict";
@@ -34932,7 +34932,7 @@ class PartialEvaluator {
         registry,
         ordering
       } = properties.cidSystemInfo;
-      const ucs2CMapName = primitives_Name.get(`${registry}-${ordering}-UCS2`);
+      const ucs2CMapName = Name.get(`${registry}-${ordering}-UCS2`);
       const ucs2CMap = await CMapFactory.create({
         encoding: ucs2CMapName,
         fetchBuiltInCMap: this._fetchBuiltInCMapBound,
@@ -34961,7 +34961,7 @@ class PartialEvaluator {
     if (!cmapObj) {
       return null;
     }
-    if (cmapObj instanceof primitives_Name) {
+    if (cmapObj instanceof Name) {
       const cmap = await CMapFactory.create({
         encoding: cmapObj,
         fetchBuiltInCMap: this._fetchBuiltInCMapBound,
@@ -35117,7 +35117,7 @@ class PartialEvaluator {
         defaultWidth = typeof missingWidth === "number" ? missingWidth : 0;
       } else {
         const baseFontName = dict.get("BaseFont");
-        if (baseFontName instanceof primitives_Name) {
+        if (baseFontName instanceof Name) {
           const metrics = this.getBaseFontMetrics(baseFontName.name);
           glyphsWidths = this.buildCharCodeToWidth(metrics.widths, properties);
           defaultWidth = metrics.defaultWidth;
@@ -35196,7 +35196,7 @@ class PartialEvaluator {
   preEvaluateFont(dict) {
     const baseDict = dict;
     let type = dict.get("Subtype");
-    if (!(type instanceof primitives_Name)) {
+    if (!(type instanceof Name)) {
       throw new FormatError("invalid font Subtype");
     }
     let composite = false;
@@ -35211,7 +35211,7 @@ class PartialEvaluator {
         throw new FormatError("Descendant font is not a dictionary.");
       }
       type = dict.get("Subtype");
-      if (!(type instanceof primitives_Name)) {
+      if (!(type instanceof Name)) {
         throw new FormatError("invalid font Subtype");
       }
       composite = true;
@@ -35229,13 +35229,13 @@ class PartialEvaluator {
     if (descriptor) {
       hash = new MurmurHash3_64();
       const encoding = baseDict.getRaw("Encoding");
-      if (encoding instanceof primitives_Name) {
+      if (encoding instanceof Name) {
         hash.update(encoding.name);
       } else if (encoding instanceof Ref) {
         hash.update(encoding.toString());
       } else if (encoding instanceof Dict) {
         for (const entry of encoding.getRawValues()) {
-          if (entry instanceof primitives_Name) {
+          if (entry instanceof Name) {
             hash.update(entry.name);
           } else if (entry instanceof Ref) {
             hash.update(entry.toString());
@@ -35244,7 +35244,7 @@ class PartialEvaluator {
               diffBuf = new Array(diffLength);
             for (let j = 0; j < diffLength; j++) {
               const diffEntry = entry[j];
-              if (diffEntry instanceof primitives_Name) {
+              if (diffEntry instanceof Name) {
                 diffBuf[j] = diffEntry.name;
               } else if (typeof diffEntry === "number" || diffEntry instanceof Ref) {
                 diffBuf[j] = diffEntry.toString();
@@ -35259,7 +35259,7 @@ class PartialEvaluator {
         const stream = toUnicode.str || toUnicode;
         const uint8array = stream.buffer ? new Uint8Array(stream.buffer.buffer, 0, stream.bufferLength) : new Uint8Array(stream.bytes.buffer, stream.start, stream.end - stream.start);
         hash.update(uint8array);
-      } else if (toUnicode instanceof primitives_Name) {
+      } else if (toUnicode instanceof Name) {
         hash.update(toUnicode.name);
       }
       const widths = dict.get("Widths") || baseDict.get("Widths");
@@ -35293,7 +35293,7 @@ class PartialEvaluator {
           hash.update(widthsBuf.join());
         }
         const cidToGidMap = dict.getRaw("CIDToGIDMap") || baseDict.getRaw("CIDToGIDMap");
-        if (cidToGidMap instanceof primitives_Name) {
+        if (cidToGidMap instanceof Name) {
           hash.update(cidToGidMap.name);
         } else if (cidToGidMap instanceof Ref) {
           hash.update(cidToGidMap.toString());
@@ -35331,7 +35331,7 @@ class PartialEvaluator {
         descriptor = Dict.empty;
       } else {
         let baseFontName = dict.get("BaseFont");
-        if (!(baseFontName instanceof primitives_Name)) {
+        if (!(baseFontName instanceof Name)) {
           throw new FormatError("Base font is not specified");
         }
         baseFontName = baseFontName.name.replaceAll(/[,_]/g, "-");
@@ -35386,16 +35386,16 @@ class PartialEvaluator {
     let fontName = descriptor.get("FontName");
     let baseFont = dict.get("BaseFont");
     if (typeof fontName === "string") {
-      fontName = primitives_Name.get(fontName);
+      fontName = Name.get(fontName);
     }
     if (typeof baseFont === "string") {
-      baseFont = primitives_Name.get(baseFont);
+      baseFont = Name.get(baseFont);
     }
     const fontNameStr = fontName?.name;
     const baseFontStr = baseFont?.name;
     if (isType3Font) {
       if (!fontNameStr) {
-        fontName = primitives_Name.get(type);
+        fontName = Name.get(type);
       }
     } else if (fontNameStr !== baseFontStr) {
       info(`The FontDescriptor's FontName is "${fontNameStr}" but ` + `should be the same as the Font's BaseFont "${baseFontStr}".`);
@@ -35404,7 +35404,7 @@ class PartialEvaluator {
       }
       fontName ||= baseFont;
     }
-    if (!(fontName instanceof primitives_Name)) {
+    if (!(fontName instanceof Name)) {
       throw new FormatError("invalid font name");
     }
     let fontFile, subtype, length1, length2, length3;
@@ -35430,7 +35430,7 @@ class PartialEvaluator {
     if (fontFile) {
       if (fontFile.dict) {
         const subtypeEntry = fontFile.dict.get("Subtype");
-        if (subtypeEntry instanceof primitives_Name) {
+        if (subtypeEntry instanceof Name) {
           subtype = subtypeEntry.name;
         }
         length1 = fontFile.dict.get("Length1");
@@ -35514,7 +35514,7 @@ class PartialEvaluator {
     };
     if (composite) {
       const cidEncoding = baseDict.get("Encoding");
-      if (cidEncoding instanceof primitives_Name) {
+      if (cidEncoding instanceof Name) {
         properties.cidEncoding = cidEncoding.name;
       }
       const cMap = await CMapFactory.create({
@@ -35555,10 +35555,10 @@ class PartialEvaluator {
   }
   static get fallbackFontDict() {
     const dict = new Dict();
-    dict.set("BaseFont", primitives_Name.get("Helvetica"));
-    dict.set("Type", primitives_Name.get("FallbackType"));
-    dict.set("Subtype", primitives_Name.get("FallbackType"));
-    dict.set("Encoding", primitives_Name.get("WinAnsiEncoding"));
+    dict.set("BaseFont", Name.get("Helvetica"));
+    dict.set("Type", Name.get("FallbackType"));
+    dict.set("Subtype", Name.get("FallbackType"));
+    dict.set("Encoding", Name.get("WinAnsiEncoding"));
     return shadow(this, "fallbackFontDict", dict);
   }
 }
@@ -36364,7 +36364,7 @@ class DefaultAppearanceEvaluator extends EvaluatorPreprocessor {
         switch (fn | 0) {
           case OPS.setFont:
             const [fontName, fontSize] = args;
-            if (fontName instanceof primitives_Name) {
+            if (fontName instanceof Name) {
               result.fontName = fontName.name;
             }
             if (typeof fontSize === "number" && fontSize > 0) {
@@ -36442,7 +36442,7 @@ class AppearanceStreamEvaluator extends EvaluatorPreprocessor {
             break;
           case OPS.setFont:
             const [fontName, fontSize] = args;
-            if (fontName instanceof primitives_Name) {
+            if (fontName instanceof Name) {
               result.fontName = fontName.name;
             }
             if (typeof fontSize === "number" && fontSize > 0) {
@@ -36530,7 +36530,7 @@ class FakeUnicodeFont {
     if (!FakeUnicodeFont._fontNameId) {
       FakeUnicodeFont._fontNameId = 1;
     }
-    this.fontName = primitives_Name.get(`InvalidPDFjsFont_${fontFamily}_${FakeUnicodeFont._fontNameId++}`);
+    this.fontName = Name.get(`InvalidPDFjsFont_${fontFamily}_${FakeUnicodeFont._fontNameId++}`);
   }
   get fontDescriptorRef() {
     if (!FakeUnicodeFont._fontDescriptorRef) {
@@ -37562,7 +37562,7 @@ class StructTreeRoot {
       return;
     }
     for (const [key, value] of roleMapDict) {
-      if (value instanceof primitives_Name) {
+      if (value instanceof Name) {
         this.roleMap.set(key, value.name);
       }
     }
@@ -37617,7 +37617,7 @@ class StructTreeRoot {
     const structTreeRootRef = xref.getNewTemporaryRef();
     root.set("StructTreeRoot", structTreeRootRef);
     const structTreeRoot = new Dict(xref);
-    structTreeRoot.set("Type", primitives_Name.get("StructTreeRoot"));
+    structTreeRoot.set("Type", Name.get("StructTreeRoot"));
     const parentTreeRef = xref.getNewTemporaryRef();
     structTreeRoot.set("ParentTree", parentTreeRef);
     const kids = [];
@@ -37781,7 +37781,7 @@ class StructTreeRoot {
     changes,
     cache
   }) {
-    const objr = primitives_Name.get("OBJR");
+    const objr = Name.get("OBJR");
     let nextKey = -1;
     let structTreePageObjs;
     for (const [pageIndex, elements] of newAnnotationsByPage) {
@@ -37853,7 +37853,7 @@ class StructTreeRoot {
     expanded,
     actualText
   }) {
-    tagDict.set("S", primitives_Name.get(type));
+    tagDict.set("S", Name.get(type));
     if (title) {
       tagDict.set("T", stringToAsciiOrUTF16BE(title));
     }
@@ -37995,7 +37995,7 @@ class StructElementNode {
   }
   get role() {
     const nameObj = this.dict.get("S");
-    const name = nameObj instanceof primitives_Name ? nameObj.name : "";
+    const name = nameObj instanceof Name ? nameObj.name : "";
     const {
       root
     } = this.tree;
@@ -38040,7 +38040,7 @@ class StructElementNode {
     if (pageRef instanceof Ref) {
       pageObjId = pageRef.toString();
     }
-    const type = kid.get("Type") instanceof primitives_Name ? kid.get("Type").name : null;
+    const type = kid.get("Type") instanceof Name ? kid.get("Type").name : null;
     if (type === "MCR") {
       if (this.tree.pageDict.objId !== pageObjId) {
         return null;
@@ -38311,7 +38311,7 @@ function fetchDest(dest) {
 function fetchRemoteDest(action) {
   let dest = action.get("D");
   if (dest) {
-    if (dest instanceof primitives_Name) {
+    if (dest instanceof Name) {
       dest = dest.name;
     }
     if (typeof dest === "string") {
@@ -38349,7 +38349,7 @@ class Catalog {
   }
   get version() {
     const version = this.#catDict.get("Version");
-    if (version instanceof primitives_Name) {
+    if (version instanceof Name) {
       if (PDF_VERSION_REGEXP.test(version.name)) {
         return shadow(this, "version", version.name);
       }
@@ -38661,7 +38661,7 @@ class Catalog {
     if (!Array.isArray(intent)) {
       intent = [intent];
     }
-    if (intent.every(i => i instanceof primitives_Name)) {
+    if (intent.every(i => i instanceof Name)) {
       obj.intent = intent.map(i => i.name);
     }
     const usage = group.get("Usage");
@@ -38672,7 +38672,7 @@ class Catalog {
     const print = usage.get("Print");
     if (print instanceof Dict) {
       const printState = print.get("PrintState");
-      if (printState instanceof primitives_Name) {
+      if (printState instanceof Name) {
         switch (printState.name) {
           case "ON":
           case "OFF":
@@ -38685,7 +38685,7 @@ class Catalog {
     const view = usage.get("View");
     if (view instanceof Dict) {
       const viewState = view.get("ViewState");
-      if (viewState instanceof primitives_Name) {
+      if (viewState instanceof Name) {
         switch (viewState.name) {
           case "ON":
           case "OFF":
@@ -38790,7 +38790,7 @@ class Catalog {
     return {
       name: typeof config.get("Name") === "string" ? stringToPDFString(config.get("Name")) : null,
       creator: typeof config.get("Creator") === "string" ? stringToPDFString(config.get("Creator")) : null,
-      baseState: config.get("BaseState") instanceof primitives_Name ? config.get("BaseState").name : null,
+      baseState: config.get("BaseState") instanceof Name ? config.get("BaseState").name : null,
       on: parseOnOff(config.get("ON")),
       off: parseOnOff(config.get("OFF")),
       order: parseOrder(config.get("Order")),
@@ -38902,7 +38902,7 @@ class Catalog {
         }
         if (labelDict.has("S")) {
           const s = labelDict.get("S");
-          if (!(s instanceof primitives_Name)) {
+          if (!(s instanceof Name)) {
             throw new FormatError("Invalid style in PageLabel dictionary.");
           }
           style = s.name;
@@ -38960,7 +38960,7 @@ class Catalog {
   get pageLayout() {
     const obj = this.#catDict.get("PageLayout");
     let pageLayout = "";
-    if (obj instanceof primitives_Name) {
+    if (obj instanceof Name) {
       switch (obj.name) {
         case "SinglePage":
         case "OneColumn":
@@ -38976,7 +38976,7 @@ class Catalog {
   get pageMode() {
     const obj = this.#catDict.get("PageMode");
     let pageMode = "UseNone";
-    if (obj instanceof primitives_Name) {
+    if (obj instanceof Name) {
       switch (obj.name) {
         case "UseNone":
         case "UseOutlines":
@@ -39010,7 +39010,7 @@ class Catalog {
           }
           break;
         case "NonFullScreenPageMode":
-          if (value instanceof primitives_Name) {
+          if (value instanceof Name) {
             switch (value.name) {
               case "UseNone":
               case "UseOutlines":
@@ -39024,7 +39024,7 @@ class Catalog {
           }
           break;
         case "Direction":
-          if (value instanceof primitives_Name) {
+          if (value instanceof Name) {
             switch (value.name) {
               case "L2R":
               case "R2L":
@@ -39039,7 +39039,7 @@ class Catalog {
         case "ViewClip":
         case "PrintArea":
         case "PrintClip":
-          if (value instanceof primitives_Name) {
+          if (value instanceof Name) {
             switch (value.name) {
               case "MediaBox":
               case "CropBox":
@@ -39054,7 +39054,7 @@ class Catalog {
           }
           break;
         case "PrintScaling":
-          if (value instanceof primitives_Name) {
+          if (value instanceof Name) {
             switch (value.name) {
               case "None":
               case "AppDefault":
@@ -39066,7 +39066,7 @@ class Catalog {
           }
           break;
         case "Duplex":
-          if (value instanceof primitives_Name) {
+          if (value instanceof Name) {
             switch (value.name) {
               case "Simplex":
               case "DuplexFlipShortEdge":
@@ -39531,7 +39531,7 @@ class Catalog {
     }
     if (action instanceof Dict) {
       const actionType = action.get("S");
-      if (!(actionType instanceof primitives_Name)) {
+      if (!(actionType instanceof Name)) {
         warn("parseDestDictionary: Invalid type in Action dictionary.");
         return;
       }
@@ -39557,7 +39557,7 @@ class Catalog {
           break;
         case "URI":
           url = action.get("URI");
-          if (url instanceof primitives_Name) {
+          if (url instanceof Name) {
             url = "/" + url.name;
           }
           break;
@@ -39608,7 +39608,7 @@ class Catalog {
           break;
         case "Named":
           const namedAction = action.get("N");
-          if (namedAction instanceof primitives_Name) {
+          if (namedAction instanceof Name) {
             resultObj.action = namedAction.name;
           }
           break;
@@ -39620,7 +39620,7 @@ class Catalog {
           }
           const stateArr = [];
           for (const elem of state) {
-            if (elem instanceof primitives_Name) {
+            if (elem instanceof Name) {
               switch (elem.name) {
                 case "ON":
                 case "OFF":
@@ -39675,7 +39675,7 @@ class Catalog {
       resultObj.unsafeUrl = url;
     }
     const parseDest = (d, obj, field = "dest") => {
-      if (d instanceof primitives_Name) d = d.name;
+      if (d instanceof Name) d = d.name;
       if (typeof d === "string") obj[field] = stringToPDFString(d, true);else if (isValidExplicitDest(d)) obj[field] = d;
     };
     if (dest) parseDest(dest, resultObj);
@@ -39698,7 +39698,7 @@ class ExtendedCatalog extends Catalog {
         result[key] = this._convertStructToObject(struct.get(key));
       });
       return result;
-    } else if (struct instanceof primitives_Name) {
+    } else if (struct instanceof Name) {
       return struct.name;
     }
     return struct;
@@ -39872,7 +39872,7 @@ class ExtendedCatalog extends Catalog {
   }
   getFieldValueStr(fontObj, key) {
     const value = fontObj.get(key);
-    if (value instanceof primitives_Name) {
+    if (value instanceof Name) {
       return value.name;
     }
     if (typeof value === "string") {
@@ -50850,7 +50850,7 @@ class AnnotationFactory {
       return undefined;
     }
     let subtype = dict.get("Subtype");
-    subtype = subtype instanceof primitives_Name ? subtype.name : null;
+    subtype = subtype instanceof Name ? subtype.name : null;
     if (collectByType && !collectByType.has(AnnotationType[subtype.toUpperCase()])) {
       return null;
     }
@@ -50883,7 +50883,7 @@ class AnnotationFactory {
           dict,
           key: "FT"
         });
-        fieldType = fieldType instanceof primitives_Name ? fieldType.name : null;
+        fieldType = fieldType instanceof Name ? fieldType.name : null;
         switch (fieldType) {
           case "Tx":
             return new TextWidgetAnnotation(parameters);
@@ -51233,7 +51233,7 @@ class Annotation {
       structParent: -1
     };
     const name = dict.get("Name");
-    if (name instanceof primitives_Name) {
+    if (name instanceof Name) {
       this.data.name = stringToPDFString(name.name);
     }
     if (dict.has("A")) {
@@ -51275,7 +51275,7 @@ class Annotation {
       this.data.pageIndex = params.pageIndex;
     }
     const it = dict.get("IT");
-    if (it instanceof primitives_Name) {
+    if (it instanceof Name) {
       this.data.it = it.name;
     }
     this._isOffscreenCanvasSupported = params.evaluatorOptions.isOffscreenCanvasSupported;
@@ -51401,7 +51401,7 @@ class Annotation {
     if (Array.isArray(lineEndings) && lineEndings.length === 2) {
       for (let i = 0; i < 2; i++) {
         const obj = lineEndings[i];
-        if (obj instanceof primitives_Name) {
+        if (obj instanceof Name) {
           switch (obj.name) {
             case "None":
               continue;
@@ -51487,7 +51487,7 @@ class Annotation {
       return;
     }
     const as = dict.get("AS");
-    if (!(as instanceof primitives_Name) || !normalAppearanceState.has(as.name)) {
+    if (!(as instanceof Name) || !normalAppearanceState.has(as.name)) {
       return;
     }
     const appearance = normalAppearanceState.get(as.name);
@@ -51498,7 +51498,7 @@ class Annotation {
   setOptionalContent(dict) {
     this.oc = null;
     const oc = dict.get("OC");
-    if (oc instanceof primitives_Name) {
+    if (oc instanceof Name) {
       warn("setOptionalContent: Support for /Name-entry is not implemented.");
     } else if (oc instanceof Dict) {
       this.oc = oc;
@@ -51714,7 +51714,7 @@ class AnnotationBorderStyle {
     this.verticalCornerRadius = 0;
   }
   setWidth(width, rect = [0, 0, 0, 0]) {
-    if (width instanceof primitives_Name) {
+    if (width instanceof Name) {
       this.width = 0;
       return;
     }
@@ -51732,7 +51732,7 @@ class AnnotationBorderStyle {
     }
   }
   setStyle(style) {
-    if (!(style instanceof primitives_Name)) {
+    if (!(style instanceof Name)) {
       return;
     }
     switch (style.name) {
@@ -51771,7 +51771,7 @@ class AnnotationBorderStyle {
       if (dashArray.length === 0 || isValid && !allZeros) {
         this.dashArray = dashArray;
         if (forceStyle) {
-          this.setStyle(primitives_Name.get("D"));
+          this.setStyle(Name.get("D"));
         }
       } else {
         this.width = 0;
@@ -51801,7 +51801,7 @@ class MarkupAnnotation extends Annotation {
       const rawIRT = dict.getRaw("IRT");
       this.data.inReplyTo = rawIRT instanceof Ref ? rawIRT.toString() : null;
       const rt = dict.get("RT");
-      this.data.replyType = rt instanceof primitives_Name ? rt.name : AnnotationReplyType.REPLY;
+      this.data.replyType = rt instanceof Name ? rt.name : AnnotationReplyType.REPLY;
     }
     let popupRef = null;
     if (this.data.replyType === AnnotationReplyType.GROUP) {
@@ -52008,7 +52008,7 @@ class WidgetAnnotation extends Annotation {
       dict,
       key: "FT"
     });
-    data.fieldType = fieldType instanceof primitives_Name ? fieldType.name : null;
+    data.fieldType = fieldType instanceof Name ? fieldType.name : null;
     const localResources = getInheritableProperty({
       dict,
       key: "DR"
@@ -52040,7 +52040,7 @@ class WidgetAnnotation extends Annotation {
   _decodeFormValue(formValue) {
     if (Array.isArray(formValue)) {
       return formValue.filter(item => typeof item === "string").map(item => stringToPDFString(item));
-    } else if (formValue instanceof primitives_Name) {
+    } else if (formValue instanceof Name) {
       return stringToPDFString(formValue.name);
     } else if (typeof formValue === "string") {
       return stringToPDFString(formValue);
@@ -52402,7 +52402,7 @@ class WidgetAnnotation extends Annotation {
       fontName,
       fontSize
     } = appearanceData;
-    await evaluator.handleSetFont(resources, [fontName && primitives_Name.get(fontName), fontSize], null, operatorList, task, initialState, null);
+    await evaluator.handleSetFont(resources, [fontName && Name.get(fontName), fontSize], null, operatorList, task, initialState, null);
     return initialState.font;
   }
   _getTextWidth(text, font) {
@@ -52833,7 +52833,7 @@ class ButtonWidgetAnnotation extends WidgetAnnotation {
       path: this.data.fieldName,
       value: value ? this.data.exportValue : ""
     };
-    const name = primitives_Name.get(value ? this.data.exportValue : "Off");
+    const name = Name.get(value ? this.data.exportValue : "Off");
     this.setValue(dict, name, evaluator.xref, changes);
     dict.set("AS", name);
     dict.set("M", `D:${getModificationDate()}`);
@@ -52882,7 +52882,7 @@ class ButtonWidgetAnnotation extends WidgetAnnotation {
       path: this.data.fieldName,
       value: value ? this.data.buttonValue : ""
     };
-    const name = primitives_Name.get(value ? this.data.buttonValue : "Off");
+    const name = Name.get(value ? this.data.buttonValue : "Off");
     if (value) {
       this.setValue(dict, name, evaluator.xref, changes);
     }
@@ -53002,7 +53002,7 @@ class ButtonWidgetAnnotation extends WidgetAnnotation {
     if (fieldParent instanceof Dict) {
       this.parent = params.dict.getRaw("Parent");
       const fieldParentValue = fieldParent.get("V");
-      if (fieldParentValue instanceof primitives_Name) {
+      if (fieldParentValue instanceof Name) {
         this.data.fieldValue = this._decodeFormValue(fieldParentValue);
       }
     }
@@ -53404,8 +53404,8 @@ class PopupAnnotation extends Annotation {
       parent
     } = annotation;
     const popup = oldAnnotation || new Dict(xref);
-    popup.setIfNotExists("Type", primitives_Name.get("Annot"));
-    popup.setIfNotExists("Subtype", primitives_Name.get("Popup"));
+    popup.setIfNotExists("Type", Name.get("Annot"));
+    popup.setIfNotExists("Subtype", Name.get("Popup"));
     popup.setIfNotExists("Open", false);
     popup.setIfArray("Rect", rect);
     popup.set("Parent", parent);
@@ -53479,8 +53479,8 @@ class FreeTextAnnotation extends MarkupAnnotation {
       value
     } = annotation;
     const freetext = oldAnnotation || new Dict(xref);
-    freetext.setIfNotExists("Type", primitives_Name.get("Annot"));
-    freetext.setIfNotExists("Subtype", primitives_Name.get("FreeText"));
+    freetext.setIfNotExists("Type", Name.get("Annot"));
+    freetext.setIfNotExists("Subtype", Name.get("FreeText"));
     freetext.set(oldAnnotation ? "M" : "CreationDate", `D:${getModificationDate(date)}`);
     if (oldAnnotation) {
       freetext.delete("RC");
@@ -53901,8 +53901,8 @@ class InkAnnotation extends MarkupAnnotation {
       user
     } = annotation;
     const ink = oldAnnotation || new Dict(xref);
-    ink.setIfNotExists("Type", primitives_Name.get("Annot"));
-    ink.setIfNotExists("Subtype", primitives_Name.get("Ink"));
+    ink.setIfNotExists("Type", Name.get("Annot"));
+    ink.setIfNotExists("Subtype", Name.get("Ink"));
     ink.set(oldAnnotation ? "M" : "CreationDate", `D:${getModificationDate(date)}`);
     ink.setIfArray("Rect", rect);
     ink.setIfArray("InkList", outlines?.points || paths?.points);
@@ -54079,8 +54079,8 @@ class HighlightAnnotation extends MarkupAnnotation {
       quadPoints
     } = annotation;
     const highlight = oldAnnotation || new Dict(xref);
-    highlight.setIfNotExists("Type", primitives_Name.get("Annot"));
-    highlight.setIfNotExists("Subtype", primitives_Name.get("Highlight"));
+    highlight.setIfNotExists("Type", Name.get("Annot"));
+    highlight.setIfNotExists("Subtype", Name.get("Highlight"));
     highlight.set(oldAnnotation ? "M" : "CreationDate", `D:${getModificationDate(date)}`);
     highlight.setIfArray("Rect", rect);
     highlight.setIfNotExists("F", 4);
@@ -54295,8 +54295,8 @@ class StampAnnotation extends MarkupAnnotation {
       type: "image/jpeg",
       quality: 1
     }).then(blob => blob.arrayBuffer());
-    const xobjectName = primitives_Name.get("XObject");
-    const imageName = primitives_Name.get("Image");
+    const xobjectName = Name.get("XObject");
+    const imageName = Name.get("Image");
     const image = new Dict(xref);
     image.set("Type", xobjectName);
     image.set("Subtype", imageName);
@@ -54347,8 +54347,8 @@ class StampAnnotation extends MarkupAnnotation {
       user
     } = annotation;
     const stamp = oldAnnotation || new Dict(xref);
-    stamp.setIfNotExists("Type", primitives_Name.get("Annot"));
-    stamp.setIfNotExists("Subtype", primitives_Name.get("Stamp"));
+    stamp.setIfNotExists("Type", Name.get("Annot"));
+    stamp.setIfNotExists("Subtype", Name.get("Stamp"));
     stamp.set(oldAnnotation ? "M" : "CreationDate", `D:${getModificationDate(date)}`);
     stamp.setIfArray("Rect", rect);
     stamp.setIfNotExists("F", 4);
@@ -54448,7 +54448,7 @@ class FileAttachmentAnnotation extends MarkupAnnotation {
     this.data.noHTML = false;
     this.data.file = file.serializable;
     const name = dict.get("Name");
-    this.data.name = name instanceof primitives_Name ? stringToPDFString(name.name) : "PushPin";
+    this.data.name = name instanceof Name ? stringToPDFString(name.name) : "PushPin";
     const fillAlpha = dict.get("ca");
     this.data.fillAlpha = typeof fillAlpha === "number" && fillAlpha >= 0 && fillAlpha <= 1 ? fillAlpha : null;
   }
@@ -55772,7 +55772,7 @@ class CipherTransformFactory {
     return hash.subarray(0, Math.min(n + 5, 16));
   }
   #buildCipherConstructor(cf, name, num, gen, key) {
-    if (!(name instanceof primitives_Name)) {
+    if (!(name instanceof Name)) {
       throw new FormatError("Invalid crypt filter name.");
     }
     const self = this;
@@ -55819,7 +55819,7 @@ class CipherTransformFactory {
       } else {
         const cfDict = dict.get("CF");
         const streamCryptoName = dict.get("StmF");
-        if (cfDict instanceof Dict && streamCryptoName instanceof primitives_Name) {
+        if (cfDict instanceof Dict && streamCryptoName instanceof Name) {
           cfDict.suppressEncryption = true;
           const handlerDict = cfDict.get(streamCryptoName.name);
           keyLength = handlerDict?.get("Length") || 128;
@@ -55888,8 +55888,8 @@ class CipherTransformFactory {
         cf.suppressEncryption = true;
       }
       this.cf = cf;
-      this.stmf = dict.get("StmF") || primitives_Name.get("Identity");
-      this.strf = dict.get("StrF") || primitives_Name.get("Identity");
+      this.stmf = dict.get("StmF") || Name.get("Identity");
+      this.strf = dict.get("StrF") || Name.get("Identity");
       this.eff = dict.get("EFF") || this.stmf;
     }
   }
@@ -57499,7 +57499,7 @@ class PDFDocument {
         continue;
       }
       const subFilter = value.get("SubFilter");
-      if (!(subFilter instanceof primitives_Name)) {
+      if (!(subFilter instanceof Name)) {
         continue;
       }
       collectedSignatureCertificates.add(subFilter.name);
@@ -57648,7 +57648,7 @@ class PDFDocument {
         return this;
       }
     };
-    const parseFont = (fontName, fallbackFontDict, cssFontInfo) => partialEvaluator.handleSetFont(resources, [primitives_Name.get(fontName), 1], null, operatorList, task, initialState, fallbackFontDict, cssFontInfo).catch(reason => {
+    const parseFont = (fontName, fallbackFontDict, cssFontInfo) => partialEvaluator.handleSetFont(resources, [Name.get(fontName), 1], null, operatorList, task, initialState, fallbackFontDict, cssFontInfo).catch(reason => {
       warn(`loadXfaFonts: "${reason}".`);
       return null;
     });
@@ -57806,7 +57806,7 @@ class PDFDocument {
           }
           break;
         case "Trapped":
-          if (value instanceof primitives_Name) {
+          if (value instanceof Name) {
             docInfo[key] = value;
             continue;
           }
@@ -57822,7 +57822,7 @@ class PDFDocument {
               customValue = value;
               break;
             default:
-              if (value instanceof primitives_Name) {
+              if (value instanceof Name) {
                 customValue = value;
               }
               break;
@@ -58033,7 +58033,7 @@ class PDFDocument {
       return;
     }
     let subtype = await field.getAsync("Subtype");
-    subtype = subtype instanceof primitives_Name ? subtype.name : null;
+    subtype = subtype instanceof Name ? subtype.name : null;
     switch (subtype) {
       case "Link":
         return;
@@ -58776,9 +58776,9 @@ async function writeStream(stream, buffer, transform) {
       bytes = new Uint8Array(buf);
       let newFilter, newParams;
       if (!filter) {
-        newFilter = primitives_Name.get("FlateDecode");
+        newFilter = Name.get("FlateDecode");
       } else if (!isFilterZeroFlateDecode) {
-        newFilter = Array.isArray(filter) ? [primitives_Name.get("FlateDecode"), ...filter] : [primitives_Name.get("FlateDecode"), filter];
+        newFilter = Array.isArray(filter) ? [Name.get("FlateDecode"), ...filter] : [Name.get("FlateDecode"), filter];
         if (params) {
           newParams = Array.isArray(params) ? [null, ...params] : [null, params];
         }
@@ -58815,7 +58815,7 @@ async function writeArray(array, buffer, transform) {
   buffer.push("]");
 }
 async function writeValue(value, buffer, transform) {
-  if (value instanceof primitives_Name) {
+  if (value instanceof Name) {
     buffer.push(`/${escapePDFName(value.name)}`);
   } else if (value instanceof Ref) {
     buffer.push(`${value.num} ${value.gen} R`);
