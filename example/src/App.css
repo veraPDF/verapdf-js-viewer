@@ -21,6 +21,12 @@ footer {
   justify-content: center;
 }
 
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+}
+
 .pdf-container-wrapper {
   background-color: #f9f8f8;
+  overflow: auto;
 }
