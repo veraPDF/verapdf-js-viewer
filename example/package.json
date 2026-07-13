@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "https://KateOrient.github.io/verapdf-js-viewer/",
+  "homepage": "https://verapdf.github.io/verapdf-js-viewer/",
   "description": "A sample page for @duallab/verapdf-js-viewer.",
   "scripts": {
     "dev": "vite",
