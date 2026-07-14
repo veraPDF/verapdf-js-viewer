@@ -24,13 +24,13 @@ var useIntersection = require('use-intersection');
 var styled = require('styled-components');
 var pdfWorkerURL = require('pdfjs-dist/build/pdf.worker?url');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+function _interopDefault (e) { return e && e.__esModule ? e : { 'default': e }; }
 
-var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
-var EventEmitter__default = /*#__PURE__*/_interopDefaultLegacy(EventEmitter);
-var ___default = /*#__PURE__*/_interopDefaultLegacy(_);
-var styled__default = /*#__PURE__*/_interopDefaultLegacy(styled);
-var pdfWorkerURL__default = /*#__PURE__*/_interopDefaultLegacy(pdfWorkerURL);
+var React__default = /*#__PURE__*/_interopDefault(React);
+var EventEmitter__default = /*#__PURE__*/_interopDefault(EventEmitter);
+var ___default = /*#__PURE__*/_interopDefault(_);
+var styled__default = /*#__PURE__*/_interopDefault(styled);
+var pdfWorkerURL__default = /*#__PURE__*/_interopDefault(pdfWorkerURL);
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -111,7 +111,7 @@ const bboxBgSelected = 'rgba(255,69,0,0.5)';
 const bboxBgRelated = 'rgba(255,176,0,0.3)';
 const bboxBgStructured = 'rgba(255,255,255,0)';
 const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
-const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-d59wxb" }) `
+const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-o6cctv" }) `
   mix-blend-mode: normal;
   left: ${(props) => props.left};
   bottom: ${(props) => props.bottom};
@@ -914,7 +914,7 @@ const WARNING_CODES = {
 ___$insertStyle(".pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page .bbox-wrapper {\n  opacity: 0.75;\n  isolation: isolate;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 const bboxBorderHover = 'orangered';
-const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" }) `
+const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1iqpdam" }) `
   margin-left: auto;
   margin-right: auto;
   height: ${(props) => props.height ? props.height * props.scale + 'px' : 'fit-content'};

@@ -17,6 +17,7 @@ export default {
       exports: 'named',
       sourcemap: true,
       strict: false,
+      interop: 'auto'
     }
   ],
   plugins: [
