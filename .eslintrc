@@ -1,0 +1,50 @@
+{
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 2020,
+		"sourceType": "module"
+	},
+    "extends": [
+        "react-app",
+        "eslint:recommended",
+        "plugin:react/recommended",
+		"plugin:@typescript-eslint/recommended",
+        "prettier/@typescript-eslint",
+        "plugin:prettier/recommended"
+    ],
+    "rules": {
+		"react/self-closing-comp": [
+			"error",
+			{
+				"component": true,
+				"html": true
+			}
+		],
+        "quotes": ["error", "single"],
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
+        "prettier/prettier": [
+            "error", {
+                "semi": true,
+                "singleQuote": true,
+                "trailingComma": "all",
+                "printWidth": 120,
+                "tabWidth": 2,
+				"endOfLine": "auto"
+            }
+        ],
+		"react/display-name": 0,
+		"react/prop-types": 0,
+		"@typescript-eslint/consistent-type-assertions": "off",
+		"@typescript-eslint/no-empty-function": [
+		  "error",
+		  {
+			"allow": ["arrowFunctions", "methods"]
+		  }
+		]
+    },
+    "settings": {
+		"react": {
+		  "version": "detect"
+		}
+    }
+}
