@@ -30,3 +30,4 @@ export declare const rotateCoordinates: (coords: number[], rotateAngle: number, 
 export declare const rotatePoint: (rotateAngle: number, point: number[], viewport: number[]) => number[];
 export declare const activeBboxInViewport: () => boolean;
 export declare const scrollToActiveBbox: (force?: boolean) => void;
+export declare const getLocationByContentItemPath: (contentItemPath: number[], nMcidData: any, left: number, bottom: number) => any[];

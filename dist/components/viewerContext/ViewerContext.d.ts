@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, ReactElement } from 'react';
-import { IRenderBboxProps } from "../bbox/Bbox";
+import { IRenderBboxProps } from '../bbox/Bbox';
 export declare const ViewerContext: React.Context<{
     page: number;
     setPage(page: number): void;

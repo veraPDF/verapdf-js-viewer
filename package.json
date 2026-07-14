@@ -4,8 +4,9 @@
   "description": "Display PDF with an option to highlight a collection of rectangles on top of page rendering. Used by veraPDF web application to visualize locations of validation errors",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rollup -c",
-    "start": "rollup -c -w"
+    "build": "yarn lint && rollup -c",
+    "start": "rollup -c -w",
+    "lint": "eslint src/**/*.ts src/**/*.tsx"
   },
   "keywords": [],
   "author": "duallab",
@@ -17,10 +18,12 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/styled-components": "^5.1.7",
-    "@typescript-eslint/eslint-plugin": "^4.14.0",
-    "@typescript-eslint/parser": "^4.14.0",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "eslint": "^8.3.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-config-react": "^1.1.7",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^3.3.1",
     "lodash": "^4.17.21",
     "prettier": "^2.2.1",

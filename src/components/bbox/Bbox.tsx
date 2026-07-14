@@ -1,7 +1,7 @@
 import React, { FC, memo, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
-import { ViewerContext } from "../viewerContext/ViewerContext";
+import { ViewerContext } from '../viewerContext/ViewerContext';
 
 import './bbox.scss';
 
@@ -21,7 +21,7 @@ const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
 
 export interface IBbox {
   location: (number | string)[];
-  id: string,
+  id: string;
   isVisible?: boolean;
   index?: number;
   groupId?: string;
@@ -31,7 +31,7 @@ export interface IBbox {
   operatorIndex?: number;
   contentItemPath?: number[];
   subOperatorIndex?: number | '*';
-  area?: number,
+  area?: number;
 }
 
 export interface IMcidItem {
@@ -70,7 +70,7 @@ interface IBboxProps {
   colorScheme?: IColorScheme;
   selectionMode?: TreeBboxSelectionMode;
   onClick?(e: any): void;
-  pageBorders: { height?: number, width?: number };
+  pageBorders: { height?: number; width?: number };
 }
 
 export interface IRenderBboxProps {
@@ -106,33 +106,42 @@ const BboxDiv = styled.div`
   height: ${(props: IBboxDivProps) => props.height};
   width: ${(props: IBboxDivProps) => props.width};
   top: ${(props: IBboxDivProps) => props.top};
-  border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.border || bboxBorder};
-  background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.background || bboxBg};
+  border-color: ${(props: IBboxDivProps) => (props.colorScheme && props.colorScheme.border) || bboxBorder};
+  background-color: ${(props: IBboxDivProps) => (props.colorScheme && props.colorScheme.background) || bboxBg};
   &:hover {
-    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderHovered || bboxBorderHover};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundHovered || bboxBg};
+    border-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.borderHovered) || bboxBorderHover};
+    background-color: ${(props: IBboxDivProps) => (props.colorScheme && props.colorScheme.backgroundHovered) || bboxBg};
   }
   &.pdf-bbox_selected {
-    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderSelected || bboxBorderHover};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundSelected || bboxBgSelected};
+    border-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.borderSelected) || bboxBorderHover};
+    background-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.backgroundSelected) || bboxBgSelected};
   }
   &.pdf-bbox_related {
-    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderRelated || bboxRelatedBorder};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundRelated || bboxBgRelated};
+    border-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.borderRelated) || bboxRelatedBorder};
+    background-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.backgroundRelated) || bboxBgRelated};
   }
   &.pdf-bbox_structured {
     &:hover {
       border-color: ${bboxStructuredBorderHover};
     }
-    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderStructured || bboxStructuredBorder};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundStructured || bboxBgStructured};
+    border-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.borderStructured) || bboxStructuredBorder};
+    background-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.backgroundStructured) || bboxBgStructured};
   }
   &.pdf-bbox_structured_selected {
-    border-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.borderSelectedStructured || bboxSelectedStructuredBorder};
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.backgroundSelectedStructured || bboxBgSelectedStructured};
+    border-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.borderSelectedStructured) || bboxSelectedStructuredBorder};
+    background-color: ${(props: IBboxDivProps) =>
+      (props.colorScheme && props.colorScheme.backgroundSelectedStructured) || bboxBgSelectedStructured};
   }
   &.pdf-bbox_structured_selected_multiple {
-    background-color: ${(props: IBboxDivProps) => props.colorScheme && props.colorScheme.background || bboxBg};
+    background-color: ${(props: IBboxDivProps) => (props.colorScheme && props.colorScheme.background) || bboxBg};
   }
 `;
 
@@ -144,34 +153,18 @@ const clamp = (
     min = 0,
     offset = 0,
   }: {
-    max?: number,
-    min?: number,
-    offset?: number,
-  } = {}
+    max?: number;
+    min?: number;
+    offset?: number;
+  } = {},
 ) => {
   if (max === undefined) return Math.max((offset + +value) * scale, min);
-  return Math.min(
-    Math.max(
-      (offset + +value) * scale,
-      min,
-    ),
-    max,
-  );
-}
+  return Math.min(Math.max((offset + +value) * scale, min), max);
+};
 
 const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
-  const {
-    bbox,
-    disabled,
-    selected,
-    related,
-    structured,
-    scale,
-    colorScheme,
-    selectionMode,
-    pageBorders,
-    onClick,
-  } = props;
+  const { bbox, disabled, selected, related, structured, scale, colorScheme, selectionMode, pageBorders, onClick } =
+    props;
   const { renderBbox } = useContext(ViewerContext);
 
   const [left, bottom, width, height, top] = useMemo(() => {
@@ -184,13 +177,17 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
     return [`${x0}px`, `${y0}px`, `${w}px`, `${h}px`, 'auto'];
   }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
 
-  const isSelected = useMemo(() => selected ? ' pdf-bbox_selected' : '', [selected]);
-  const isRelated = useMemo(() => related ? ' pdf-bbox_related' : '', [related]);
-  const isDisabled = useMemo(() => disabled ? ' pdf-bbox_disabled' : '', [disabled]);
-  const isStructured = useMemo(() => structured ? ' pdf-bbox_structured' : '', [structured]);
-  const isStructuredSelected = useMemo(() => structured && selected ? ' pdf-bbox_structured_selected' : '', [structured, selected]);
+  const isSelected = useMemo(() => (selected ? ' pdf-bbox_selected' : ''), [selected]);
+  const isRelated = useMemo(() => (related ? ' pdf-bbox_related' : ''), [related]);
+  const isDisabled = useMemo(() => (disabled ? ' pdf-bbox_disabled' : ''), [disabled]);
+  const isStructured = useMemo(() => (structured ? ' pdf-bbox_structured' : ''), [structured]);
+  const isStructuredSelected = useMemo(
+    () => (structured && selected ? ' pdf-bbox_structured_selected' : ''),
+    [structured, selected],
+  );
   const isStructuredSelectedMultiple = useMemo(() => {
-    if (structured && selected && selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS) return ' pdf-bbox_structured_selected_multiple';
+    if (structured && selected && selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS)
+      return ' pdf-bbox_structured_selected_multiple';
     else return '';
   }, [structured, selected, selectionMode]);
 
@@ -211,17 +208,20 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
     });
   }
 
-  return <BboxDiv className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`}
-                  left={left}
-                  bottom={bottom}
-                  width={width}
-                  height={height}
-                  top={top}
-                  colorScheme={colorScheme || {}}
-                  title={bbox.bboxTitle}
-                  aria-describedby={bbox.bboxTitle}
-                  onClick={onClick}
-  />;
-}
+  return (
+    <BboxDiv
+      className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`}
+      left={left}
+      bottom={bottom}
+      width={width}
+      height={height}
+      top={top}
+      colorScheme={colorScheme || {}}
+      title={bbox.bboxTitle}
+      aria-describedby={bbox.bboxTitle}
+      onClick={onClick}
+    />
+  );
+};
 
 export default memo(Bbox);

@@ -3,9 +3,9 @@ import React, { FC, ReactElement, useCallback } from 'react';
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import ViewerProvider from './components/viewerContext/ViewerContext';
 import { scrollToActiveBbox } from './services/bboxService';
-import { IRenderBboxProps } from "./components/bbox/Bbox";
+import { IRenderBboxProps } from './components/bbox/Bbox';
 
-import './styles.scss'
+import './styles.scss';
 
 export interface IBboxLocation {
   page: number;
@@ -24,22 +24,23 @@ interface IPdfViewerProps extends IPdfDocumentProps {
 const App: FC<IPdfViewerProps> = (props) => {
   const { className = '', bboxes = [], renderBbox, ...pdfProps } = props;
 
-  const onViewerClick = useCallback((e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
-    props.onBboxClick?.(null);
-  }, [props.onBboxClick]);
+  const onViewerClick = useCallback(
+    (e: { stopPropagation: () => void }) => {
+      e.stopPropagation();
+      props.onBboxClick?.(null);
+    },
+    [props.onBboxClick],
+  );
 
   return (
     <ViewerProvider renderBbox={renderBbox}>
       <div className={`pdf-viewer ${className}`} role="button" tabIndex={0} onClick={onViewerClick}>
-        <PdfDocument {...pdfProps} bboxes={bboxes}/>
+        <PdfDocument {...pdfProps} bboxes={bboxes} />
       </div>
     </ViewerProvider>
   );
-}
+};
 
-export {
-  scrollToActiveBbox,
-}
+export { scrollToActiveBbox };
 
-export default App
+export default App;

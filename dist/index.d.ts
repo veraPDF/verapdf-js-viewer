@@ -1,7 +1,7 @@
 import { FC, ReactElement } from 'react';
 import { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import { scrollToActiveBbox } from './services/bboxService';
-import { IRenderBboxProps } from "./components/bbox/Bbox";
+import { IRenderBboxProps } from './components/bbox/Bbox';
 import './styles.scss';
 export interface IBboxLocation {
     page: number;
@@ -16,5 +16,5 @@ interface IPdfViewerProps extends IPdfDocumentProps {
     renderBbox?: (props: IRenderBboxProps) => ReactElement;
 }
 declare const App: FC<IPdfViewerProps>;
-export { scrollToActiveBbox, };
+export { scrollToActiveBbox };
 export default App;
