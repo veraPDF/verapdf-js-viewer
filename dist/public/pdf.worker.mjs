@@ -29949,53 +29949,66 @@ class BoundingBoxesCalculator {
     return [x1 + result_vector[0], y1 + result_vector[1], x0 + result_vector[0], y0 + result_vector[1]];
   }
   getTextBoundingBox(glyphs) {
-    let tx = 0;
-    let ty = 0;
     const ctm = this.graphicsStateManager.state.ctm;
-    const descent = (this.textStateManager.state.font.descent || 0) * this.textStateManager.state.fontSize;
-    const ascent = (this.textStateManager.state.font.ascent || 1) * this.textStateManager.state.fontSize;
-    const rise = this.textStateManager.state.textRise * this.textStateManager.state.fontSize;
+    const textState = this.textStateManager.state;
+    const {
+      fontMatrix,
+      textMatrix,
+      textHScale,
+      fontSize,
+      font,
+      textRise,
+      charSpacing,
+      wordSpacing
+    } = textState;
+    const scaledFontSize = textHScale * fontSize;
+    const descent = (font.descent || 0) * fontSize;
+    const ascent = (font.ascent || 1) * fontSize;
+    const rise = textRise * fontSize;
     let tx0, ty0, shift, height;
-    if (!this.textStateManager.state.font.vertical) {
-      [tx0, ty0] = this.transformPoint(0, descent + rise, this.textStateManager.state.textMatrix);
-      shift = [tx0 - this.textStateManager.state.textMatrix[4], ty0 - this.textStateManager.state.textMatrix[5]];
-      height = this.transformPoint(0, ascent - descent, this.textStateManager.state.textMatrix);
+    if (!font.vertical) {
+      [tx0, ty0] = this.transformPoint(0, descent + rise, textMatrix);
+      shift = [tx0 - textMatrix[4], ty0 - textMatrix[5]];
+      height = this.transformPoint(0, ascent - descent, textMatrix);
     } else {
-      [tx0, ty0] = this.transformPoint(-this.textStateManager.state.fontSize / 2, rise, this.textStateManager.state.textMatrix);
-      shift = [tx0 - this.textStateManager.state.textMatrix[4], ty0 - this.textStateManager.state.textMatrix[5]];
-      height = this.transformPoint(ascent - descent, 0, this.textStateManager.state.textMatrix);
+      [tx0, ty0] = this.transformPoint(-scaledFontSize / 2, rise, textMatrix);
+      shift = [tx0 - textMatrix[4], ty0 - textMatrix[5]];
+      height = this.transformPoint(scaledFontSize, 0, textMatrix);
     }
-    height[0] -= this.textStateManager.state.textMatrix[4];
-    height[1] -= this.textStateManager.state.textMatrix[5];
+    height[0] -= textMatrix[4];
+    height[1] -= textMatrix[5];
     height = Math.hypot(height[0], height[1]);
-    height *= this.textStateManager.state.textMatrix[0] * this.textStateManager.state.textMatrix[3] < 0 ? -1 : 1;
+    height *= textMatrix[0] * textMatrix[3] < 0 ? -1 : 1;
     let glyphsSize = [];
+    let tx = 0,
+      ty = 0;
     for (let i = 0; i < glyphs.length; i++) {
+      textState.translateTextMatrix(tx, -ty);
+      tx = ty = 0;
       const glyph = glyphs[i];
       if (typeof glyph === "number") {
-        if (this.textStateManager.state.font.vertical) {
-          ty = -glyph / 1000 * this.textStateManager.state.fontSize * this.textStateManager.state.textHScale;
+        if (!font.vertical) {
+          tx = -glyph / 1000 * scaledFontSize;
         } else {
-          tx = -glyph / 1000 * this.textStateManager.state.fontSize * this.textStateManager.state.textHScale;
+          ty = glyph / 1000 * fontSize;
         }
       } else {
-        let glyphWidth = null;
-        glyphWidth = this.textStateManager.state.font.vertical && glyph.vmetric ? glyph.vmetric[0] : glyph.width;
-        if (!this.textStateManager.state.font.vertical) {
-          const w0 = glyphWidth * (this.textStateManager.state.fontMatrix ? this.textStateManager.state.fontMatrix[0] : 1 / 1000);
-          tx = (w0 * this.textStateManager.state.fontSize + this.textStateManager.state.charSpacing + (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0)) * this.textStateManager.state.textHScale;
+        const vmetric = glyph.vmetric ?? font.defaultVMetrics;
+        const glyphWidth = font.vertical && vmetric ? -vmetric[0] : glyph.width;
+        const [x, y] = [textMatrix[4] + shift[0], textMatrix[5] + shift[1]];
+        if (!font.vertical) {
+          const w0 = glyphWidth * (fontMatrix ? fontMatrix[0] : 1 / 1000);
+          textState.translateTextMatrix(w0 * scaledFontSize, 0);
+          tx = (charSpacing + (glyph.isSpace ? wordSpacing : 0)) * textHScale;
         } else {
-          const w1 = glyphWidth * (this.textStateManager.state.fontMatrix ? this.textStateManager.state.fontMatrix[0] : 1 / 1000);
-          ty = w1 * this.textStateManager.state.fontSize - this.textStateManager.state.charSpacing - (glyph.isSpace ? this.textStateManager.state.wordSpacing : 0);
+          const w1 = glyphWidth * (fontMatrix ? fontMatrix[0] : 1 / 1000);
+          textState.translateTextMatrix(0, -w1 * fontSize);
+          ty = -charSpacing - (glyph.isSpace ? wordSpacing : 0);
         }
-      }
-      const [x, y] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
-      this.textStateManager.state.translateTextMatrix(tx, -ty);
-      if (typeof glyph !== "number") {
-        glyphsSize.push([x, y, this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]]);
+        glyphsSize.push([x, y, textMatrix[4] + shift[0], textMatrix[5] + shift[1]]);
       }
     }
-    const [tx1, ty1] = [this.textStateManager.state.textMatrix[4] + shift[0], this.textStateManager.state.textMatrix[5] + shift[1]];
+    const [tx1, ty1] = [textMatrix[4] + shift[0], textMatrix[5] + shift[1]];
     const [tx2, ty2, tx3, ty3] = this.getTopPoints(tx0, ty0, tx1, ty1, height);
     glyphsSize = glyphsSize.map(glyphSize => [...glyphSize, ...this.getTopPoints(...glyphSize, height)]);
     const [x0, y0] = this.transformPoint(tx0, ty0, ctm);
@@ -40005,22 +40018,18 @@ class ExtendedCatalog extends Catalog {
             if (seenFonts.has(fontIdentity)) {
               const existing = seenFonts.get(fontIdentity);
               if (!existing.refs.some(r => r && fontRef && r.num === fontRef.num && r.gen === fontRef.gen)) {
-                existing.refs.push(fontRef instanceof Ref ? fontRef : null);
+                existing.refs.push(fontRef);
               }
-              if (!existing.pageIndices.includes(pageIndex)) {
-                existing.pageIndices.push(pageIndex);
-              }
-              if (!existing.names.includes(fontName)) {
-                existing.names.push(fontName);
-              }
+              existing.names[pageIndex] = fontName;
               continue;
             }
             const fontInfo = {
-              names: [fontName],
+              names: {
+                [pageIndex]: fontName
+              },
               refs: [fontRef instanceof Ref ? fontRef : null],
               type: isComposite ? "Type0" : normalizedSubtype,
               subtype: normalizedSubtype,
-              pageIndices: [pageIndex],
               cidFontType,
               baseFont,
               cidBaseFont,
