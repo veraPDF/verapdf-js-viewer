@@ -1,4 +1,4 @@
-import React, { FC, memo, useContext, useMemo } from 'react';
+import React, { FC, memo, useContext, useMemo, MouseEvent } from 'react';
 import styled from 'styled-components';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { ViewerContext } from '../viewerContext/ViewerContext';
@@ -69,7 +69,7 @@ interface IBboxProps {
   scale: number;
   colorScheme?: IColorScheme;
   selectionMode?: TreeBboxSelectionMode;
-  onClick?(e: any): void;
+  onClick?(e: MouseEvent): void;
   pageBorders: { height?: number; width?: number };
 }
 
@@ -85,7 +85,7 @@ export interface IRenderBboxProps {
   scale: number;
   colorScheme?: IColorScheme;
   selectionMode?: TreeBboxSelectionMode;
-  onClick?(e: any): void;
+  onClick?(e: MouseEvent): void;
 }
 
 interface IBboxDivProps {

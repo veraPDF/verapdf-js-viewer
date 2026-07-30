@@ -9,7 +9,7 @@ export declare const ViewerContext: React.Context<{
         page: number;
     };
     setScrollIntoPage(page: number): void;
-    renderBbox?: ((props: IRenderBboxProps) => ReactElement) | undefined;
+    renderBbox?: (props: IRenderBboxProps) => ReactElement;
 }>;
 declare const ViewerProvider: FC<{
     children: ReactNode;

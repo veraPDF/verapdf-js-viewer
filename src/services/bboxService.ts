@@ -19,7 +19,7 @@ const groupChildren = (children: AnyObject[]): AnyObject[][] => {
 
 const getMultiBboxPagesObj = (mcidList: Array<IMcidItem | undefined>): AnyObject => {
   const mcidListPages = [] as number[];
-  const multiBbox = {};
+  const multiBbox = {} as Record<number, Array<IMcidItem | undefined>>;
   mcidList.forEach((obj) => {
     if (!_.isNil(obj)) mcidListPages.push(obj.pageIndex);
   });
@@ -35,7 +35,7 @@ const extractMcidFromNode = (children: AnyObject | AnyObject[] | null): AnyObjec
   if (_.isNil(children)) return [];
   const mcidList = [];
   if (!(children instanceof Array)) {
-    children.hasOwnProperty('mcid') && mcidList.push(children);
+    if (children.hasOwnProperty('mcid')) mcidList.push(children);
   } else {
     mcidList.push(..._.filter(children, (child: AnyObject) => child?.hasOwnProperty('mcid')));
   }
@@ -63,7 +63,7 @@ export const cleanArray = (arr: Array<AnyObject | null>): AnyObject[] => {
 export const getFormattedAnnotations = (annots: AnyObject): AnyObject[] => {
   const formattedAnnots: AnyObject[] = [];
 
-  _.forEach(annots, (annot: any) => {
+  _.forEach(annots, (annot: AnyObject) => {
     if (
       annot.hasOwnProperty('parentId') &&
       annot.hasOwnProperty('parentRect') &&
@@ -83,7 +83,7 @@ export const getFormattedAnnotations = (annots: AnyObject): AnyObject[] => {
 
 const annotIndexRegExp = /\/annots\[(?<annotIndex>\d+)\](\(.*\))?\//;
 export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
-  const bboxMap = {};
+  const bboxMap = {} as Record<number, AnyObject[]>;
   bboxes.forEach((bbox, index) => {
     try {
       if (_.isNil(bbox.location)) return;
@@ -130,7 +130,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
         const bboxesFromLocation = bbox.location.includes('pages[')
           ? calculateLocation(bbox.location as string)
           : calculateLocationJSON(bbox.location as string);
-        bboxesFromLocation.forEach((bboxWithLocation: IBboxLocation) => {
+        bboxesFromLocation.forEach((bboxWithLocation: AnyObject) => {
           bboxMap[bboxWithLocation.page] = [
             ...(bboxMap[bboxWithLocation.page] || []),
             {
@@ -144,7 +144,7 @@ export const buildBboxMap = (bboxes: IBboxLocation[], structure: AnyObject) => {
           ];
         });
       }
-    } catch (e) {
+    } catch {
       console.error(`Location not supported: ${bbox.location}`);
     }
   });
@@ -235,7 +235,7 @@ export const getMcidList = (node: AnyObject, mcidList: TreeElementBbox[] = []): 
 
 export const createBboxMap = (mcidList: TreeElementBbox[]): AnyObject => {
   const mcidListPages = [] as Array<number | number[]>;
-  const bboxMap = {};
+  const bboxMap = {} as Record<number, TreeElementBbox[]>;
   const getPages = (list: Array<IMcidItem | undefined>): number[] => {
     const cleanedList = list.filter((obj): obj is IMcidItem => !_.isNil(obj) && !_.isNil(obj.pageIndex));
     return Array.from(new Set(cleanedList.map((obj) => obj?.pageIndex)));
@@ -349,14 +349,14 @@ export const getBboxPages = (bboxes: IBboxLocation[], structure: AnyObject) => {
           : calculateLocationJSON(bbox.location as string);
         return bboxesFromLocation.length ? bboxesFromLocation[0].page : 0;
       }
-    } catch (e) {
+    } catch {
       console.error(`Location not supported: ${bbox.location}`);
     }
   });
 };
 
 export const checkIsBboxOutOfThePage = (bbox: IBbox, scale: number, page: number) => {
-  const parent = document.querySelector('.react-pdf__Page[data-page-number="' + page + '"]') as any;
+  const parent = document.querySelector('.react-pdf__Page[data-page-number="' + page + '"]') as HTMLElement;
   const parentHeight = parent.offsetHeight;
   const parentWidth = parent.offsetWidth;
 
@@ -438,16 +438,7 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
     return defaultValue;
   }
 
-  if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
-    const mcid = selectedTag.stm ? { mcid: selectedTag.mcid, ref: selectedTag.stm.num } : selectedTag.mcid;
-    return [[[mcid], selectedTag.pageIndex]];
-  } else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
-    return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
-  } else if (selectedTag.hasOwnProperty('contentItems')) {
-    return [
-      [undefined, selectedTag.pageIndex, [selectedTag.contentStream, selectedTag.content, ...selectedTag.contentItems]],
-    ];
-  } else if (selectedTag instanceof Array) {
+  if (selectedTag instanceof Array) {
     let objectOfErrors = { ...structure };
     selectedTag.forEach((node, index) => {
       let nextStepObject;
@@ -475,6 +466,15 @@ const getTagsFromErrorPlace = (context: string, structure: AnyObject) => {
       objectOfErrors = { ...nextStepObject };
     });
     return findAllMcid(objectOfErrors);
+  } else if (selectedTag.hasOwnProperty('mcid') && selectedTag.hasOwnProperty('pageIndex')) {
+    const mcid = selectedTag.stm ? { mcid: selectedTag.mcid, ref: selectedTag.stm.num } : selectedTag.mcid;
+    return [[[mcid], selectedTag.pageIndex]];
+  } else if (selectedTag.hasOwnProperty('annot') && selectedTag.hasOwnProperty('pageIndex')) {
+    return [[{ annot: selectedTag.annot }, selectedTag.pageIndex]];
+  } else if (selectedTag.hasOwnProperty('contentItems')) {
+    return [
+      [undefined, selectedTag.pageIndex, [selectedTag.contentStream, selectedTag.content, ...selectedTag.contentItems]],
+    ];
   }
   return defaultValue;
 };
@@ -496,7 +496,7 @@ const convertContextToPath = (errorContext = '') => {
 
   try {
     if (contextString.includes('contentItem')) {
-      const result: any = contextString.match(
+      const result: AnyObject | null = contextString.match(
         /pages\[(?<pages>\d+)\](\(.+\))?\/(annots\[(?<annots>\d+)\](\(.+\))?\/appearance\[\d\](\(.+\))?\/)?contentStream\[(?<contentStream>\d+)\](\(.+\))?\/content\[(?<content>\d+)\](\{mcid:\d+\})?(?<contentItems>((\(.+\))?\/contentItem\[(\d+)\](\{mcid:\d+\})?)+)/,
       );
       if (result) {
@@ -507,15 +507,15 @@ const convertContextToPath = (errorContext = '') => {
           path.content = parseInt(result.groups.content, 10);
           path.contentItems = result.groups.contentItems
             .split('/')
-            .filter((ci: any) => ci.includes('contentItem'))
-            .map((ci: any) => {
+            .filter((ci: AnyObject) => ci.includes('contentItem'))
+            .map((ci: AnyObject) => {
               const contentItemIndex = ci.match(/\[(?<contentItem>\d+)\]/);
               return parseInt(contentItemIndex?.groups?.contentItem || '-1', 10);
             });
           path.annotIndex = parseInt(result.groups.annots, 10) || undefined;
           return path;
         } catch (err) {
-          console.log('NoMCIDContentItemPathParseError:', err.message || err);
+          console.log('NoMCIDContentItemPathParseError:', (err as Error)?.message || err);
         }
       }
       const path: AnyObject = {};
@@ -550,7 +550,7 @@ const convertContextToPath = (errorContext = '') => {
     });
 
     return arrayOfNodes;
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -563,7 +563,7 @@ const convertContextToPath = (errorContext = '') => {
  *  @return [[{Array}, {Number}]] - [[[array of mcids], page of error]]
  */
 function findAllMcid(tagObject: AnyObject) {
-  const mcidMap: any = {};
+  const mcidMap: AnyObject = {};
 
   function func(obj: AnyObject) {
     if (!obj) return;
@@ -764,7 +764,7 @@ function concatBoundingBoxes(newBoundingBox: AnyObject, oldBoundingBox?: AnyObje
 
 export const getLocationByContentItemPath = (
   contentItemPath: number[],
-  nMcidData: any,
+  nMcidData: AnyObject,
   left: number,
   bottom: number,
 ) => {

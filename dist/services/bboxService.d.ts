@@ -8,7 +8,7 @@ export type CustomBBox = {
 };
 export declare const cleanArray: (arr: Array<AnyObject | null>) => AnyObject[];
 export declare const getFormattedAnnotations: (annots: AnyObject) => AnyObject[];
-export declare const buildBboxMap: (bboxes: IBboxLocation[], structure: AnyObject) => {};
+export declare const buildBboxMap: (bboxes: IBboxLocation[], structure: AnyObject) => Record<number, AnyObject[]>;
 export declare const parseTree: (tree: AnyObject | AnyObject[]) => AnyObject;
 export declare const structurizeTree: (node: AnyObject) => OrNull<AnyObject>;
 export declare const setTreeIds: (node: AnyObject, id?: string, annotMap?: AnyObject, refToIdMap?: Map<number, string>) => [OrNull<AnyObject>, AnyObject, Map<number, string>];
@@ -30,4 +30,4 @@ export declare const rotateCoordinates: (coords: number[], rotateAngle: number, 
 export declare const rotatePoint: (rotateAngle: number, point: number[], viewport: number[]) => number[];
 export declare const activeBboxInViewport: () => boolean;
 export declare const scrollToActiveBbox: (force?: boolean) => void;
-export declare const getLocationByContentItemPath: (contentItemPath: number[], nMcidData: any, left: number, bottom: number) => any[];
+export declare const getLocationByContentItemPath: (contentItemPath: number[], nMcidData: AnyObject, left: number, bottom: number) => any[];

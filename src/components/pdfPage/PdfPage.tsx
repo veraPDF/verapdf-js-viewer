@@ -1,7 +1,18 @@
-import React, { FC, useCallback, useState, useRef, memo, useEffect, useContext, useMemo, useLayoutEffect } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useState,
+  useRef,
+  memo,
+  useEffect,
+  useContext,
+  useMemo,
+  useLayoutEffect,
+  MouseEvent,
+} from 'react';
 import { usePrevious } from 'react-use';
 import { Page } from 'react-pdf';
-import { PageCallback } from 'react-pdf/src/shared/types';
+import { PageCallback } from 'react-pdf/dist/shared/types';
 import { useIntersection } from 'use-intersection';
 import styled from 'styled-components';
 import _ from 'lodash';
@@ -25,7 +36,7 @@ import { WARNING_CODES } from '../../services/constants';
 
 import './pdfPage.scss';
 
-interface IPdfPageProps extends IPageProps {
+interface IPdfPageProps extends Omit<IPageProps, 'onPageRenderSuccess'> {
   bboxList?: IBbox[];
   treeElementsBboxes?: TreeElementBbox[];
   treeBboxSelectionMode?: TreeBboxSelectionMode;
@@ -97,7 +108,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   }, []);
 
   useIntersection(
-    intersectionRef,
+    intersectionRef as React.RefObject<Element>,
     {
       threshold: [0.2, 0.4, 0.5, 0.6, 0.8, 1],
     },
@@ -125,7 +136,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     [props.onBboxClick],
   );
   const onBboxClick = useCallback(
-    (index: any, id: any) => (e: Event) => {
+    (index: number, id: string) => (e: MouseEvent) => {
       e.stopPropagation();
       props.onBboxClick?.({ index, id });
     },
@@ -134,10 +145,12 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const onPageRenderSuccess = useCallback(() => {
     setIsRendered(true);
     props.onPageRenderSuccess?.(intersectionRef.current!);
-    document.querySelectorAll('.pdf-page_rendered img')?.forEach((img: any) => {
+    document.querySelectorAll<HTMLImageElement>('.pdf-page_rendered img')?.forEach((img) => {
       if (img.alt.includes('Annotation')) {
         const index = img.src.lastIndexOf('/') + 1;
         const name = img.src.substr(index);
+        // @ts-expect-error expected
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         img.src = require(`pdfjs-dist/web/images/${name}`) || img.src;
       }
     });
@@ -378,7 +391,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
                     key={index}
                     bbox={bbox}
                     pageBorders={pageBorders}
-                    onClick={onBboxClick(bbox.index, bbox.id)}
+                    onClick={onBboxClick(bbox.index!, bbox.id)}
                     disabled={isBboxDisabled(bbox)}
                     structured={isBboxStructured(bbox)}
                     selected={isBboxSelected(bbox)}

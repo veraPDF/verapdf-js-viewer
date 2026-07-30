@@ -5,7 +5,7 @@ import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
 import { CustomBBox } from '../../services/bboxService';
 import './pdfPage.scss';
-interface IPdfPageProps extends IPageProps {
+interface IPdfPageProps extends Omit<IPageProps, 'onPageRenderSuccess'> {
     bboxList?: IBbox[];
     treeElementsBboxes?: TreeElementBbox[];
     treeBboxSelectionMode?: TreeBboxSelectionMode;
