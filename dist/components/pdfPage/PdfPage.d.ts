@@ -1,4 +1,3 @@
-import React from 'react';
 import { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
@@ -24,5 +23,5 @@ interface IPdfPageProps extends Omit<IPageProps, 'onPageRenderSuccess'> {
     isPageSelected?: boolean;
     onWarning?(warningCode: string): void;
 }
-declare const _default: React.NamedExoticComponent<IPdfPageProps>;
+declare const _default: import("react").NamedExoticComponent<IPdfPageProps>;
 export default _default;

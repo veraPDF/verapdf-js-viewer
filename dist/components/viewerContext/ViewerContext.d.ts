@@ -1,6 +1,6 @@
-import React, { FC, ReactNode, ReactElement } from 'react';
+import { FC, ReactNode, ReactElement } from 'react';
 import { IRenderBboxProps } from '../bbox/Bbox';
-export declare const ViewerContext: React.Context<{
+export declare const ViewerContext: import("react").Context<{
     page: number;
     setPage(page: number): void;
     maxPage: number;

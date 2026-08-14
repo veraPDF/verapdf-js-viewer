@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect, useRef } from 'react';
+import { FC, memo, useCallback, useMemo, useState, useContext, useEffect, useRef } from 'react';
 import { DocumentCallback, PageCallback } from 'react-pdf/dist/shared/types';
 import { useDebounce } from 'react-use';
 import { Document, pdfjs } from 'react-pdf';

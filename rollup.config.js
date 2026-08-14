@@ -23,7 +23,6 @@ const config = {
   plugins: [
     sass({ insert: true }),
     typescript({
-      abortOnError: false,
       transformers: [
         () => ({
           before: [styledComponentsTransformer],
@@ -39,7 +38,7 @@ const config = {
       },
     }),
   ],
-  external: ['react', 'react-dom'],
+  external: ['react', 'react-dom', 'react/jsx-runtime'],
 };
 
 export default config;

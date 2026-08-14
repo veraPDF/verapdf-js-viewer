@@ -1,4 +1,4 @@
-import React, { FC, createContext, useState, ReactNode, ReactElement, useCallback } from 'react';
+import { FC, createContext, useState, ReactNode, ReactElement, useCallback } from 'react';
 import { IRenderBboxProps } from '../bbox/Bbox';
 
 export const ViewerContext = createContext(

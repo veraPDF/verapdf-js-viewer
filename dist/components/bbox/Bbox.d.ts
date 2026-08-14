@@ -1,4 +1,4 @@
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import './bbox.scss';
 export interface IBbox {
@@ -68,5 +68,5 @@ export interface IRenderBboxProps {
     onClick?(e: MouseEvent): void;
 }
 export type TreeElementBbox = [Array<IMcidItem | undefined>, string];
-declare const _default: React.NamedExoticComponent<IBboxProps>;
+declare const _default: import("react").NamedExoticComponent<IBboxProps>;
 export default _default;

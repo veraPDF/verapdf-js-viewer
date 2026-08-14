@@ -22,7 +22,7 @@ export declare const calculateLocationInStreamOperator: (location: string) => {
 } | null;
 export declare const getSelectedPageByLocation: (bboxLocation: string) => number;
 export declare const getBboxPages: (bboxes: IBboxLocation[], structure: AnyObject) => any[];
-export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean;
+export declare const checkIsBboxOutOfThePage: (bbox: IBbox, scale: number, page: number) => boolean | undefined;
 export declare const getBboxForViewport: (bbox: number[], viewport: number[], rotateAngle: number, leftOffset: number, bottomOffset: number) => number[];
 export declare const parseMcidToBbox: (listOfMcid: number[] | AnyObject[] | AnyObject, pageMap: AnyObject, refMap: AnyObject, annotations: AnyObject, viewport: number[], rotateAngle: number, left?: number, bottom?: number) => number[];
 export declare const rotateViewport: (rotateAngle: number, viewport: number[]) => number[];

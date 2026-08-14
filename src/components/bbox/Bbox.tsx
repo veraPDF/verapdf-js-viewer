@@ -1,4 +1,4 @@
-import React, { FC, memo, useContext, useMemo, MouseEvent } from 'react';
+import { FC, memo, useContext, useMemo, MouseEvent } from 'react';
 import styled from 'styled-components';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { ViewerContext } from '../viewerContext/ViewerContext';
