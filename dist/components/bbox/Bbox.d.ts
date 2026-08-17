@@ -1,4 +1,4 @@
-import React from 'react';
+import { MouseEvent } from 'react';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import './bbox.scss';
 export interface IBbox {
@@ -47,7 +47,7 @@ interface IBboxProps {
     scale: number;
     colorScheme?: IColorScheme;
     selectionMode?: TreeBboxSelectionMode;
-    onClick?(e: any): void;
+    onClick?(e: MouseEvent): void;
     pageBorders: {
         height?: number;
         width?: number;
@@ -65,8 +65,8 @@ export interface IRenderBboxProps {
     scale: number;
     colorScheme?: IColorScheme;
     selectionMode?: TreeBboxSelectionMode;
-    onClick?(e: any): void;
+    onClick?(e: MouseEvent): void;
 }
 export type TreeElementBbox = [Array<IMcidItem | undefined>, string];
-declare const _default: React.NamedExoticComponent<IBboxProps>;
+declare const _default: import("react").NamedExoticComponent<IBboxProps>;
 export default _default;

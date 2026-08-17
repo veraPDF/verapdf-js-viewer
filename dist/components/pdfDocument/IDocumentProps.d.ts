@@ -1,5 +1,5 @@
 import React from 'react';
-import { DocumentCallback, NodeOrRenderer } from 'react-pdf/src/shared/types';
+import { DocumentCallback, NodeOrRenderer } from 'react-pdf/dist/shared/types';
 export interface IDocumentProps {
     file: File | string;
     error?: string | React.ReactElement | NodeOrRenderer;

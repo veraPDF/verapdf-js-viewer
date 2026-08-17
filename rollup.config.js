@@ -1,14 +1,14 @@
-import sass from 'rollup-plugin-sass'
-import typescript from 'rollup-plugin-typescript2'
+import sass from 'rollup-plugin-sass';
+import typescript from 'rollup-plugin-typescript2';
 import createStyledComponentsTransformer from 'typescript-plugin-styled-components';
 import copy from 'rollup-plugin-copy';
 import commonjs from 'rollup-plugin-commonjs';
 
-import pkg from './package.json'
+import pkg from './package.json';
 
 const styledComponentsTransformer = createStyledComponentsTransformer();
 
-export default {
+const config = {
   input: 'src/index.tsx',
   output: [
     {
@@ -17,8 +17,8 @@ export default {
       exports: 'named',
       sourcemap: true,
       strict: false,
-      interop: 'auto'
-    }
+      interop: 'auto',
+    },
   ],
   plugins: [
     sass({ insert: true }),
@@ -29,16 +29,16 @@ export default {
         }),
       ],
     }),
-	copy({
-      targets: [
-        { src: 'node_modules/pdfjs-dist/build/pdf.worker.mjs', dest: 'dist/public' },
-      ]
+    copy({
+      targets: [{ src: 'node_modules/pdfjs-dist/build/pdf.worker.mjs', dest: 'dist/public' }],
     }),
-	commonjs({
+    commonjs({
       namedExports: {
         'node_modules/pdfjs-dist/build/pdf.worker.mjs': ['pdfjsWorker'],
       },
     }),
   ],
-  external: ['react', 'react-dom']
-}
+  external: ['react', 'react-dom', 'react/jsx-runtime'],
+};
+
+export default config;

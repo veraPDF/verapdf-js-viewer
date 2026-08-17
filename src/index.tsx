@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useCallback } from 'react';
+import { FC, ReactElement, useCallback } from 'react';
 
 import PdfDocument, { IPdfDocumentProps } from './components/pdfDocument/PdfDocument';
 import ViewerProvider from './components/viewerContext/ViewerContext';

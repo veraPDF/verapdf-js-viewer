@@ -1,5 +1,5 @@
-import React, { FC, memo, useCallback, useMemo, useState, useContext, useEffect, useRef } from 'react';
-import { DocumentCallback, PageCallback } from 'react-pdf/src/shared/types';
+import { FC, memo, useCallback, useMemo, useState, useContext, useEffect, useRef } from 'react';
+import { DocumentCallback, PageCallback } from 'react-pdf/dist/shared/types';
 import { useDebounce } from 'react-use';
 import { Document, pdfjs } from 'react-pdf';
 import EventEmitter from 'eventemitter3';
@@ -28,7 +28,7 @@ import {
   getBboxPages,
   scrollToActiveBbox,
 } from '../../services/bboxService';
-import { IColorScheme } from '../bbox/Bbox';
+import { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 //import * as pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs';
@@ -102,8 +102,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [loaded, setLoaded] = useState(false);
   const [structureTree, setStructureTree] = useState({});
   const [parsedTree, setParsedTree] = useState({});
-  const [bboxMap, setBboxMap] = useState({});
-  const [treeElementsBboxes, setTreeElementsBboxes] = useState({});
+  const [bboxMap, setBboxMap] = useState<Record<number, AnyObject[]>>({});
+  const [treeElementsBboxes, setTreeElementsBboxes] = useState<Record<number, TreeElementBbox[]>>({});
   const [pagesByViewport, setPagesByViewport] = useState<number[]>([]);
   const [ratioArray, setRatioArray] = useState<number[]>([]);
   const [defaultHeight, setDefaultHeight] = useState(props.defaultHeight);
@@ -423,7 +423,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   }, [props.file]);
 
   useEffect(() => {
-    function handlekeydownEvent(event: any) {
+    function handlekeydownEvent(event: KeyboardEvent) {
       const getVisibleBboxIndex = (direction: 'up' | 'down') => {
         if (!visibleBboxIndexes.length) {
           return undefined;
@@ -507,7 +507,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
                   onGetTextSuccess={props.onGetTextSuccess}
                   onGetTextError={props.onGetTextError}
                   onPageInViewport={onPageInViewport}
-                  bboxList={bboxMap[page]}
+                  bboxList={bboxMap[page] as IBbox[]}
                   treeElementsBboxes={treeElementsBboxes[page]}
                   treeBboxSelectionMode={props.treeBboxSelectionMode}
                   groupId={activeBbox?.groupId}

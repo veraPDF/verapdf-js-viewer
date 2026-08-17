@@ -1,4 +1,3 @@
-import React from 'react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { IDocumentProps } from './IDocumentProps';
@@ -36,5 +35,5 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     onWarning?(warningCode: string): void;
     onSelectBbox(index: number | undefined): void;
 }
-declare const _default: React.NamedExoticComponent<IPdfDocumentProps>;
+declare const _default: import("react").NamedExoticComponent<IPdfDocumentProps>;
 export default _default;

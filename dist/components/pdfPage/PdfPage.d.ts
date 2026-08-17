@@ -1,11 +1,10 @@
-import React from 'react';
 import { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
 import { IPageProps } from './IPageProps';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
 import { AnyObject } from '../../types/generics';
 import { CustomBBox } from '../../services/bboxService';
 import './pdfPage.scss';
-interface IPdfPageProps extends IPageProps {
+interface IPdfPageProps extends Omit<IPageProps, 'onPageRenderSuccess'> {
     bboxList?: IBbox[];
     treeElementsBboxes?: TreeElementBbox[];
     treeBboxSelectionMode?: TreeBboxSelectionMode;
@@ -24,5 +23,5 @@ interface IPdfPageProps extends IPageProps {
     isPageSelected?: boolean;
     onWarning?(warningCode: string): void;
 }
-declare const _default: React.NamedExoticComponent<IPdfPageProps>;
+declare const _default: import("react").NamedExoticComponent<IPdfPageProps>;
 export default _default;
