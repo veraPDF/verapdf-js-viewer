@@ -47,7 +47,7 @@
   "dependencies": {
     "eventemitter3": "^5.0.4",
     "pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.32",
-    "react-pdf": "10.3.0",
+    "react-pdf": "10.4.1",
     "react-use": "^17.6.1",
     "styled-components": "^5.2.1",
     "url": "^0.11.4",
