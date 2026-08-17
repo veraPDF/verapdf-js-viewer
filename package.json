@@ -49,7 +49,7 @@
     "pdfjs-dist": "github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.32",
     "react-pdf": "10.3.0",
     "react-use": "^17.6.1",
-    "styled-components": "^5.2.1",
+    "styled-components": "^6.5.2",
     "url": "^0.11.4",
     "use-intersection": "^0.2.1"
   },
