@@ -197,11 +197,13 @@ export const structurizeTree = (node: AnyObject): OrNull<AnyObject> => {
 export const setTreeIds = (
   node: AnyObject,
   id = '0',
+  pdfPath = 'StructTreeRoot:/0',
   annotMap: AnyObject = {},
   refToIdMap: Map<number, string> = new Map(),
 ): [OrNull<AnyObject>, AnyObject, Map<number, string>] => {
   if (_.isNil(node)) return [null, annotMap, refToIdMap];
   node.id = id;
+  node.pdfPath = pdfPath;
   if (node.ref) refToIdMap.set(node.ref.num, id);
   if (node?.hasOwnProperty('annotList')) {
     node.annotList.forEach((annot: IAnnotItem) => {
@@ -215,11 +217,12 @@ export const setTreeIds = (
     return [node, annotMap, refToIdMap];
   }
   if (!(node.children instanceof Array))
-    node.children = [setTreeIds(node.children, `${id}:0`, annotMap, refToIdMap)[0]];
+    node.children = [setTreeIds(node.children, `${id}:0`, `${pdfPath}/0`, annotMap, refToIdMap)[0]];
   else
     node.children = _.map(
       node.children,
-      (child, index) => setTreeIds(child, `${id}:${index}`, annotMap, refToIdMap)[0],
+      (child: AnyObject, index: number) =>
+        setTreeIds(child, `${id}:${index}`, `${pdfPath}/${index}`, annotMap, refToIdMap)[0],
     );
   return [node, annotMap, refToIdMap];
 };

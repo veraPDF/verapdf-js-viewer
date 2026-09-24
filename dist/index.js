@@ -65,7 +65,7 @@ const bboxBgSelected = 'rgba(255,69,0,0.5)';
 const bboxBgRelated = 'rgba(255,176,0,0.3)';
 const bboxBgStructured = 'rgba(255,255,255,0)';
 const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
-const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1jqx3qg" }) `
+const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1fg2vj0" }) `
   mix-blend-mode: normal;
   left: ${(props) => props.left};
   bottom: ${(props) => props.bottom};
@@ -346,10 +346,11 @@ const structurizeTree = (node) => {
     node.children = cleanArray(node.children);
     return node;
 };
-const setTreeIds = (node, id = '0', annotMap = {}, refToIdMap = new Map()) => {
+const setTreeIds = (node, id = '0', pdfPath = 'StructTreeRoot:/0', annotMap = {}, refToIdMap = new Map()) => {
     if (___default["default"].isNil(node))
         return [null, annotMap, refToIdMap];
     node.id = id;
+    node.pdfPath = pdfPath;
     if (node.ref)
         refToIdMap.set(node.ref.num, id);
     if (node === null || node === void 0 ? void 0 : node.hasOwnProperty('annotList')) {
@@ -365,9 +366,9 @@ const setTreeIds = (node, id = '0', annotMap = {}, refToIdMap = new Map()) => {
         return [node, annotMap, refToIdMap];
     }
     if (!(node.children instanceof Array))
-        node.children = [setTreeIds(node.children, `${id}:0`, annotMap, refToIdMap)[0]];
+        node.children = [setTreeIds(node.children, `${id}:0`, `${pdfPath}/0`, annotMap, refToIdMap)[0]];
     else
-        node.children = ___default["default"].map(node.children, (child, index) => setTreeIds(child, `${id}:${index}`, annotMap, refToIdMap)[0]);
+        node.children = ___default["default"].map(node.children, (child, index) => setTreeIds(child, `${id}:${index}`, `${pdfPath}/${index}`, annotMap, refToIdMap)[0]);
     return [node, annotMap, refToIdMap];
 };
 const getMcidList = (node, mcidList = []) => {
@@ -919,7 +920,7 @@ const WARNING_CODES = {
 insertStyle(".pdf-page .bbox-wrapper {\n  opacity: 0.75;\n  isolation: isolate;\n}\n.pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 const bboxBorderHover = 'orangered';
-const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1r5bcob" }) `
+const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-akx7mn" }) `
   margin-left: auto;
   margin-right: auto;
   height: ${(props) => (props.height ? props.height * props.scale + 'px' : 'fit-content')};
