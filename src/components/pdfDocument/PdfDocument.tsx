@@ -93,6 +93,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   onPageChange?(page: number): void;
   onWarning?(warningCode: string): void;
   onSelectBbox(index: number | undefined): void;
+  hiddenTreeIds?: string[];
 }
 
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
@@ -109,6 +110,8 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [defaultHeight, setDefaultHeight] = useState(props.defaultHeight);
   const [defaultWidth, setDefaultWidth] = useState(props.defaultWidth);
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
+
+  const hiddenTreeIdSet = useMemo(() => new Set(props.hiddenTreeIds ?? []), [props.hiddenTreeIds]);
 
   const { activeBboxId, activeBboxIndex } = useMemo(() => {
     const { id: activeBboxId } = props.activeBboxId ?? {};
@@ -164,6 +167,28 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     const mcidList = getMcidList(parsedTree ?? {});
     setTreeElementsBboxes(createBboxMap(mcidList));
   }, [parsedTree]);
+
+  const visibleTreeElementsBboxes = useMemo<Record<number, TreeElementBbox[]>>(() => {
+    const visibleByPage: Record<number, TreeElementBbox[]> = {};
+
+    Object.entries(treeElementsBboxes).forEach(([page, entries]) => {
+      visibleByPage[Number(page)] = entries.filter(([, id]) => {
+        let currentId = id;
+
+        while (currentId) {
+          if (hiddenTreeIdSet.has(currentId)) return false;
+
+          const separator = currentId.lastIndexOf(':');
+          if (separator < 0) break;
+          currentId = currentId.slice(0, separator);
+        }
+
+        return true;
+      });
+    });
+
+    return visibleByPage;
+  }, [treeElementsBboxes, hiddenTreeIdSet]);
 
   const handleZoomOnActive = useCallback(
     async (page: number, controller: AbortController) => {
@@ -508,7 +533,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
                   onGetTextError={props.onGetTextError}
                   onPageInViewport={onPageInViewport}
                   bboxList={bboxMap[page] as IBbox[]}
-                  treeElementsBboxes={treeElementsBboxes[page]}
+                  treeElementsBboxes={visibleTreeElementsBboxes[page]}
                   treeBboxSelectionMode={props.treeBboxSelectionMode}
                   groupId={activeBbox?.groupId}
                   customBbox={customBbox?.page === page ? customBbox : undefined}
