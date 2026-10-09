@@ -111,7 +111,10 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [defaultWidth, setDefaultWidth] = useState(props.defaultWidth);
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
 
-  const hiddenTreeIdSet = useMemo(() => new Set(props.hiddenTreeIds ?? []), [props.hiddenTreeIds]);
+  const hiddenTreeIds = useMemo(
+    () => Array.from(new Set(props.hiddenTreeIds ?? [])).map((id) => id + ':'),
+    [props.hiddenTreeIds],
+  );
 
   const { activeBboxId, activeBboxIndex } = useMemo(() => {
     const { id: activeBboxId } = props.activeBboxId ?? {};
@@ -172,23 +175,13 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     const visibleByPage: Record<number, TreeElementBbox[]> = {};
 
     Object.entries(treeElementsBboxes).forEach(([page, entries]) => {
-      visibleByPage[Number(page)] = entries.filter(([, id]) => {
-        let currentId = id;
-
-        while (currentId) {
-          if (hiddenTreeIdSet.has(currentId)) return false;
-
-          const separator = currentId.lastIndexOf(':');
-          if (separator < 0) break;
-          currentId = currentId.slice(0, separator);
-        }
-
-        return true;
-      });
+      visibleByPage[Number(page)] = entries.filter(
+        ([, id]) => !hiddenTreeIds.some((prefix) => (id + ':').startsWith(prefix)),
+      );
     });
 
     return visibleByPage;
-  }, [treeElementsBboxes, hiddenTreeIdSet]);
+  }, [treeElementsBboxes, hiddenTreeIds]);
 
   const handleZoomOnActive = useCallback(
     async (page: number, controller: AbortController) => {

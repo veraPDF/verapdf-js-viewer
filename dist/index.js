@@ -1205,7 +1205,7 @@ const PdfDocument = (props) => {
     const [defaultHeight, setDefaultHeight] = react.useState(props.defaultHeight);
     const [defaultWidth, setDefaultWidth] = react.useState(props.defaultWidth);
     const [selectedPage, setSelectedPage] = react.useState(undefined);
-    const hiddenTreeIdSet = react.useMemo(() => { var _a; return new Set((_a = props.hiddenTreeIds) !== null && _a !== void 0 ? _a : []); }, [props.hiddenTreeIds]);
+    const hiddenTreeIds = react.useMemo(() => { var _a; return Array.from(new Set((_a = props.hiddenTreeIds) !== null && _a !== void 0 ? _a : [])).map((id) => id + ':'); }, [props.hiddenTreeIds]);
     const { activeBboxId, activeBboxIndex } = react.useMemo(() => {
         var _a, _b;
         const { id: activeBboxId } = (_a = props.activeBboxId) !== null && _a !== void 0 ? _a : {};
@@ -1260,21 +1260,10 @@ const PdfDocument = (props) => {
     const visibleTreeElementsBboxes = react.useMemo(() => {
         const visibleByPage = {};
         Object.entries(treeElementsBboxes).forEach(([page, entries]) => {
-            visibleByPage[Number(page)] = entries.filter(([, id]) => {
-                let currentId = id;
-                while (currentId) {
-                    if (hiddenTreeIdSet.has(currentId))
-                        return false;
-                    const separator = currentId.lastIndexOf(':');
-                    if (separator < 0)
-                        break;
-                    currentId = currentId.slice(0, separator);
-                }
-                return true;
-            });
+            visibleByPage[Number(page)] = entries.filter(([, id]) => !hiddenTreeIds.some((prefix) => (id + ':').startsWith(prefix)));
         });
         return visibleByPage;
-    }, [treeElementsBboxes, hiddenTreeIdSet]);
+    }, [treeElementsBboxes, hiddenTreeIds]);
     const handleZoomOnActive = react.useCallback(async (page, controller) => {
         var _a, _b, _c, _d, _e;
         const { setScale } = props;
