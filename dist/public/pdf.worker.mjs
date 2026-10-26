@@ -323,7 +323,8 @@ const OPS = {
   rawFillPath: 94,
   boundingBoxes: 100,
   operationPosition: 101,
-  annotBBoxesAndOpPos: 102
+  annotBBoxesAndOpPos: 102,
+  operandName: 103
 };
 const DrawOPS = {
   moveTo: 0,
@@ -29928,6 +29929,7 @@ class BoundingBoxesCalculator {
     this.boundingBoxes = {};
     this.refBoundingBoxes = {};
     this.ignoreCalculations = ignoreCalculations;
+    this.operandNameArray = [];
     this.operationArray = [];
     this.mcidArray = [];
     this.sameMcidDepth = 0;
@@ -30343,7 +30345,8 @@ class BoundingBoxesCalculator {
         }
         break;
       case OPS.paintXObject:
-        const [type, bboxes] = args;
+        const [name, type, bboxes] = args;
+        this.operandNameArray[this.operationIndex] = name;
         if (type === "Image") {
           this.getImageBoundingBox();
           this.saveGraphicsBoundingBox();
@@ -33434,7 +33437,7 @@ class PartialEvaluator {
             if (isValidName) {
               const localImage = localImageCache.getByName(name);
               if (localImage) {
-                boundingBoxCalculator.parseOperator(OPS.paintXObject, ["Image"]);
+                boundingBoxCalculator.parseOperator(OPS.paintXObject, [name, "Image"]);
                 addCachedImageOps(operatorList, localImage);
                 args = null;
                 continue;
@@ -33448,7 +33451,7 @@ class PartialEvaluator {
               if (xobj instanceof Ref) {
                 const cachedImage = localImageCache.getByRef(xobj) || self._regionalImageCache.getByRef(xobj) || self.globalImageCache.getData(xobj, self.pageIndex);
                 if (cachedImage) {
-                  boundingBoxCalculator.parseOperator(OPS.paintXObject, ["Image"]);
+                  boundingBoxCalculator.parseOperator(OPS.paintXObject, [name, "Image"]);
                   addCachedImageOps(operatorList, cachedImage);
                   resolveXObject();
                   return;
@@ -33469,14 +33472,14 @@ class PartialEvaluator {
                   newPath: true
                 }), localColorSpaceCache, seenRefs, intent, boundingBoxCalculator.textState, boundingBoxCalculator.graphicsState).then(function ([boundingBoxesByMCID, _, boundingBoxesWithoutMCID]) {
                   boundingBoxCalculator.addRefBoundingBoxes(xobj.dict.objId, boundingBoxesByMCID);
-                  boundingBoxCalculator.parseOperator(OPS.paintXObject, [type.name, boundingBoxesWithoutMCID]);
+                  boundingBoxCalculator.parseOperator(OPS.paintXObject, [name, type.name, boundingBoxesWithoutMCID]);
                   stateManager.restore();
                   boundingBoxCalculator.restoreState();
                   resolveXObject();
                 }, rejectXObject);
                 return;
               } else if (type.name === "Image") {
-                boundingBoxCalculator.parseOperator(OPS.paintXObject, [type.name]);
+                boundingBoxCalculator.parseOperator(OPS.paintXObject, [name, type.name]);
                 self.buildPaintImageXObject({
                   resources,
                   image: xobj,
@@ -33895,7 +33898,7 @@ class PartialEvaluator {
         return;
       }
       closePendingRestoreOPS();
-      resolve([boundingBoxCalculator.boundingBoxes, boundingBoxCalculator.operationArray, boundingBoxCalculator.getNoMCIDBoundingBoxes(), boundingBoxCalculator.refBoundingBoxes]);
+      resolve([boundingBoxCalculator.boundingBoxes, boundingBoxCalculator.operationArray, boundingBoxCalculator.getNoMCIDBoundingBoxes(), boundingBoxCalculator.refBoundingBoxes, boundingBoxCalculator.operandNameArray]);
     }).catch(reason => {
       if (reason instanceof AbortException) {
         return;
@@ -50833,7 +50836,7 @@ class XFAFactory {
       } = result;
       const {
         attributes
-      } = html;
+      } = html ?? {};
       if (attributes) {
         if (attributes.class) {
           attributes.class = attributes.class.filter(attr => !attr.startsWith("xfa"));
@@ -57029,7 +57032,7 @@ class Page {
         return AnnotationFactory.printNewAnnotations(annotationGlobals, partialEvaluator, task, newAnnots, imagePromises);
       });
     }
-    let MCIDBoundingBoxes, positionByOperationIndex, noMCIDBoundingBoxes, refMCIDBoundingBoxes;
+    let MCIDBoundingBoxes, positionByOperationIndex, noMCIDBoundingBoxes, refMCIDBoundingBoxes, operandNameByIndex;
     const pageListPromise = Promise.all([contentStreamPromise, resourcesPromise]).then(async ([contentStream]) => {
       const resources = await this.#getMergedResources(contentStream.dict, RESOURCES_KEYS_OPERATOR_LIST);
       const opList = new OperatorList(intent, sink);
@@ -57044,11 +57047,12 @@ class Page {
         resources,
         operatorList: opList,
         intent
-      }).then(function ([boundingBoxesByMCID, operationArray, boundingBoxesWithoutMCID, refBoundingBoxesByMCID]) {
+      }).then(function ([boundingBoxesByMCID, operationArray, boundingBoxesWithoutMCID, refBoundingBoxesByMCID, operandNameArray]) {
         MCIDBoundingBoxes = boundingBoxesByMCID;
         positionByOperationIndex = operationArray;
         noMCIDBoundingBoxes = boundingBoxesWithoutMCID;
         refMCIDBoundingBoxes = refBoundingBoxesByMCID;
+        operandNameByIndex = operandNameArray;
       });
       return opList;
     });
@@ -57070,6 +57074,7 @@ class Page {
     }
     if (annotations.length === 0 || intent & RenderingIntentFlag.ANNOTATIONS_DISABLE) {
       if (intent & RenderingIntentFlag.OPLIST) {
+        pageOpList.addOp(OPS.operandName, operandNameByIndex);
         pageOpList.addOp(OPS.annotBBoxesAndOpPos, []);
         pageOpList.addOp(OPS.operationPosition, positionByOperationIndex);
         pageOpList.addOp(OPS.boundingBoxes, [MCIDBoundingBoxes, noMCIDBoundingBoxes, refMCIDBoundingBoxes]);
@@ -57113,6 +57118,7 @@ class Page {
       annotationsBBoxesAndOperationPosition.push(annotBBoxesAndOpPos ? [annotBBoxesAndOpPos.operationPosition, annotBBoxesAndOpPos.boundingBoxes] : []);
     }
     if (intent & RenderingIntentFlag.OPLIST) {
+      pageOpList.addOp(OPS.operandName, operandNameByIndex);
       pageOpList.addOp(OPS.annotBBoxesAndOpPos, annotationsBBoxesAndOperationPosition);
       pageOpList.addOp(OPS.operationPosition, positionByOperationIndex);
       pageOpList.addOp(OPS.boundingBoxes, [MCIDBoundingBoxes, noMCIDBoundingBoxes]);
