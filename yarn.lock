@@ -301,6 +301,78 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
+"@napi-rs/canvas-android-arm64@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-android-arm64/-/canvas-android-arm64-1.0.13.tgz#aec9429165e399cb30046c77156dc7a097eaa9ac"
+  integrity sha512-trn7AaDzQ+yeeA0ezhkC7cB1ZDPtp4UYk0EvB5F8qtYL9jEVWtVrU30WOpI52DszoTxaTsCgf5PP4ZVaOlOIHQ==
+
+"@napi-rs/canvas-darwin-arm64@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-darwin-arm64/-/canvas-darwin-arm64-1.0.13.tgz#327e7e720a562e4ece1a705d6738ee818a2675d2"
+  integrity sha512-6Y2djEetL8copxfNK6hg7oig/xqTwOchv19hBOm+zBNdKc/02Z3kjZN5wrLzv/l5O04/bAQS6I/AlQpwBlXgPg==
+
+"@napi-rs/canvas-darwin-x64@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-darwin-x64/-/canvas-darwin-x64-1.0.13.tgz#551865791321cc988f242a8343a85bf264904b27"
+  integrity sha512-OZoPwwu4TMMg8GTCFBrg8UFExwQTU/55i3uTC/izDat6PHE+ro9dimyQoOboFf91+NY7Pnn70ScR8f8I8+eZXw==
+
+"@napi-rs/canvas-linux-arm-gnueabihf@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-arm-gnueabihf/-/canvas-linux-arm-gnueabihf-1.0.13.tgz#fd3577ca819ed9d3417bc978fbdf5a2f47f7846e"
+  integrity sha512-dZSYaKROuswU2eUWG5aBKndNVe68elo1YX93xtRax7q658tj8rYE+HwduovWJgs6qwv1r1/CLR60nDeBbyjvyg==
+
+"@napi-rs/canvas-linux-arm64-gnu@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.13.tgz#a9edc2c39839a43a2ead9fe564d8eb277299a7e6"
+  integrity sha512-W6FzYE8ADHI93In1vi80KBL6btDtAMuj50Ch5ptkWS8xuntyzbR4h5JDUmXoakxZn2yMInksudTEqVSWoFqFGg==
+
+"@napi-rs/canvas-linux-arm64-musl@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-1.0.13.tgz#485b61cdd9345796b2f66c091dde2088e9def735"
+  integrity sha512-+6fQ+rR49hkAa4voh2stLIwQ+4t+gmoseM8Bc53/DlMXb73IKymDPWK9A/NtWeqTW4ijWppYuyuxS2hPI8tzNA==
+
+"@napi-rs/canvas-linux-riscv64-gnu@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-riscv64-gnu/-/canvas-linux-riscv64-gnu-1.0.13.tgz#6228e7ba4c3654eff17deb31dafd9e1f36209d64"
+  integrity sha512-17XEMO3t9RW/TtHtSFf2AkaSWuCWdzbPeidz7zrOFawHxoLSJCnpTI1hN5aUvrZNnkNNmt/vZVJCh0ryUaik3A==
+
+"@napi-rs/canvas-linux-x64-gnu@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-x64-gnu/-/canvas-linux-x64-gnu-1.0.13.tgz#50e0344306cd1e034743737fc483585997f19422"
+  integrity sha512-lc48IwknVHBsNzXn9Xs5OkUsRX38Ml3Z1aOybQ51mMEzZckm8+4A0qROlyYHEoBPzr1kL3IU8ZUAqDb7wtdX8w==
+
+"@napi-rs/canvas-linux-x64-musl@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-linux-x64-musl/-/canvas-linux-x64-musl-1.0.13.tgz#4d13665e418c67abb5f71f2d627e1ce9a1b72608"
+  integrity sha512-bGY1r26S2bs8UNFJcPWcCSNdCFbKep5PATsvtgtC9A5u6SRgr2/jJE/RlhHL5m9ZpixNDhVkLY/5h16Kx5V9YA==
+
+"@napi-rs/canvas-win32-arm64-msvc@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-win32-arm64-msvc/-/canvas-win32-arm64-msvc-1.0.13.tgz#0085f51724aa10dbc4bb4828fd883004c3326cc8"
+  integrity sha512-2vRPBZoaIvJrUkDhZTE2Hn0YrnpJRCWVM3EJACoBKjuWI6WgPxGtUoRMsxRviCsyks8bKTSFdyw14CellnG2qA==
+
+"@napi-rs/canvas-win32-x64-msvc@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-1.0.13.tgz#8af201bd0170d53dd9cd6756ae0009f0339f1c07"
+  integrity sha512-DUlW3lZPz63kYsf8mxgyyZuevhlH0T3/BGP9l+NazhB0F1+gL6D4hqZdnhZpw24DlWmTpATDcyYSZlJOi+DdfQ==
+
+"@napi-rs/canvas@^1.0.0":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@napi-rs/canvas/-/canvas-1.0.13.tgz#cfd0428669eee5323c2d80402dbbe4d78f5cf9dc"
+  integrity sha512-b87ugZpQ5ViwqVBkjervxpwa0GmJPsKHLBNoZN6GpjWeHzTbDUGryriq+2DYW2XbB+xCqSIINQysC0/I87nPbw==
+  optionalDependencies:
+    "@napi-rs/canvas-android-arm64" "1.0.13"
+    "@napi-rs/canvas-darwin-arm64" "1.0.13"
+    "@napi-rs/canvas-darwin-x64" "1.0.13"
+    "@napi-rs/canvas-linux-arm-gnueabihf" "1.0.13"
+    "@napi-rs/canvas-linux-arm64-gnu" "1.0.13"
+    "@napi-rs/canvas-linux-arm64-musl" "1.0.13"
+    "@napi-rs/canvas-linux-riscv64-gnu" "1.0.13"
+    "@napi-rs/canvas-linux-x64-gnu" "1.0.13"
+    "@napi-rs/canvas-linux-x64-musl" "1.0.13"
+    "@napi-rs/canvas-win32-arm64-msvc" "1.0.13"
+    "@napi-rs/canvas-win32-x64-msvc" "1.0.13"
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -1242,6 +1314,11 @@ es-to-primitive@^1.3.0:
     is-callable "^1.2.7"
     is-date-object "^1.1.0"
     is-symbol "^1.1.1"
+
+es-toolkit@^1.52.0:
+  version "1.53.0"
+  resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.53.0.tgz#084c0372cce0f7146b26cdbcae896eceb683fe39"
+  integrity sha512-3+AYXp9fmJ/UhHBMYj2/U+RaUouMD90SzoItyDOB2Za7W6dB7fQApFGnZPl2MF6K8/Tv1koh1JyirSx/kju6Pw==
 
 escalade@^3.2.0:
   version "3.2.0"
@@ -2496,7 +2573,12 @@ path2d@^0.2.0:
   resolved "https://registry.yarnpkg.com/path2d/-/path2d-0.2.2.tgz#cc85d61ed7827e7863a2ee36713d4b5315a3d85d"
   integrity sha512-+vnG6S4dYcYxZd+CZxzXCNKdELYZSKfohrk98yajCo1PtRoDgCTrrwOvK1GT0UoAdVszagDVllQc0U1vaX4NUQ==
 
-pdfjs-dist@5.4.296, "pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.35":
+pdfjs-dist@6.3.289, "pdfjs-dist@file:.yalc/pdfjs-dist":
+  version "6.3.289"
+  optionalDependencies:
+    "@napi-rs/canvas" "^1.0.0"
+
+"pdfjs-dist@github:veraPDF/pdfjs-dist#v5.4.296-taggedPdf-0.1.35":
   version "5.4.296"
   resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/7f658c637df20c19f59b117d2dc317239eefc6bb"
   optionalDependencies:
@@ -2596,17 +2678,18 @@ react-is@^16.13.1, react-is@^16.7.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-react-pdf@10.3.0:
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/react-pdf/-/react-pdf-10.3.0.tgz#b7c5e4bfb17b4eb128c7b78d8f198a742eda5bbb"
-  integrity sha512-2LQzC9IgNVAX8gM+6F+1t/70a9/5RWThYxc+CWAmT2LW/BRmnj+35x1os5j/nR2oldyf8L+hCAMBmVKU8wrYFA==
+react-pdf@11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/react-pdf/-/react-pdf-11.0.0.tgz#779067bee2c7cbd0f0df580df2d865ac12f1c94a"
+  integrity sha512-x4Ierg3Sl+gOoqd0pVOQndiuFKeGcXQmUNtaSH0D/cs2nUW1HBDlFBT2Z8jDsDJv0Kh//jlOJT21ERyQtlRe7A==
   dependencies:
     clsx "^2.0.0"
     dequal "^2.0.3"
+    es-toolkit "^1.52.0"
     make-cancellable-promise "^2.0.0"
     make-event-props "^2.0.0"
     merge-refs "^2.0.0"
-    pdfjs-dist "5.4.296"
+    pdfjs-dist "6.3.289"
     tiny-invariant "^1.0.0"
     warning "^4.0.0"
 

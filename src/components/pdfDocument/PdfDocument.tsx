@@ -111,6 +111,12 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [defaultWidth, setDefaultWidth] = useState(props.defaultWidth);
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
 
+  const documentOptions = useMemo(() => {
+    return {
+      wasmUrl: props.wasmUrl || '',
+    };
+  }, [props.wasmUrl]);
+
   const hiddenTreeIds = useMemo(
     () => Array.from(new Set(props.hiddenTreeIds ?? [])).map((id) => id + ':'),
     [props.hiddenTreeIds],
@@ -494,6 +500,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       noData={props.noData}
       onItemClick={props.onItemClick}
       rotate={props.rotate}
+      options={documentOptions}
     >
       {useMemo(
         () =>

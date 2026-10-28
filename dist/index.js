@@ -65,7 +65,7 @@ const bboxBgSelected = 'rgba(255,69,0,0.5)';
 const bboxBgRelated = 'rgba(255,176,0,0.3)';
 const bboxBgStructured = 'rgba(255,255,255,0)';
 const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
-const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-d59wxb" }) `
+const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1fg2vj0" }) `
   mix-blend-mode: normal;
   left: ${(props) => props.left};
   bottom: ${(props) => props.bottom};
@@ -919,7 +919,7 @@ const WARNING_CODES = {
 insertStyle(".pdf-page .bbox-wrapper {\n  opacity: 0.75;\n  isolation: isolate;\n}\n.pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 const bboxBorderHover = 'orangered';
-const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" }) `
+const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-akx7mn" }) `
   margin-left: auto;
   margin-right: auto;
   height: ${(props) => (props.height ? props.height * props.scale + 'px' : 'fit-content')};
@@ -1205,6 +1205,11 @@ const PdfDocument = (props) => {
     const [defaultHeight, setDefaultHeight] = react.useState(props.defaultHeight);
     const [defaultWidth, setDefaultWidth] = react.useState(props.defaultWidth);
     const [selectedPage, setSelectedPage] = react.useState(undefined);
+    const documentOptions = react.useMemo(() => {
+        return {
+            wasmUrl: props.wasmUrl || '',
+        };
+    }, [props.wasmUrl]);
     const hiddenTreeIds = react.useMemo(() => { var _a; return Array.from(new Set((_a = props.hiddenTreeIds) !== null && _a !== void 0 ? _a : [])).map((id) => id + ':'); }, [props.hiddenTreeIds]);
     const { activeBboxId, activeBboxIndex } = react.useMemo(() => {
         var _a, _b;
@@ -1535,7 +1540,7 @@ const PdfDocument = (props) => {
             document.removeEventListener('keydown', handlekeydownEvent);
         };
     }, [activeBboxIndex, props.page, maxPage, visibleBboxIndexes]);
-    return (jsxRuntime.jsx(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate, children: react.useMemo(() => loaded
+    return (jsxRuntime.jsx(reactPdf.Document, { className: "pdf-document", file: props.file, onLoadSuccess: onDocumentLoadSuccess, onLoadError: props.onLoadError, externalLinkTarget: props.externalLinkTarget, error: props.error, loading: props.loading, noData: props.noData, onItemClick: props.onItemClick, rotate: props.rotate, options: documentOptions, children: react.useMemo(() => loaded
             ? shownPages.map((page) => (jsxRuntime.jsx(PdfPage$1, { defaultHeight: defaultHeight, defaultWidth: defaultWidth, page: page, pageError: props.pageError, inputRef: props.inputRef, height: props.height, width: props.width, pageLoading: props.pageLoading, renderAnnotationLayer: props.renderAnnotationLayer, renderInteractiveForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onPageLoadError: props.onPageLoadError, onPageLoadSuccess: onPageLoadSuccess, onPageRenderError: props.onPageRenderError, onPageRenderSuccess: (ref) => {
                     var _a;
                     renderedPages.current.set(page, ref);
