@@ -29,7 +29,7 @@
     "prettier": "^3.9.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "rollup": "^2.80.0",
+    "rollup": "^4.62.4",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-sass": "^1.16.0-rc.1",
