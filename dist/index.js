@@ -8,8 +8,8 @@ var EventEmitter = require('eventemitter3');
 var _ = require('lodash');
 require('react-pdf/dist/Page/AnnotationLayer.css');
 require('react-pdf/dist/Page/TextLayer.css');
-var useIntersection = require('use-intersection');
 var styled = require('styled-components');
+var useIntersection = require('use-intersection');
 var pdfWorkerURL = require('pdfjs-dist/build/pdf.worker?url');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { 'default': e }; }
@@ -24,132 +24,6 @@ var TreeBboxSelectionMode;
     TreeBboxSelectionMode["SELECTED"] = "SELECTED";
     TreeBboxSelectionMode["SELECTED_WITH_KIDS"] = "SELECTED_WITH_KIDS";
 })(TreeBboxSelectionMode || (TreeBboxSelectionMode = {}));
-
-const ViewerContext = react.createContext({});
-const ViewerProvider = ({ renderBbox, children, }) => {
-    const [page, setPage] = react.useState(1);
-    const [maxPage, setMaxPage] = react.useState(0);
-    const [scrollInto, setScrollInto] = react.useState({ page: 0 });
-    const setScrollIntoPage = react.useCallback((page) => setScrollInto({ page }), [setScrollInto]);
-    const context = {
-        page,
-        setPage,
-        maxPage,
-        setMaxPage,
-        scrollInto,
-        setScrollIntoPage,
-        renderBbox,
-    };
-    return jsxRuntime.jsx(ViewerContext.Provider, { value: context, children: children });
-};
-
-function insertStyle(css) {
-    if (!css || typeof window === 'undefined')
-        return;
-    const style = document.createElement('style');
-    style.textContent = css;
-    document.head.appendChild(style);
-    return css;
-}
-
-insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 3;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 1000;\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_structured_selected {\n  pointer-events: none;\n  z-index: 4;\n}\n.pdf-bbox_disabled {\n  display: none;\n}\n\nsection[data-annotation-id] {\n  z-index: 2 !important;\n}\nsection[data-annotation-id] * {\n  color: transparent !important;\n}");
-
-const bboxBorder = 'grey';
-const bboxRelatedBorder = 'rgba(255,176,0,0.5)';
-const bboxStructuredBorder = 'rgba(255,255,255,0)';
-const bboxSelectedStructuredBorder = 'rgba(255,122,0,1)';
-const bboxBorderHover$1 = 'orangered';
-const bboxStructuredBorderHover = 'rgba(255,122,0,1)';
-const bboxBg = 'rgba(255,255,255,0)';
-const bboxBgSelected = 'rgba(255,69,0,0.5)';
-const bboxBgRelated = 'rgba(255,176,0,0.3)';
-const bboxBgStructured = 'rgba(255,255,255,0)';
-const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
-const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-d59wxb" }) `
-  mix-blend-mode: normal;
-  left: ${(props) => props.left};
-  bottom: ${(props) => props.bottom};
-  height: ${(props) => props.height};
-  width: ${(props) => props.width};
-  top: ${(props) => props.top};
-  border-color: ${(props) => (props.colorScheme && props.colorScheme.border) || bboxBorder};
-  background-color: ${(props) => (props.colorScheme && props.colorScheme.background) || bboxBg};
-  &:hover {
-    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderHovered) || bboxBorderHover$1};
-    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundHovered) || bboxBg};
-  }
-  &.pdf-bbox_selected {
-    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelected) || bboxBorderHover$1};
-    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundSelected) || bboxBgSelected};
-  }
-  &.pdf-bbox_related {
-    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderRelated) || bboxRelatedBorder};
-    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundRelated) || bboxBgRelated};
-  }
-  &.pdf-bbox_structured {
-    &:hover {
-      border-color: ${bboxStructuredBorderHover};
-    }
-    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderStructured) || bboxStructuredBorder};
-    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundStructured) || bboxBgStructured};
-  }
-  &.pdf-bbox_structured_selected {
-    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelectedStructured) || bboxSelectedStructuredBorder};
-    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundSelectedStructured) || bboxBgSelectedStructured};
-  }
-  &.pdf-bbox_structured_selected_multiple {
-    background-color: ${(props) => (props.colorScheme && props.colorScheme.background) || bboxBg};
-  }
-`;
-const clamp = (value, scale, { max, min = 0, offset = 0, } = {}) => {
-    if (max === undefined)
-        return Math.max((offset + +value) * scale, min);
-    return Math.min(Math.max((offset + +value) * scale, min), max);
-};
-const Bbox = (props) => {
-    const { bbox, disabled, selected, related, structured, scale, colorScheme, selectionMode, pageBorders, onClick } = props;
-    const { renderBbox } = react.useContext(ViewerContext);
-    const [left, bottom, width, height, top] = react.useMemo(() => {
-        const x0 = clamp(bbox.location[0], scale, { max: pageBorders.width });
-        const y0 = clamp(bbox.location[1], scale, { max: pageBorders.height });
-        const w = clamp(bbox.location[2], scale, { max: pageBorders.width, offset: +bbox.location[0] }) - x0;
-        if (bbox.location[3] === 'bottom')
-            return [`${x0}px`, '0', `${w}px`, 'auto', `calc(100% - ${y0}px)`];
-        if (bbox.location[3] === 'top')
-            return [`${x0}px`, `${y0}px`, `${w}px`, 'auto', '0'];
-        const h = clamp(bbox.location[3], scale, { max: pageBorders.height, offset: +bbox.location[1] }) - y0;
-        return [`${x0}px`, `${y0}px`, `${w}px`, `${h}px`, 'auto'];
-    }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
-    const isSelected = react.useMemo(() => (selected ? ' pdf-bbox_selected' : ''), [selected]);
-    const isRelated = react.useMemo(() => (related ? ' pdf-bbox_related' : ''), [related]);
-    const isDisabled = react.useMemo(() => (disabled ? ' pdf-bbox_disabled' : ''), [disabled]);
-    const isStructured = react.useMemo(() => (structured ? ' pdf-bbox_structured' : ''), [structured]);
-    const isStructuredSelected = react.useMemo(() => (structured && selected ? ' pdf-bbox_structured_selected' : ''), [structured, selected]);
-    const isStructuredSelectedMultiple = react.useMemo(() => {
-        if (structured && selected && selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS)
-            return ' pdf-bbox_structured_selected_multiple';
-        else
-            return '';
-    }, [structured, selected, selectionMode]);
-    if (renderBbox) {
-        return renderBbox({
-            left,
-            width,
-            height,
-            top,
-            colorScheme,
-            disabled,
-            related,
-            selected,
-            scale,
-            selectionMode,
-            structured,
-            onClick,
-        });
-    }
-    return (jsxRuntime.jsx(BboxDiv, { className: `pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`, left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: colorScheme || {}, title: bbox.bboxTitle, "aria-describedby": bbox.bboxTitle, onClick: onClick }));
-};
-var Bbox$1 = react.memo(Bbox);
 
 const groupChildren = (children) => {
     var _a, _b, _c;
@@ -916,10 +790,146 @@ const WARNING_CODES = {
     BBOX_OUT_OF_THE_PAGE_VIEWPORT: 'BBOX_OUT_OF_THE_PAGE_VIEWPORT',
 };
 
+const ViewerContext = react.createContext({});
+const ViewerProvider = ({ renderBbox, children, }) => {
+    const [page, setPage] = react.useState(1);
+    const [maxPage, setMaxPage] = react.useState(0);
+    const [scrollInto, setScrollInto] = react.useState({ page: 0 });
+    const setScrollIntoPage = react.useCallback((page) => setScrollInto({ page }), [setScrollInto]);
+    const context = {
+        page,
+        setPage,
+        maxPage,
+        setMaxPage,
+        scrollInto,
+        setScrollIntoPage,
+        renderBbox,
+    };
+    return jsxRuntime.jsx(ViewerContext.Provider, { value: context, children: children });
+};
+
+function insertStyle(css) {
+    if (!css || typeof window === 'undefined')
+        return;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+    return css;
+}
+
+insertStyle(".pdf-bbox {\n  position: absolute;\n  border: 2px solid grey;\n  box-sizing: border-box;\n  cursor: pointer;\n  z-index: 3;\n}\n.pdf-bbox:hover {\n  border-color: orangered;\n}\n.pdf-bbox_selected {\n  z-index: 1000;\n  background: rgba(255, 69, 0, 0.5);\n}\n.pdf-bbox_structured_selected {\n  pointer-events: none;\n  z-index: 4;\n}\n.pdf-bbox_disabled {\n  display: none;\n}\n.pdf-bbox_unselectable:not(.pdf-bbox_selected) {\n  cursor: default;\n  z-index: -1;\n}\n.pdf-bbox_unselectable:not(.pdf-bbox_selected):hover {\n  border-color: transparent;\n  background-color: transparent;\n}\n\nsection[data-annotation-id] {\n  z-index: 2 !important;\n}\nsection[data-annotation-id] * {\n  color: transparent !important;\n}");
+
+const bboxBorder = 'grey';
+const bboxRelatedBorder = 'rgba(255,176,0,0.5)';
+const bboxStructuredBorder = 'rgba(255,255,255,0)';
+const bboxSelectedStructuredBorder = 'rgba(255,122,0,1)';
+const bboxBorderHover$1 = 'orangered';
+const bboxStructuredBorderHover = 'rgba(255,122,0,1)';
+const bboxBg = 'rgba(255,255,255,0)';
+const bboxBgSelected = 'rgba(255,69,0,0.5)';
+const bboxBgRelated = 'rgba(255,176,0,0.3)';
+const bboxBgStructured = 'rgba(255,255,255,0)';
+const bboxBgSelectedStructured = 'rgba(255,100,0,0.4)';
+const BboxDiv = styled__default["default"].div.withConfig({ displayName: "BboxDiv", componentId: "-1jqx3qg" }) `
+  mix-blend-mode: normal;
+  left: ${(props) => props.left};
+  bottom: ${(props) => props.bottom};
+  height: ${(props) => props.height};
+  width: ${(props) => props.width};
+  top: ${(props) => props.top};
+  border-color: ${(props) => (props.colorScheme && props.colorScheme.border) || bboxBorder};
+  background-color: ${(props) => (props.colorScheme && props.colorScheme.background) || bboxBg};
+  &:hover {
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderHovered) || bboxBorderHover$1};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundHovered) || bboxBg};
+  }
+  &.pdf-bbox_selected {
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelected) || bboxBorderHover$1};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundSelected) || bboxBgSelected};
+  }
+  &.pdf-bbox_related {
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderRelated) || bboxRelatedBorder};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundRelated) || bboxBgRelated};
+  }
+  &.pdf-bbox_structured {
+    &:hover {
+      border-color: ${bboxStructuredBorderHover};
+    }
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderStructured) || bboxStructuredBorder};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundStructured) || bboxBgStructured};
+  }
+  &.pdf-bbox_structured_selected {
+    border-color: ${(props) => (props.colorScheme && props.colorScheme.borderSelectedStructured) || bboxSelectedStructuredBorder};
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.backgroundSelectedStructured) || bboxBgSelectedStructured};
+  }
+  &.pdf-bbox_structured_selected_multiple {
+    background-color: ${(props) => (props.colorScheme && props.colorScheme.background) || bboxBg};
+  }
+  &.pdf-bbox_unselectable:not(.pdf-bbox_selected):hover {
+    border-color: transparent;
+    background-color: transparent;
+    cursor: default;
+    z-index: -1;
+  }
+`;
+const clamp = (value, scale, { max, min = 0, offset = 0, } = {}) => {
+    if (max === undefined)
+        return Math.max((offset + +value) * scale, min);
+    return Math.min(Math.max((offset + +value) * scale, min), max);
+};
+const Bbox = (props) => {
+    const { bbox, disabled, selected, related, structured, scale, colorScheme, selectionMode, pageBorders, onClick } = props;
+    const { renderBbox } = react.useContext(ViewerContext);
+    const [left, bottom, width, height, top] = react.useMemo(() => {
+        const x0 = clamp(bbox.location[0], scale, { max: pageBorders.width });
+        const y0 = clamp(bbox.location[1], scale, { max: pageBorders.height });
+        const w = clamp(bbox.location[2], scale, { max: pageBorders.width, offset: +bbox.location[0] }) - x0;
+        if (bbox.location[3] === 'bottom')
+            return [`${x0}px`, '0', `${w}px`, 'auto', `calc(100% - ${y0}px)`];
+        if (bbox.location[3] === 'top')
+            return [`${x0}px`, `${y0}px`, `${w}px`, 'auto', '0'];
+        const h = clamp(bbox.location[3], scale, { max: pageBorders.height, offset: +bbox.location[1] }) - y0;
+        return [`${x0}px`, `${y0}px`, `${w}px`, `${h}px`, 'auto'];
+    }, [bbox.location, scale, pageBorders.width, pageBorders.height]);
+    const isSelected = react.useMemo(() => (selected ? ' pdf-bbox_selected' : ''), [selected]);
+    const isRelated = react.useMemo(() => (related ? ' pdf-bbox_related' : ''), [related]);
+    const isDisabled = react.useMemo(() => (disabled ? ' pdf-bbox_disabled' : ''), [disabled]);
+    const isSelectable = react.useMemo(() => bbox.isSelectable !== false, [bbox.isSelectable]);
+    const isUnselectable = react.useMemo(() => (isSelectable ? '' : ' pdf-bbox_unselectable'), [isSelectable]);
+    const isStructured = react.useMemo(() => (structured ? ' pdf-bbox_structured' : ''), [structured]);
+    const isStructuredSelected = react.useMemo(() => (structured && selected ? ' pdf-bbox_structured_selected' : ''), [structured, selected]);
+    const isStructuredSelectedMultiple = react.useMemo(() => {
+        if (structured && selected && selectionMode === TreeBboxSelectionMode.SELECTED_WITH_KIDS)
+            return ' pdf-bbox_structured_selected_multiple';
+        else
+            return '';
+    }, [structured, selected, selectionMode]);
+    const handleClick = isSelectable ? onClick : (e) => e.stopPropagation();
+    if (renderBbox) {
+        return renderBbox({
+            left,
+            width,
+            height,
+            top,
+            colorScheme,
+            disabled,
+            related,
+            selected,
+            scale,
+            selectionMode,
+            structured,
+            selectable: isSelectable,
+            onClick: handleClick,
+        });
+    }
+    return (jsxRuntime.jsx(BboxDiv, { className: `pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}${isUnselectable}`, left: left, bottom: bottom, width: width, height: height, top: top, colorScheme: colorScheme || {}, title: bbox.bboxTitle, "aria-describedby": bbox.bboxTitle, onClick: handleClick }));
+};
+var Bbox$1 = react.memo(Bbox);
+
 insertStyle(".pdf-page .bbox-wrapper {\n  opacity: 0.75;\n  isolation: isolate;\n}\n.pdf-page {\n  position: relative;\n  background: #fff;\n  margin-top: 8px;\n  overflow: hidden;\n  -moz-box-shadow: 0 0 4px 2px #cccccc;\n  -webkit-box-shadow: 0 0 4px 2px #cccccc;\n  box-shadow: 0 0 4px 2px #cccccc;\n}\n.pdf-page_selected {\n  outline: orangered solid 2px;\n}");
 
 const bboxBorderHover = 'orangered';
-const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1bn9hgf" }) `
+const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "StyledPdfPage", componentId: "-1r5bcob" }) `
   margin-left: auto;
   margin-right: auto;
   height: ${(props) => (props.height ? props.height * props.scale + 'px' : 'fit-content')};
@@ -931,9 +941,9 @@ const StyledPdfPage = styled__default["default"].div.withConfig({ displayName: "
 const PdfPage = (props) => {
     var _a, _b;
     const { scrollInto } = react.useContext(ViewerContext);
-    const { treeElementsBboxes, customBbox, bboxList, scale = 1 } = props;
+    const { treeElementsBboxes, customBbox, customBboxes, bboxList, scale = 1 } = props;
     const [page, setPage] = react.useState(null);
-    const prevPageBboxes = reactUse.usePrevious({ page, treeElementsBboxes, customBbox });
+    const prevPageBboxes = reactUse.usePrevious({ page, treeElementsBboxes, customBbox, customBboxes });
     const intersectionRef = react.useRef(null);
     const [bboxesAll, setBboxesAll] = react.useState([]);
     const [bboxesErrors, setBboxesErrors] = react.useState([]);
@@ -982,10 +992,10 @@ const PdfPage = (props) => {
         e.stopPropagation();
         (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, null);
     }, [props.onBboxClick]);
-    const onBboxClick = react.useCallback((index, id) => (e) => {
+    const onBboxClick = react.useCallback((index, id, source) => (e) => {
         var _a;
         e.stopPropagation();
-        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { index, id });
+        (_a = props.onBboxClick) === null || _a === void 0 ? void 0 : _a.call(props, { index, id, source });
     }, [props.onBboxClick]);
     const onPageRenderSuccess = react.useCallback(() => {
         var _a, _b;
@@ -1012,6 +1022,7 @@ const PdfPage = (props) => {
         const triggeredByBboxList = prevPageBboxes &&
             prevPageBboxes.page === page &&
             ___default["default"].isEqual(prevPageBboxes.customBbox, customBbox) &&
+            ___default["default"].isEqual(prevPageBboxes.customBboxes, customBboxes) &&
             prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
         if (page) {
             if (triggeredByBboxList && !(bboxList === null || bboxList === void 0 ? void 0 : bboxList.length))
@@ -1069,6 +1080,19 @@ const PdfPage = (props) => {
                                 id: customBbox.id,
                                 location: customBbox.rect,
                                 area: customBbox.rect[2] * customBbox.rect[3],
+                                isSelectable: customBbox.isSelectable,
+                            });
+                        }
+                        if (customBboxes === null || customBboxes === void 0 ? void 0 : customBboxes.length) {
+                            customBboxes.forEach((bbox) => {
+                                allBboxes.push({
+                                    id: bbox.id,
+                                    location: bbox.rect,
+                                    area: bbox.rect[2] * bbox.rect[3],
+                                    source: bbox.source,
+                                    isSelectable: bbox.isSelectable,
+                                    isVisible: true,
+                                });
                             });
                         }
                         setBboxesAll(allBboxes);
@@ -1077,7 +1101,7 @@ const PdfPage = (props) => {
                 });
             }
         }
-    }, [page, bboxList, treeElementsBboxes, customBbox]);
+    }, [page, bboxList, treeElementsBboxes, customBbox, customBboxes]);
     react.useEffect(() => {
         var _a;
         if (!loaded && isIntersecting) {
@@ -1159,7 +1183,7 @@ const PdfPage = (props) => {
             (_a = props.onWarning) === null || _a === void 0 ? void 0 : _a.call(props, WARNING_CODES.BBOX_OUT_OF_THE_PAGE_VIEWPORT);
         }
     }, [activeBboxes, scale, props.page]), [activeBboxes]);
-    return (jsxRuntime.jsx("div", { className: "pdf-page-min-margin-wrapper", style: { margin: '0 15px' }, children: jsxRuntime.jsx(StyledPdfPage, { className: `pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`, "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {}, children: loaded ? (jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [jsxRuntime.jsx(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, customTextRenderer: props.customTextRenderer }), isRendered ? (jsxRuntime.jsx("div", { className: "bbox-wrapper", children: bboxes.map((bbox, index) => (jsxRuntime.jsx(Bbox$1, { bbox: bbox, pageBorders: pageBorders, onClick: onBboxClick(bbox.index, bbox.id), disabled: isBboxDisabled(bbox), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isBboxRelated(bbox), scale: pageScale, selectionMode: props.treeBboxSelectionMode, colorScheme: props.colorScheme }, index))) })) : null] })) : null }) }));
+    return (jsxRuntime.jsx("div", { className: "pdf-page-min-margin-wrapper", style: { margin: '0 15px' }, children: jsxRuntime.jsx(StyledPdfPage, { className: `pdf-page pdf-page_rendered${props.isPageSelected ? ' pdf-page_selected' : ''}`, "data-page": props.page, onClick: onPageClick, height: !isRendered ? props.height || props.defaultHeight : undefined, width: !isRendered ? props.width || props.defaultWidth : undefined, scale: pageScale, ref: intersectionRef, colorScheme: props.colorScheme || {}, children: loaded ? (jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [jsxRuntime.jsx(reactPdf.Page, { pageNumber: props.page, error: props.pageError, height: props.height, width: props.width, loading: props.pageLoading, inputRef: props.inputRef, renderAnnotationLayer: props.renderAnnotationLayer, renderForms: props.renderInteractiveForms, renderTextLayer: props.renderTextLayer, scale: props.scale, onLoadError: props.onPageLoadError, onLoadSuccess: onPageLoadSuccess, onRenderError: props.onPageRenderError, onRenderSuccess: onPageRenderSuccess, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, customTextRenderer: props.customTextRenderer }), isRendered ? (jsxRuntime.jsx("div", { className: "bbox-wrapper", children: bboxes.map((bbox, index) => (jsxRuntime.jsx(Bbox$1, { bbox: bbox, pageBorders: pageBorders, onClick: onBboxClick(bbox.index, bbox.id, bbox.source), disabled: isBboxDisabled(bbox), structured: isBboxStructured(bbox), selected: isBboxSelected(bbox), related: isBboxRelated(bbox), scale: pageScale, selectionMode: props.treeBboxSelectionMode, colorScheme: props.colorScheme }, index))) })) : null] })) : null }) }));
 };
 var PdfPage$1 = react.memo(PdfPage);
 
@@ -1194,7 +1218,7 @@ const PdfDocument = (props) => {
     var _a, _b;
     const renderedPages = react.useRef(new MapWithEvents());
     const { page, setPage, maxPage, setMaxPage, scrollInto, setScrollIntoPage } = react.useContext(ViewerContext);
-    const { bboxes = [], customBbox } = props;
+    const { bboxes = [], customBbox, customBboxes } = props;
     const [loaded, setLoaded] = react.useState(false);
     const [structureTree, setStructureTree] = react.useState({});
     const [parsedTree, setParsedTree] = react.useState({});
@@ -1236,6 +1260,13 @@ const PdfDocument = (props) => {
     const activeBbox = react.useMemo(() => {
         return activeBboxIndex != null ? bboxes[activeBboxIndex] : null;
     }, [activeBboxIndex, bboxes]);
+    const activeCustomBbox = react.useMemo(() => {
+        if (activeBboxIndex != null || ___default["default"].isNil(activeBboxId))
+            return undefined;
+        if ((customBbox === null || customBbox === void 0 ? void 0 : customBbox.id) === activeBboxId)
+            return customBbox;
+        return customBboxes === null || customBboxes === void 0 ? void 0 : customBboxes.find((bbox) => bbox.id === activeBboxId);
+    }, [activeBboxIndex, activeBboxId, customBbox, customBboxes]);
     const visibleBboxIndexes = react.useMemo(() => bboxes.reduce((visibleIndexes, bbox, index) => {
         if (bbox.isVisible !== false) {
             visibleIndexes.push(index);
@@ -1327,8 +1358,8 @@ const PdfDocument = (props) => {
         }
         let bboxPage = 0;
         const autoZoom = isBboxMode ? props.activeBboxIndex.zoom : props.activeBboxId.zoom;
-        if (!isBboxMode && customBbox && customBbox.id === activeBboxId)
-            bboxPage = customBbox.page;
+        if (!isBboxMode && activeCustomBbox)
+            bboxPage = activeCustomBbox.page;
         else {
             const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
             const finder = isBboxMode
@@ -1384,7 +1415,7 @@ const PdfDocument = (props) => {
             }
         }
         return;
-    }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes, customBbox]);
+    }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes, activeCustomBbox]);
     react.useEffect(() => {
         if (activeBbox) {
             const selectedPage = getSelectedPageByLocation(activeBbox.location);
@@ -1393,10 +1424,13 @@ const PdfDocument = (props) => {
             }
             setSelectedPage(selectedPage);
         }
+        else if (activeCustomBbox) {
+            setPage(activeCustomBbox.page);
+        }
         else {
             setSelectedPage(undefined);
         }
-    }, [activeBbox]);
+    }, [activeBbox, activeCustomBbox]);
     const onDocumentLoadSuccess = react.useCallback(async (data) => {
         var _a;
         setStructureTree(data._pdfInfo.structureTree);
@@ -1540,7 +1574,7 @@ const PdfDocument = (props) => {
                     var _a;
                     renderedPages.current.set(page, ref);
                     (_a = props.onPageRenderSuccess) === null || _a === void 0 ? void 0 : _a.call(props);
-                }, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: visibleTreeElementsBboxes[page], treeBboxSelectionMode: props.treeBboxSelectionMode, groupId: activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.groupId, customBbox: (customBbox === null || customBbox === void 0 ? void 0 : customBbox.page) === page ? customBbox : undefined, activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning }, page)))
+                }, onGetAnnotationsSuccess: props.onGetAnnotationsSuccess, onGetAnnotationsError: props.onGetAnnotationsError, onGetTextSuccess: props.onGetTextSuccess, onGetTextError: props.onGetTextError, onPageInViewport: onPageInViewport, bboxList: bboxMap[page], treeElementsBboxes: visibleTreeElementsBboxes[page], treeBboxSelectionMode: props.treeBboxSelectionMode, groupId: activeBbox === null || activeBbox === void 0 ? void 0 : activeBbox.groupId, customBbox: (customBbox === null || customBbox === void 0 ? void 0 : customBbox.page) === page ? customBbox : undefined, customBboxes: customBboxes === null || customBboxes === void 0 ? void 0 : customBboxes.filter((bbox) => bbox.page === page), activeBboxIndex: props.activeBboxIndex, activeBboxId: props.activeBboxId, isTreeBboxesVisible: props.isTreeBboxesVisible, onBboxClick: onBboxClick, colorScheme: props.colorScheme, isPageSelected: selectedPage === page, onWarning: props.onWarning }, page)))
             : null, [loaded, shownPages, defaultHeight, defaultWidth, bboxMap, treeElementsBboxes, props, selectedPage]) }));
 };
 var PdfDocument$1 = react.memo(PdfDocument);

@@ -78,6 +78,7 @@ const zoomOutScaleRatioThreshold = 0.7;
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   showAllPages?: boolean;
   customBbox?: CustomBBox;
+  customBboxes?: CustomBBox[];
   activeBboxIndex?: { index: number; zoom: boolean };
   activeBboxId?: { id: string; zoom: boolean };
   bboxes: IBboxLocation[];
@@ -99,7 +100,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
 const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const renderedPages = useRef(new MapWithEvents<number, HTMLDivElement>());
   const { page, setPage, maxPage, setMaxPage, scrollInto, setScrollIntoPage } = useContext(ViewerContext);
-  const { bboxes = [], customBbox } = props;
+  const { bboxes = [], customBbox, customBboxes } = props;
   const [loaded, setLoaded] = useState(false);
   const [structureTree, setStructureTree] = useState({});
   const [parsedTree, setParsedTree] = useState({});
@@ -142,6 +143,11 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const activeBbox = useMemo(() => {
     return activeBboxIndex != null ? bboxes[activeBboxIndex] : null;
   }, [activeBboxIndex, bboxes]);
+  const activeCustomBbox = useMemo(() => {
+    if (activeBboxIndex != null || _.isNil(activeBboxId)) return undefined;
+    if (customBbox?.id === activeBboxId) return customBbox;
+    return customBboxes?.find((bbox) => bbox.id === activeBboxId);
+  }, [activeBboxIndex, activeBboxId, customBbox, customBboxes]);
   const visibleBboxIndexes = useMemo(
     () =>
       bboxes.reduce<number[]>((visibleIndexes, bbox, index) => {
@@ -253,7 +259,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
     }
     let bboxPage = 0;
     const autoZoom = isBboxMode ? props.activeBboxIndex!.zoom : props.activeBboxId!.zoom;
-    if (!isBboxMode && customBbox && customBbox.id === activeBboxId) bboxPage = customBbox.page;
+    if (!isBboxMode && activeCustomBbox) bboxPage = activeCustomBbox.page;
     else {
       const entries = Object.entries(isBboxMode ? bboxMap : treeElementsBboxes);
       const finder = isBboxMode
@@ -307,7 +313,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       }
     }
     return;
-  }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes, customBbox]);
+  }, [props.activeBboxIndex, props.activeBboxId, bboxMap, treeElementsBboxes, activeCustomBbox]);
 
   useEffect(() => {
     if (activeBbox) {
@@ -316,10 +322,12 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
         setPage(selectedPage);
       }
       setSelectedPage(selectedPage);
+    } else if (activeCustomBbox) {
+      setPage(activeCustomBbox.page);
     } else {
       setSelectedPage(undefined);
     }
-  }, [activeBbox]);
+  }, [activeBbox, activeCustomBbox]);
 
   const onDocumentLoadSuccess = useCallback(
     async (data: IDocumentData) => {
@@ -530,6 +538,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
                   treeBboxSelectionMode={props.treeBboxSelectionMode}
                   groupId={activeBbox?.groupId}
                   customBbox={customBbox?.page === page ? customBbox : undefined}
+                  customBboxes={customBboxes?.filter((bbox) => bbox.page === page)}
                   activeBboxIndex={props.activeBboxIndex}
                   activeBboxId={props.activeBboxId}
                   isTreeBboxesVisible={props.isTreeBboxesVisible}

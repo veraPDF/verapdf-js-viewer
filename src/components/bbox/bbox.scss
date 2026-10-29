@@ -24,6 +24,16 @@
   &_disabled {
     display: none;
   }
+
+  &_unselectable:not(.pdf-bbox_selected) {
+    cursor: default;
+    z-index: -1;
+
+    &:hover {
+      border-color: transparent;
+      background-color: transparent;
+    }
+  }
 }
 
 section[data-annotation-id] {

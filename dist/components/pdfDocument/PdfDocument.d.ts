@@ -10,6 +10,7 @@ import './pdfDocument.scss';
 export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
     showAllPages?: boolean;
     customBbox?: CustomBBox;
+    customBboxes?: CustomBBox[];
     activeBboxIndex?: {
         index: number;
         zoom: boolean;
