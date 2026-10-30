@@ -4,7 +4,13 @@ import { IBboxLocation } from '../index';
 import { AnyObject, OrNull } from '../types/generics';
 import { IBbox, IMcidItem, IAnnotItem, TreeElementBbox } from '../components/bbox/Bbox';
 
-export type CustomBBox = { id: string; page: number; rect: number[] };
+export type CustomBBox = {
+  id: string;
+  page: number;
+  rect: number[];
+  source?: string;
+  isSelectable: boolean;
+};
 
 const groupChildren = (children: AnyObject[]): AnyObject[][] => {
   if (_.isNil(children)) children = [];

@@ -5,6 +5,8 @@ export type CustomBBox = {
     id: string;
     page: number;
     rect: number[];
+    source?: string;
+    isSelectable: boolean;
 };
 export declare const cleanArray: (arr: Array<AnyObject | null>) => AnyObject[];
 export declare const getFormattedAnnotations: (annots: AnyObject) => AnyObject[];

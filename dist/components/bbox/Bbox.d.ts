@@ -5,6 +5,8 @@ export interface IBbox {
     location: (number | string)[];
     id: string;
     isVisible?: boolean;
+    isSelectable?: boolean;
+    source?: string;
     index?: number;
     groupId?: string;
     bboxTitle?: string;
@@ -65,6 +67,7 @@ export interface IRenderBboxProps {
     scale: number;
     colorScheme?: IColorScheme;
     selectionMode?: TreeBboxSelectionMode;
+    selectable?: boolean;
     onClick?(e: MouseEvent): void;
 }
 export type TreeElementBbox = [Array<IMcidItem | undefined>, string];

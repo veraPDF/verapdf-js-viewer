@@ -1,38 +1,38 @@
+import _ from 'lodash';
 import {
   FC,
-  useCallback,
-  useState,
-  useRef,
-  memo,
-  useEffect,
-  useContext,
-  useMemo,
-  useLayoutEffect,
   MouseEvent,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import { usePrevious } from 'react-use';
 import { Page } from 'react-pdf';
 import { PageCallback } from 'react-pdf/dist/shared/types';
-import { useIntersection } from 'use-intersection';
+import { usePrevious } from 'react-use';
 import styled from 'styled-components';
-import _ from 'lodash';
+import { useIntersection } from 'use-intersection';
 
-import Bbox, { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
-import { IPageProps } from './IPageProps';
-import { ViewerContext } from '../viewerContext/ViewerContext';
 import { TreeBboxSelectionMode } from '../../enums/treeBboxSelectionMode';
-import { AnyObject } from '../../types/generics';
 import {
   CustomBBox,
+  checkIsBboxOutOfThePage,
   cleanArray,
-  parseMcidToBbox,
   createAllBboxes,
   getBboxForViewport,
-  checkIsBboxOutOfThePage,
   getFormattedAnnotations,
   getLocationByContentItemPath,
+  parseMcidToBbox,
 } from '../../services/bboxService';
 import { WARNING_CODES } from '../../services/constants';
+import { AnyObject } from '../../types/generics';
+import Bbox, { IBbox, IColorScheme, TreeElementBbox } from '../bbox/Bbox';
+import { ViewerContext } from '../viewerContext/ViewerContext';
+import { IPageProps } from './IPageProps';
 
 import './pdfPage.scss';
 
@@ -41,6 +41,7 @@ interface IPdfPageProps extends Omit<IPageProps, 'onPageRenderSuccess'> {
   treeElementsBboxes?: TreeElementBbox[];
   treeBboxSelectionMode?: TreeBboxSelectionMode;
   customBbox?: CustomBBox;
+  customBboxes?: CustomBBox[];
   isTreeBboxesVisible: boolean;
   defaultHeight?: number;
   defaultWidth?: number;
@@ -75,9 +76,9 @@ const StyledPdfPage = styled.div`
 
 const PdfPage: FC<IPdfPageProps> = (props) => {
   const { scrollInto } = useContext(ViewerContext);
-  const { treeElementsBboxes, customBbox, bboxList, scale = 1 } = props;
+  const { treeElementsBboxes, customBbox, customBboxes, bboxList, scale = 1 } = props;
   const [page, setPage] = useState<PageCallback | null>(null);
-  const prevPageBboxes = usePrevious({ page, treeElementsBboxes, customBbox });
+  const prevPageBboxes = usePrevious({ page, treeElementsBboxes, customBbox, customBboxes });
   const intersectionRef = useRef<HTMLDivElement | null>(null);
   const [bboxesAll, setBboxesAll] = useState<IBbox[]>([]);
   const [bboxesErrors, setBboxesErrors] = useState<Array<IBbox | null>>([]);
@@ -136,9 +137,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     [props.onBboxClick],
   );
   const onBboxClick = useCallback(
-    (index: number, id: string) => (e: MouseEvent) => {
+    (index: number, id: string, source?: string) => (e: MouseEvent) => {
       e.stopPropagation();
-      props.onBboxClick?.({ index, id });
+      props.onBboxClick?.({ index, id, source });
     },
     [props.onBboxClick],
   );
@@ -170,6 +171,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
       prevPageBboxes &&
       prevPageBboxes.page === page &&
       _.isEqual(prevPageBboxes.customBbox, customBbox) &&
+      _.isEqual(prevPageBboxes.customBboxes, customBboxes) &&
       prevPageBboxes.treeElementsBboxes === treeElementsBboxes;
     if (page) {
       if (triggeredByBboxList && !bboxList?.length) setBboxesErrors([]);
@@ -244,6 +246,19 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
                 id: customBbox.id,
                 location: customBbox.rect,
                 area: customBbox.rect[2] * customBbox.rect[3],
+                isSelectable: customBbox.isSelectable,
+              });
+            }
+            if (customBboxes?.length) {
+              customBboxes.forEach((bbox) => {
+                allBboxes.push({
+                  id: bbox.id,
+                  location: bbox.rect,
+                  area: bbox.rect[2] * bbox.rect[3],
+                  source: bbox.source,
+                  isSelectable: bbox.isSelectable,
+                  isVisible: true,
+                });
               });
             }
             setBboxesAll(allBboxes);
@@ -252,7 +267,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
         });
       }
     }
-  }, [page, bboxList, treeElementsBboxes, customBbox]);
+  }, [page, bboxList, treeElementsBboxes, customBbox, customBboxes]);
   useEffect(() => {
     if (!loaded && isIntersecting) {
       setLoaded(true);
@@ -391,7 +406,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
                     key={index}
                     bbox={bbox}
                     pageBorders={pageBorders}
-                    onClick={onBboxClick(bbox.index!, bbox.id)}
+                    onClick={onBboxClick(bbox.index!, bbox.id, bbox.source)}
                     disabled={isBboxDisabled(bbox)}
                     structured={isBboxStructured(bbox)}
                     selected={isBboxSelected(bbox)}

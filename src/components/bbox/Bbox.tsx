@@ -23,6 +23,8 @@ export interface IBbox {
   location: (number | string)[];
   id: string;
   isVisible?: boolean;
+  isSelectable?: boolean;
+  source?: string;
   index?: number;
   groupId?: string;
   bboxTitle?: string;
@@ -85,6 +87,7 @@ export interface IRenderBboxProps {
   scale: number;
   colorScheme?: IColorScheme;
   selectionMode?: TreeBboxSelectionMode;
+  selectable?: boolean;
   onClick?(e: MouseEvent): void;
 }
 
@@ -143,8 +146,13 @@ const BboxDiv = styled.div`
   &.pdf-bbox_structured_selected_multiple {
     background-color: ${(props: IBboxDivProps) => (props.colorScheme && props.colorScheme.background) || bboxBg};
   }
+  &.pdf-bbox_unselectable:not(.pdf-bbox_selected):hover {
+    border-color: transparent;
+    background-color: transparent;
+    cursor: default;
+    z-index: -1;
+  }
 `;
-
 const clamp = (
   value: string | number,
   scale: number,
@@ -180,6 +188,8 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
   const isSelected = useMemo(() => (selected ? ' pdf-bbox_selected' : ''), [selected]);
   const isRelated = useMemo(() => (related ? ' pdf-bbox_related' : ''), [related]);
   const isDisabled = useMemo(() => (disabled ? ' pdf-bbox_disabled' : ''), [disabled]);
+  const isSelectable = useMemo(() => bbox.isSelectable !== false, [bbox.isSelectable]);
+  const isUnselectable = useMemo(() => (isSelectable ? '' : ' pdf-bbox_unselectable'), [isSelectable]);
   const isStructured = useMemo(() => (structured ? ' pdf-bbox_structured' : ''), [structured]);
   const isStructuredSelected = useMemo(
     () => (structured && selected ? ' pdf-bbox_structured_selected' : ''),
@@ -190,6 +200,7 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
       return ' pdf-bbox_structured_selected_multiple';
     else return '';
   }, [structured, selected, selectionMode]);
+  const handleClick = isSelectable ? onClick : (e: MouseEvent) => e.stopPropagation();
 
   if (renderBbox) {
     return renderBbox({
@@ -204,13 +215,14 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
       scale,
       selectionMode,
       structured,
-      onClick,
+      selectable: isSelectable,
+      onClick: handleClick,
     });
   }
 
   return (
     <BboxDiv
-      className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}`}
+      className={`pdf-bbox${isSelected}${isRelated}${isStructured}${isStructuredSelected}${isStructuredSelectedMultiple}${isDisabled}${isUnselectable}`}
       left={left}
       bottom={bottom}
       width={width}
@@ -219,7 +231,7 @@ const Bbox: FC<IBboxProps> = (props: IBboxProps) => {
       colorScheme={colorScheme || {}}
       title={bbox.bboxTitle}
       aria-describedby={bbox.bboxTitle}
-      onClick={onClick}
+      onClick={handleClick}
     />
   );
 };
