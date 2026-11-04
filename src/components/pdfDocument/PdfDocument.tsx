@@ -113,6 +113,9 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
   const [selectedPage, setSelectedPage] = useState<number | undefined>(undefined);
 
   const documentOptions = useMemo(() => {
+    if (_.isEmpty(props.wasmUrl)) {
+      return {};
+    }
     return {
       wasmUrl: props.wasmUrl || '',
     };
@@ -509,6 +512,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
       onItemClick={props.onItemClick}
       rotate={props.rotate}
       options={documentOptions}
+      suspense={false}
     >
       {useMemo(
         () =>

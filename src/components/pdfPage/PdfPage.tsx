@@ -389,6 +389,7 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
               renderForms={props.renderInteractiveForms}
               renderTextLayer={props.renderTextLayer}
               scale={props.scale}
+              suspense={false}
               onLoadError={props.onPageLoadError}
               onLoadSuccess={onPageLoadSuccess}
               onRenderError={props.onPageRenderError}
