@@ -9,3 +9,6 @@ yarn-error.log*
 .idea/
 
 /example/node_modules
+
+.yalc/
+yalc.lock
