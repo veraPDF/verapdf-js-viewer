@@ -2417,9 +2417,9 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-pdfjs-dist@6.3.289, "pdfjs-dist@github:veraPDF/pdfjs-dist#v6.3.289-taggedPdf-0.1.35":
+pdfjs-dist@6.3.289, "pdfjs-dist@github:veraPDF/pdfjs-dist#v6.3.289-taggedPdf-0.1.36":
   version "6.3.289"
-  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/1c5ca8fcc75337f24220085936d9c2a1201f5a1d"
+  resolved "https://codeload.github.com/veraPDF/pdfjs-dist/tar.gz/79f024e2eeac412cbf57cc724e23f9677de2b7d4"
   optionalDependencies:
     "@napi-rs/canvas" "^1.0.0"
 

@@ -40976,7 +40976,7 @@ class StructTreePage {
     const structParentToObjIdMap = {};
     for (const [elemId, type, objId] of ids) {
       const obj = parentTree.get(elemId);
-      structParentToObjIdMap[elemId] = +(objId.match(/^\d+/) ?? [-1])[0];
+      structParentToObjIdMap[elemId] = +(obj.objId.match(/^\d+/) ?? [-1])[0];
       if (!obj) {
         continue;
       }
