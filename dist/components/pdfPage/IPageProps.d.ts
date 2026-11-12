@@ -22,6 +22,10 @@ export interface IPageProps {
         id: string;
         zoom: boolean;
     };
+    activeBboxIds?: {
+        id: string;
+        zoom: boolean;
+    }[];
     onPageLoadError?(error: Error): void;
     onPageLoadSuccess?(page: PageCallback): void;
     onPageRenderError?(error: Error): void;
