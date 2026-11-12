@@ -123,11 +123,12 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     },
   );
 
-  const { activeBboxId, activeBboxIndex } = useMemo(() => {
+  const { activeBboxId, activeBboxIds, activeBboxIndex } = useMemo(() => {
     const { id: activeBboxId } = props.activeBboxId ?? {};
+    const activeBboxIds = (props.activeBboxIds ?? []).map(({ id }) => id);
     const { index: activeBboxIndex } = props.activeBboxIndex ?? {};
-    return { activeBboxId, activeBboxIndex };
-  }, [props.activeBboxIndex?.index, props.activeBboxId?.id]);
+    return { activeBboxId, activeBboxIds, activeBboxIndex };
+  }, [props.activeBboxIndex?.index, props.activeBboxId?.id, props.activeBboxIds]);
 
   const onPageClick = useCallback(
     (e: { stopPropagation: () => void }) => {
@@ -291,23 +292,26 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
     setPageScale(scale);
   }, [pageViewport, scale, props.width, props.height]);
 
+  const selectedBboxIds = useMemo(
+    () => [...(!_.isNil(activeBboxId) ? [activeBboxId] : []), ...activeBboxIds],
+    [activeBboxId, activeBboxIds],
+  );
   const isBboxSelected = useCallback(
     (bbox: IBbox) => {
       if (!_.isNil(activeBboxIndex)) return bbox.index === activeBboxIndex;
-      if (_.isNil(activeBboxId)) return false;
       let isStructureBboxSelected;
       switch (props.treeBboxSelectionMode) {
         case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
-          isStructureBboxSelected = bbox?.id === activeBboxId || bbox?.id?.startsWith(`${activeBboxId}:`);
+          isStructureBboxSelected = selectedBboxIds.some((id) => bbox.id === id || bbox.id.startsWith(`${id}:`));
           break;
         }
         case TreeBboxSelectionMode.SELECTED:
         default:
-          isStructureBboxSelected = bbox?.id === activeBboxId;
+          isStructureBboxSelected = selectedBboxIds.includes(bbox.id);
       }
       return isStructureBboxSelected;
     },
-    [activeBboxIndex, activeBboxId],
+    [activeBboxIndex, selectedBboxIds, props.treeBboxSelectionMode],
   );
   const isBboxRelated = useCallback(
     (bbox: IBbox) => {
@@ -345,10 +349,9 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const activeBboxes = useMemo(
     () =>
       bboxes.filter((bbox) => {
-        const isBboxMode = !_.isNil(activeBboxIndex);
-        return isBboxMode ? bbox.index === activeBboxIndex : bbox?.id === activeBboxId;
+        return isBboxSelected(bbox);
       }),
-    [activeBboxIndex, activeBboxId],
+    [bboxes, isBboxSelected],
   );
 
   useEffect(
