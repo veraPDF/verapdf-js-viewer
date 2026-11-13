@@ -1134,7 +1134,7 @@ const PdfPage = (props) => {
         let isStructureBboxSelected;
         switch (props.treeBboxSelectionMode) {
             case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
-                isStructureBboxSelected = selectedBboxIds.some((id) => bbox.id === id || bbox.id.startsWith(`${id}:`));
+                isStructureBboxSelected = selectedBboxIds.some((id) => { var _a; return bbox.id === id || ((_a = bbox.id) === null || _a === void 0 ? void 0 : _a.startsWith(`${id}:`)); });
                 break;
             }
             case TreeBboxSelectionMode.SELECTED:
