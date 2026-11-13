@@ -299,10 +299,11 @@ const PdfPage: FC<IPdfPageProps> = (props) => {
   const isBboxSelected = useCallback(
     (bbox: IBbox) => {
       if (!_.isNil(activeBboxIndex)) return bbox.index === activeBboxIndex;
+
       let isStructureBboxSelected;
       switch (props.treeBboxSelectionMode) {
         case TreeBboxSelectionMode.SELECTED_WITH_KIDS: {
-          isStructureBboxSelected = selectedBboxIds.some((id) => bbox.id === id || bbox.id.startsWith(`${id}:`));
+          isStructureBboxSelected = selectedBboxIds.some((id) => bbox.id === id || bbox.id?.startsWith(`${id}:`));
           break;
         }
         case TreeBboxSelectionMode.SELECTED:
