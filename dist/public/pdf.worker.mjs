@@ -43068,10 +43068,10 @@ class ExtendedCatalog extends Catalog {
             const fontIdentity = [baseFont, cidBaseFont, cidFontType, encoding].join(":");
             if (seenFonts.has(fontIdentity)) {
               const existing = seenFonts.get(fontIdentity);
-              if (!fontRef || !existing.refs.some(r => r && r.num === fontRef.num && r.gen === fontRef.gen)) {
+              if (!fontRef || fontRef instanceof Ref && !existing.refs.some(r => r && r.num === fontRef.num && r.gen === fontRef.gen)) {
                 existing.refs.push(fontRef);
               }
-              if (descendantRef && !existing.descendantRefs.some(r => r.num === descendantRef.num && r.gen === descendantRef.gen)) {
+              if (descendantRef instanceof Ref && !existing.descendantRefs.some(r => r.num === descendantRef.num && r.gen === descendantRef.gen)) {
                 existing.descendantRefs.push(descendantRef);
               }
               existing.names[pageIndex] = fontName;
