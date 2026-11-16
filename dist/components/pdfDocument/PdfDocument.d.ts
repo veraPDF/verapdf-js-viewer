@@ -19,6 +19,10 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
         id: string;
         zoom: boolean;
     };
+    activeBboxIds?: {
+        id: string;
+        zoom: boolean;
+    }[];
     bboxes: IBboxLocation[];
     isTreeBboxesVisible: boolean;
     treeBboxSelectionMode?: TreeBboxSelectionMode;

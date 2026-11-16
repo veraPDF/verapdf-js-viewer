@@ -81,6 +81,7 @@ export interface IPdfDocumentProps extends IDocumentProps, IPageProps {
   customBboxes?: CustomBBox[];
   activeBboxIndex?: { index: number; zoom: boolean };
   activeBboxId?: { id: string; zoom: boolean };
+  activeBboxIds?: { id: string; zoom: boolean }[];
   bboxes: IBboxLocation[];
   isTreeBboxesVisible: boolean;
   treeBboxSelectionMode?: TreeBboxSelectionMode;
@@ -552,6 +553,7 @@ const PdfDocument: FC<IPdfDocumentProps> = (props) => {
                   customBboxes={customBboxes?.filter((bbox) => bbox.page === page)}
                   activeBboxIndex={props.activeBboxIndex}
                   activeBboxId={props.activeBboxId}
+                  activeBboxIds={props.activeBboxIds}
                   isTreeBboxesVisible={props.isTreeBboxesVisible}
                   onBboxClick={onBboxClick}
                   colorScheme={props.colorScheme}
