@@ -42775,9 +42775,11 @@ class ExtendedCatalog extends Catalog {
       if (el instanceof Dict && el.has("K")) {
         const name = el.has("S") ? el.get("S").name : null;
         const roleName = this.getRoleName(el, name);
+        const namespace = this.getNamespace(el);
         const treeElement = {
           name: name ? this.convertString(name, "Name") : null,
           roleName: roleName ? this.convertString(roleName, "Role name") : null,
+          namespace: namespace ? this.convertString(namespace, "Namespace") : null,
           children: this.getTreeElement(el.get("K"), page, el.getRaw("K")),
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null,
@@ -42856,9 +42858,11 @@ class ExtendedCatalog extends Catalog {
       if (el instanceof Dict && el.has("S")) {
         const name = el.get("S").name;
         const roleName = this.getRoleName(el, name);
+        const namespace = this.getNamespace(el);
         const treeElement = {
           name: name ? this.convertString(name, "Name") : null,
           roleName: roleName ? this.convertString(roleName, "Role name") : null,
+          namespace: namespace ? this.convertString(namespace, "Namespace") : null,
           children: [],
           pageIndex: page,
           ref: ref instanceof Ref ? ref : null,
@@ -42915,6 +42919,14 @@ class ExtendedCatalog extends Catalog {
     const roleName_v1 = this.roleMap.get(name) ? this.roleMap.get(name).name : null;
     const roleName_v2 = Array.isArray(roleNameNSArray) && roleNameNSArray.length > 0 && roleNameNSArray[0].hasOwnProperty("name") ? roleNameNSArray[0].name : null;
     return roleName_v1 || roleName_v2 || name;
+  }
+  getNamespace(el) {
+    const nsDict = el instanceof Dict && el.has("NS") ? el.get("NS") : null;
+    const directUri = nsDict instanceof Dict && nsDict.has("NS") ? nsDict.get("NS") : null;
+    if (typeof directUri === "string") {
+      return directUri;
+    }
+    return null;
   }
   getAnnotIndex(el, pageObj) {
     const objRef = el instanceof Dict && el.has("Obj") ? el.getRaw("Obj") : null;
